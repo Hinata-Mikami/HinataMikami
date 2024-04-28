@@ -14,6 +14,8 @@
 %token EOF 
 
 %nonassoc EQ LT
+%left ADD SUB
+%left MUL DIV
 %nonassoc UNARY
 
 %start main expr
@@ -27,6 +29,11 @@
 
 
 (*生成される木における位置が深いほど計算の優先順位が高い*)
+command:
+  | LET var EQ expr DSC  { CLet($2,$4) }
+  | expr DSC             { CExp $1 }
+;
+
 main: 
 expr EOF {$1}
 ;
@@ -37,7 +44,7 @@ expr:
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   (*追加*)
   | LET ID EQ expr IN expr { ELet($2, $4, $6) }
-  | ID { EVar($1) }
+  | ID { EVar $1 }
 ;
 
 (*加減：左結合　→左に行くほど深くなる　右側は常に乗除算かアトミック*)
@@ -65,12 +72,7 @@ literal:
   | FALSE { LBool false } 
 ;
 
-(*復活*)
 var:
   | ID  { $1 } 
 ;
 
-command:
-  | LET var EQ expr DSC  { CLet($2,$4) }
-  | expr DSC             { CExp $1 }
-;

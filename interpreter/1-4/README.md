@@ -13,7 +13,5 @@ ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo main.cmo
 '''''
 
 ## 実行方法
-'''''
-$ ./main
+$./main
 $ (文字列を入力) (ctrl+D)
-'''''
