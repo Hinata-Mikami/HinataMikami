@@ -20,6 +20,8 @@ type expr =
   | EBin   of binOp * expr * expr 
   | EIf   of expr * expr * expr 
 
+type command = CExp of expr
+
 (*使わないので削除
 let print_name : name -> unit = print_string 
 *)

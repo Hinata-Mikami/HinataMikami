@@ -13,7 +13,7 @@ let rec repl () =
 
   try
     let expr = Parser.main Lexer.token lexbuf in
-    print_literal (Eval.f expr); print_newline (); (*valueになおす*)
+    print_value (Eval.f expr); print_newline (); (*valueになおす*)
     repl ()
 
   with (*try with 内側 exeptionで自動停止しない*)
@@ -33,7 +33,7 @@ let read_file filename =
       let lexbuf = Lexing.from_string input in
     try
       let expr = Parser.main Lexer.token lexbuf in
-      print_literal (Eval.f expr); print_newline (); (*valueになおす*)
+      print_value (Eval.f expr); print_newline (); (*valueになおす*)
     with
     | Lexer.Error msg ->
         Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p   lexbuf);
