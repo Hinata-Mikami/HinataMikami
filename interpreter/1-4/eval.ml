@@ -43,7 +43,7 @@ let rec eval (env : env) (expr : expr) : value =
   (*unused?*)
   in let eval_command (env : env) (cmd : command) : command_result =
     match cmd with
-    | CExpr expr ->
+    | CExp expr ->
       let value = eval env expr in
       Command_result (None, value, env)
     | CLet (x, expr) ->
