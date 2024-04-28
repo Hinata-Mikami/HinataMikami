@@ -1,0 +1,25 @@
+type token =
+    TRUE
+  | THEN
+  | SUB
+  | RPAR
+  | MUL
+  | LT
+  | LPAR
+  | INT of int
+  | IF
+  | ID of string
+  | FALSE
+  | EQ
+  | EOF
+  | ELSE
+  | DIV
+  | ADD
+val menhir_begin_marker : int
+val xv_term_expr : Syntax.expr
+val xv_main : Syntax.expr
+val xv_literal : Syntax.literal
+val xv_expr : Syntax.expr
+val xv_atomic_expr : Syntax.expr
+val xv_arith_expr : Syntax.expr
+val menhir_end_marker : int

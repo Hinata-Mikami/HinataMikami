@@ -1,0 +1,62 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /home/hinata/.cache/dune/db
+# Workspace root: /home/hinata/code/interpreter/week1/1-3
+# Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/hinata/.opam/default/bin/ocamlc.opt -config > /tmp/dune_437e44_output
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamllex -q -o src/lexer.ml src/lexer.mll)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/main.ml) > _build/default/src/.main.eobjs/dune__exe__Main.impl.d
+$ (cd _build/.sandbox/2ddcf1587e2b873e4e7e40a23155b849/default && /home/hinata/.opam/default/bin/menhir src/parser.mly --base src/parser --infer-write-query src/parser__mock.ml.mock)
+> File "src/parser.mly", line 11, characters 23-25:
+> Warning: the token EQ is unused.
+> File "src/parser.mly", line 7, characters 16-18:
+> Warning: the token ID is unused.
+> File "src/parser.mly", line 18, characters 10-15:
+> Warning: the token UNARY is unused.
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/lexer.ml) > _build/default/src/.main.eobjs/dune__exe__Lexer.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/eval.ml) > _build/default/src/.main.eobjs/dune__exe__Eval.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/syntax.ml) > _build/default/src/.main.eobjs/dune__exe__Syntax.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/parser__mock.ml.mock) > _build/default/src/.main.eobjs/parser__mock.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -o src/.main.eobjs/byte/dune__exe.cmo -c -impl src/.main.eobjs/dune__exe.ml-gen)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Syntax.cmo -c -impl src/syntax.ml)
+$ (cd _build/.sandbox/70c877cd80b4d4a6492b336834c5ec38/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -open Dune__exe -short-paths -i -impl src/parser__mock.ml.mock) > _build/.sandbox/70c877cd80b4d4a6492b336834c5ec38/default/src/parser__mock.mli.inferred
+$ (cd _build/.sandbox/2f701939f1a3f1448ad3a8919e103a55/default && /home/hinata/.opam/default/bin/menhir src/parser.mly --base src/parser --infer-read-reply src/parser__mock.mli.inferred)
+> File "src/parser.mly", line 16, characters 0-5:
+> Warning: the precedence level assigned to ADD is never useful.
+> File "src/parser.mly", line 17, characters 0-5:
+> Warning: the precedence level assigned to DIV is never useful.
+> File "src/parser.mly", line 15, characters 0-9:
+> Warning: the precedence level assigned to EQ is never useful.
+> File "src/parser.mly", line 15, characters 0-9:
+> Warning: the precedence level assigned to LT is never useful.
+> File "src/parser.mly", line 17, characters 0-5:
+> Warning: the precedence level assigned to MUL is never useful.
+> File "src/parser.mly", line 16, characters 0-5:
+> Warning: the precedence level assigned to SUB is never useful.
+> File "src/parser.mly", line 18, characters 0-9:
+> Warning: the precedence level assigned to UNARY is never useful.
+> Warning: 13 end-of-stream conflicts were arbitrarily resolved.
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -intf src/parser.mli) > _build/default/src/.main.eobjs/dune__exe__Parser.intf.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/parser.ml) > _build/default/src/.main.eobjs/dune__exe__Parser.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -intf src/main.mli) > _build/default/src/.main.eobjs/dune__exe__Main.intf.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Parser.cmi -c -intf src/parser.mli)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o src/.main.eobjs/native/dune__exe.cmx -c -impl src/.main.eobjs/dune__exe.ml-gen)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Eval.cmo -c -impl src/eval.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Main.cmi -c -intf src/main.mli)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Syntax.cmx -c -impl src/syntax.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Lexer.cmo -c -impl src/lexer.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Eval.cmx -c -impl src/eval.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Lexer.cmx -c -impl src/lexer.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Main.cmx -c -impl src/main.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Parser.cmx -c -impl src/parser.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o src/main.exe src/.main.eobjs/native/dune__exe.cmx src/.main.eobjs/native/dune__exe__Syntax.cmx src/.main.eobjs/native/dune__exe__Eval.cmx src/.main.eobjs/native/dune__exe__Parser.cmx src/.main.eobjs/native/dune__exe__Lexer.cmx src/.main.eobjs/native/dune__exe__Main.cmx)

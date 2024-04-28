@@ -1,0 +1,49 @@
+let rec fib n = (* n 番目のフィボナッチ数*)
+if n = 1 || n = 2 then 1 else fib(n - 1) + fib(n - 2);;
+
+  (*val fib : int -> int = <fun>*)
+
+  (* 
+
+  fib 4
+  -> if 4=1 || 4=2 then 1 else fib(4-1) + fib(4-2)
+  -> if false then 1 else fib(4-1) + fib(4-2)
+  -> fib(4-1) + fib(4-2)
+  -> fib 3 + fib 2
+
+  fib 3
+  -> if 3=1 || 3=2 then 1 else fib(3-1) + fib(3-2)
+  -> if false then 1 else fib(3-1) + fib(3-2)
+  -> fib(3-1) + fib(3-2)
+  -> fib 2 + fib 1
+
+  fib 2
+  -> if 2=1 || 2=2 then 1 else fib(2-1) + fib(2-2)
+  -> if true then 1 else fib(2-1) + fib(2-2)
+  -> 1 
+
+  fib 3
+  -> 1 + fib 1
+
+  fib 1
+  -> if 1=1 || 1=2 then 1 else fib(1-1) + fib(1-2)
+  -> if true then 1 else fib(1-1) + fib(1-2)
+  -> 1 
+
+  fib 3
+  -> 1 + 1
+  -> 2
+
+  fib 4
+  -> 2 + fib 2
+
+  fib 2
+  -> if 2=1 || 2=2 then 1 else fib(2-1) + fib(2-2)
+  -> if true then 1 else fib(2-1) + fib(2-2)
+  -> 1 
+
+  fib 4
+  -> 2 + 1
+  -> 3
+  
+  *)
