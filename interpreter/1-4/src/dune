@@ -1,7 +1,7 @@
 (ocamllex
  (modules lexer))
 
-(menhir
+(ocamlyacc
  (modules parser))
 
 (executable
