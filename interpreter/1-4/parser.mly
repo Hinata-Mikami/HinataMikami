@@ -10,16 +10,19 @@
 %token IF THEN ELSE
 %token ADD SUB MUL DIV EQ LT
 %token LPAR RPAR 
+%token DSC
 %token EOF 
 
 %nonassoc EQ LT
-%left ADD SUB
-%left MUL DIV
 %nonassoc UNARY
 
 %start main expr
 %type <Syntax.expr> main
 %type <Syntax.expr> expr 
+
+
+%start command
+%type <Syntax.command> command
 %% 
 
 
@@ -56,7 +59,6 @@ atomic_expr: (*これ以降分解できない式*)
   | LPAR expr RPAR { $2 }
 ;
 
-
 literal: 
   | INT   { LInt $1 } 
   | TRUE  { LBool true } 
@@ -66,4 +68,9 @@ literal:
 (*復活*)
 var:
   | ID  { $1 } 
+;
+
+command:
+  | LET var EQ expr DSC  { CLet($2,$4) }
+  | expr DSC             { CExp $1 }
 ;

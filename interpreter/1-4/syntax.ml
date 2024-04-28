@@ -14,17 +14,17 @@ type expr =
   | ELiteral of literal 
   | EBin   of binOp * expr * expr 
   | EIf   of expr * expr * expr 
-  | EVar of name (* 追加 *)
-  | ELet of name * expr * expr (* 追加 *)
+  | EVar of name
+  | ELet of name * expr * expr
 
 type command =
   | CExp of expr
-  | CLet of name * expr (* 追加 *)
+  | CLet of name * expr
 
+(*env : 変数に値を束縛するリスト型？*)
 type env = (name * value) list
-(*使わないので削除
-let print_name : name -> unit = print_string 
-*)
+
+exception Eval_error
 
 let print_value : value -> unit = function 
   | VInt i -> print_int i 
@@ -33,35 +33,3 @@ let print_value : value -> unit = function
 let value_of_literal : literal -> value = function 
   | LInt i -> VInt i 
   | LBool b -> VBool b 
-
-let print_literal : literal -> unit = fun lit -> print_value @@ value_of_literal lit 
-
-let print_binOp : binOp -> unit = function 
-  | OpAdd -> print_string "OpAdd" 
-  | OpSub -> print_string "OpSub"
-  | OpMul -> print_string "OpMul"
-  | OpDiv -> print_string "OpDiv"
-  | OpEq -> print_string "OpEq"
-  | OpLt-> print_string "OpLt"
-
-let rec print_expr = function 
-  | ELiteral v -> 
-    print_literal v 
-
-  | EBin (op,e1,e2) -> 
-    ( print_string "EBin (";
-      print_binOp op ; 
-      print_string ","; 
-      print_expr e1;
-      print_string ",";
-      print_expr e2;
-      print_string ")")
-  | EIf (e0,e1,e2) ->
-    (print_string "EIf (";
-     print_expr   e0;
-     print_string ","; 
-     print_expr   e1;
-     print_string ",";
-     print_expr   e2;
-     print_string ")")
- 

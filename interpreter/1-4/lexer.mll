@@ -28,5 +28,6 @@ rule token = parse
 | ')'         { RPAR }
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
-| eof         { EOF  }
+| ";;"        { DSC } (*Double Semi-Colon*)
+| eof         { EOF }
 | _           { raise (Error ("Unknown Token: " ^ Lexing.lexeme lexbuf))}
