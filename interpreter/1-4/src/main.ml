@@ -46,7 +46,7 @@ let read_file filename =
     let rec loop env = 
     try   
         let result = Parser.command Lexer.token lexbuf in
-  (*      Eval.eval_and_print_expr [] result; print_newline ();*)
+
     match result with
     (*CExp*)
     | CExp expr -> 
