@@ -26,6 +26,8 @@ type token =
   | RPAR
   | DSC
   | EOF
+  | FUN
+  | ARROW
 
 val main :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Syntax.expr

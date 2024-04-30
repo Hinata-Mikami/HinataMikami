@@ -12,11 +12,17 @@
 %token LPAR RPAR 
 %token DSC
 %token EOF 
+%token FUN ARROW
 
+
+%nonassoc FUN ARROW
+%nonassoc LET IN
+%nonassoc IF THEN ELSE
 %nonassoc EQ LT
 %left ADD SUB
 %left MUL DIV
-%nonassoc UNARY
+%nonassoc INT ID LPAR RPAR
+
 
 %start main expr
 %type <Syntax.expr> main
@@ -39,19 +45,25 @@ expr EOF {$1}
 ;
 
 expr:
+  | FUN ID ARROW expr { EFun($2,$4) }
   | arith_expr { $1 } 
-  | arith_expr LT arith_expr { EBin(OpLt, $1, $3) } (*LTの前に左右を評価*)
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
-  | ID { EVar $1 }
 ;
+
 
 (*加減：左結合　→左に行くほど深くなる　右側は常に乗除算かアトミック*)
 arith_expr:
   | arith_expr ADD term_expr { EBin(OpAdd, $1, $3) }
   | arith_expr SUB term_expr { EBin(OpSub, $1, $3) }
   | term_expr { $1 } (*加減でないときは乗除にのサブルールに入る*)
+  | app_expr { $1 }
 ;
+
+app_expr:
+  | app_expr atomic_expr { EApp($1,$2) }
+(*  | atomic_expr          { $1 } *)
+
 
 (*乗除：左結合　→左に行くほど深くなる　右側は常にアトミック*)
 term_expr:
@@ -62,6 +74,7 @@ term_expr:
 
 atomic_expr: (*これ以降分解できない式*)
   | literal { ELiteral $1 }
+  | ID             { EVar($1) }
   | LPAR expr RPAR { $2 }
 ;
 
@@ -74,4 +87,3 @@ literal:
 var:
   | ID  { $1 } 
 ;
-

@@ -53,6 +53,15 @@ let rec eval (env : env) (expr : expr) =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> (lookup_variable env n, env)
       | ELet (x, e1, e2) -> eval_let env x e1 e2
+      | EFun (x, e) -> (VFun (x, e, env), env)
+      | EApp (e1, e2) -> 
+        let v1, _ = eval env e1 in
+        let v2, _ = eval env e2 in
+        (match v1 with
+          | VFun (x, e, env') ->
+              eval ((x, v2) :: env') e
+          | _ -> raise Eval_error)
+    
 
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) =
@@ -68,6 +77,7 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt i -> print_string ("int = "); print_value v; print_newline()
      | VBool b -> print_string ("bool = "); print_value v; print_newline()
+     | VFun (_, _, _) -> () (*未実装*)
      );
      env)
   (*CLet: let n = e;;*)
