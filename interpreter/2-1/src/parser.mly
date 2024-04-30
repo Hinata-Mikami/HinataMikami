@@ -62,7 +62,7 @@ arith_expr:
 
 app_expr:
   | app_expr atomic_expr { EApp($1,$2) }
-
+  | atomic_expr { $1 } (*これを消すとreduce/reduce conflictは消えるが誤った出力になる*)
 
 (*乗除：左結合　→左に行くほど深くなる　右側は常にアトミック*)
 term_expr:
