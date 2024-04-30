@@ -59,10 +59,19 @@ let command_let (env : env) (n : name) (e : expr) =
   match eval env e with
   | (v1,_) -> eval ((n,v1) :: env) e
 
-(*
-let rec eval_and_print_expr env expr = 
-        match eval env expr with
-        | (v,_) -> print_value v
-      
-let print_var v = print_string v
-*)
+
+let print_command_result (env : env) (cmd : command) : env =
+  match cmd with
+  | CExp expr -> 
+    (match eval env expr with
+     | (v,e) -> print_string (" ― : "); 
+     (match v with
+     | VInt i -> print_string ("int = "); print_value v; print_newline()
+     | VBool b -> print_string ("bool = "); print_value v; print_newline()
+     );
+     env)
+  (*CLet: let n = e;;*)
+  | CLet (n, e) -> 
+    print_string ("val "); print_string n; print_string (" = "); 
+    let (v,e') = command_let env n e in print_value v; print_newline();
+    e'
