@@ -42,8 +42,7 @@ expr:
   | arith_expr { $1 } 
   | arith_expr LT arith_expr { EBin(OpLt, $1, $3) } (*LTの前に左右を評価*)
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
-  (*追加*)
-  | LET ID EQ expr IN expr { ELet($2, $4, $6) }
+  | LET var EQ expr IN expr { ELet($2, $4, $6) }
   | ID { EVar $1 }
 ;
 

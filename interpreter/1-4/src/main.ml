@@ -5,25 +5,32 @@ let string_of_position : Lexing.position -> string = fun pos ->
   
 let repl () =
 
-
   let lexbuf = Lexing.from_channel stdin in
 
   let rec loop env =
-    (try 
+    try 
       let () = print_string "> " in 
       let () = flush stdout in
       let result = Parser.command Lexer.token lexbuf in
-      let (_,result_env) = Eval.eval_command env result in 
-      Eval.eval_and_print_command env result; print_newline (); 
-      loop result_env
-    with 
+
+      match result with
+      (*CExp*)
+      | CExp expr -> 
+        (match Eval.eval env expr with
+         | (v,e) -> print_value v); print_newline(); loop env
+      (*CLet: let n = e;;*)
+      | CLet (n, e) -> 
+        print_string ("val "); print_string n; print_string (" = "); 
+          let (v,e1) = Eval.command_let env n e in print_value v; print_newline(); loop e1
+
+    with
     | Lexer.Error msg ->
       Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
       print_endline msg 
   
     | Parsing.Parse_error ->
       Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
-      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf))
+      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf)
   
     in loop [];;
 

@@ -12,8 +12,8 @@ type binOp = OpAdd | OpSub | OpMul | OpDiv | OpEq | OpLt
 
 type expr =
   | ELiteral of literal 
-  | EBin   of binOp * expr * expr 
-  | EIf   of expr * expr * expr 
+  | EBin of binOp * expr * expr 
+  | EIf of expr * expr * expr 
   | EVar of name
   | ELet of name * expr * expr
 
