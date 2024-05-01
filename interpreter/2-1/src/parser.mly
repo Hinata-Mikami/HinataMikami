@@ -47,6 +47,8 @@ expr EOF {$1}
 expr:
   | FUN ID ARROW expr { EFun($2,$4) }
   | arith_expr { $1 } 
+  | arith_expr EQ app_expr { EBin(OpEq, $1, $3) }
+  | arith_expr LT app_expr { EBin(OpLt, $1, $3) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
 ;
