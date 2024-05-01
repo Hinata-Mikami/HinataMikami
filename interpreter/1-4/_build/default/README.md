@@ -17,14 +17,3 @@ ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo main.cmo
 ## 実行方法
 $./main
 > (文字列を入力) ;; (Enter)
-
-
-## duneの使い方
-dune-project
-example.opam
-
-dune build
-dune exec example
-or
-dune exrc example (相対パス:src/test1.txt)
-

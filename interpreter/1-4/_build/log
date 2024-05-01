@@ -1,6 +1,16 @@
-# dune init exe main
+# dune exec example src/test1.txt
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Shared cache location: /home/hinata/.cache/dune/db
 # Workspace root: /home/hinata/code/interpreter/1-4
 # Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/hinata/.opam/default/bin/ocamlc.opt -config > /tmp/dune_7d6df4_output
