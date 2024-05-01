@@ -42,10 +42,10 @@ main:
 expr EOF {$1}
 ;
 
-(*EQないよ*)
 expr:
   | arith_expr { $1 } 
-  | arith_expr LT arith_expr { EBin(OpLt, $1, $3) } (*LTの前に左右を評価？*)
+  | arith_expr LT arith_expr { EBin(OpLt, $1, $3) }
+  | arith_expr EQ arith_expr { EBin(OpEq, $1, $3) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
   | ID { EVar $1 }
