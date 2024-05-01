@@ -1,0 +1,6 @@
+# dune init exec main
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /home/hinata/.cache/dune/db
+# Workspace root: /home/hinata/code/interpreter/2-1/src
+# Auto-detected concurrency: 12

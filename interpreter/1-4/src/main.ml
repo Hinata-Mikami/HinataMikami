@@ -4,26 +4,29 @@ let string_of_position : Lexing.position -> string = fun pos ->
   Printf.sprintf "[%s] L: %d, C: %d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
   
 (*標準入力読み取り*)
+(*エラーで再帰が止まってほしくない*)
 let repl () =
   let lexbuf = Lexing.from_channel stdin in
   (*ループ部分*)
   let rec loop_stdin env =
-    try (*もう少し内側に*)
-      let () = print_string "> " in 
-      let () = flush stdout in
-      let result = Parser.command Lexer.token lexbuf in
-      (*入力コマンドを実行し結果などをプリント->新たな環境を受け取る*)
-      loop_stdin (Eval.print_command_result env result) (*trywithの外に*) 
-
-    with
-    | Lexer.Error msg ->
+     (*もう少し内側に*)    
+    let () = print_string "> " in
+    let () = flush stdout in
+ 
+    (* let result = Parser.command Lexer.token lexbuf in ここがエラーを吐く場所 *)
+    
+    match Parser.command Lexer.token lexbuf with
+    | r -> loop_stdin (Eval.print_command_result env r) (*ここをmatch-with-exn*)
+    | exception Lexer.Error msg ->
       Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
-      print_endline msg 
-  
-    | Parsing.Parse_error ->
+      print_endline msg;
+      loop_stdin env
+    | exception Parsing.Parse_error ->
       Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
-      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf)
-  in loop_stdin [];;
+      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
+      loop_stdin env
+
+  in loop_stdin []
 
 (*ファイル評価*)
 (*cmdのリストを受け取ってから実行*)
