@@ -51,7 +51,7 @@ expr:
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
 ;
 
-
+(*ここら辺は手探り*)
 (*加減：左結合　→左に行くほど深くなる　右側は常に乗除算かアトミック*)
 arith_expr:
   | arith_expr ADD term_expr { EBin(OpAdd, $1, $3) }
