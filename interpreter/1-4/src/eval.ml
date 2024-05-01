@@ -9,6 +9,7 @@ exception Unexpected_Expression_at_binOp
 exception Unexpected_Expression_at_eval_if
 exception Variable_Not_Found
 
+(*expr型の解析*)
 let rec eval (env : env) (expr : expr) =
   (*binOpの解析*)
   let eval_bin_op (env : env) (op : binOp) (e1 : expr) (e2 : expr) =
@@ -32,7 +33,7 @@ let rec eval (env : env) (expr : expr) =
     | (VBool false, env) -> eval env e2
     | _ -> raise Unexpected_Expression_at_eval_if
 
-  (*変数に束縛された値を返す*)
+  (*Evar n : 変数に束縛された値を返す*)
   in let lookup_variable (env : env) (x : name) : value =
     try
       (*encの中からxに対応するキーを返す*)
@@ -41,12 +42,13 @@ let rec eval (env : env) (expr : expr) =
     | Not_found -> raise Variable_Not_Found
 
   (*変数の定義*)
-  (*let n = e1 in e2*)
-  (*局所定義：(n, e1)はこのスコープ外には反映されてほしくない*)
+  (*let n = e1 in e2 の評価*)
+  (*今の環境でe1を評価してその結果をv1とし、その環境でe2を評価する*)
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) = 
     match eval env e1 with
        | (v1,_) -> eval ((n,v1) :: env) e2
 
+  (*eval関数のメイン部分*)
   in match expr with
       | ELiteral x -> (value_of_literal x, env)
       | EBin (op, e1, e2) -> eval_bin_op env op e1 e2
@@ -54,12 +56,23 @@ let rec eval (env : env) (expr : expr) =
       | EVar n -> (lookup_variable env n, env)
       | ELet (x, e1, e2) -> eval_let env x e1 e2
 
+(*次のprint_command_resultで使う*)
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) =
   match eval env e with
   | (v1,_) -> eval ((n,v1) :: env) e
 
 
+(*
+今の環境でe1を評価し，その結果をv1とする
+xとv1との対応を今の環境に追加
+得られた新しい環境で以降のコマンドを処理する
+read-eval-printループを実装する再帰関数の引数に…
+*)
+
+(*対話型シェルのようにcmdを実行し、実行結果等を表示しつつ、新たな環境envを返す関数*)
+(*main.mlの再帰関数loop_stdin env や loop_file env の再帰部分の引数に*)
+(*env -> command -> env*)
 let print_command_result (env : env) (cmd : command) : env =
   match cmd with
   | CExp expr -> 
