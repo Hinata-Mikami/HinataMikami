@@ -1,1 +1,1 @@
-let x = true;; let x = false;; x;;
+let f = fun x -> fun y -> x in f 1 2;;
