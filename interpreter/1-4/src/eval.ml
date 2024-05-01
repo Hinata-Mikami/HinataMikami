@@ -60,7 +60,7 @@ let rec eval (env : env) (expr : expr) =
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) =
   match eval env e with
-  | (v1,_) -> eval ((n,v1) :: env) e
+  | (v1,_) -> eval ((n,v1) :: env) e (*eval x 2 になってる*)
 
 
 (*
@@ -86,5 +86,5 @@ let print_command_result (env : env) (cmd : command) : env =
   (*CLet: let n = e;;*)
   | CLet (n, e) -> 
     print_string ("val "); print_string n; print_string (" = "); 
-    let (v,e') = command_let env n e in print_value v; print_newline();
-    e'
+    let (v,env') = command_let env n e in print_value v; print_newline();
+    env'

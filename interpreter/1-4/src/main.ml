@@ -8,12 +8,12 @@ let repl () =
   let lexbuf = Lexing.from_channel stdin in
   (*ループ部分*)
   let rec loop_stdin env =
-    try 
+    try (*もう少し内側に*)
       let () = print_string "> " in 
       let () = flush stdout in
       let result = Parser.command Lexer.token lexbuf in
       (*入力コマンドを実行し結果などをプリント->新たな環境を受け取る*)
-      loop_stdin (Eval.print_command_result env result)
+      loop_stdin (Eval.print_command_result env result) (*trywithの外に*) 
 
     with
     | Lexer.Error msg ->
@@ -26,26 +26,28 @@ let repl () =
   in loop_stdin [];;
 
 (*ファイル評価*)
+(*cmdのリストを受け取ってから実行*)
 let read_file filename =
     let op_file = open_in filename in
     let lexbuf = Lexing.from_channel op_file in
     (*ループ部分*)
+    (*try withを再帰の外側に*)
     let rec loop_file env = 
       try   
-        let result = Parser.command Lexer.token lexbuf in
+        let result = Parser.command Lexer.token lexbuf in (*この中にwith…Some/None *)
         (*入力コマンドを実行し結果などをプリント->新たな環境を受け取る*)
-        loop_file (Eval.print_command_result env result)
+        loop_file (Eval.print_command_result env result) (*tryの外にあるべき*)
     with
       | End_of_file -> Printf.printf "End of File"; close_in op_file
       | Lexer.Error msg ->
           Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
-          print_endline msg 
+          print_endline msg (*close*)
       | Parsing.Parse_error ->
           Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
-          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf) 
+          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf) (*close*)
   in loop_file []
 (*ファイルの読み込みが終わった後Parse Errorが出てしまう問題の解消ができていない*)
-
+(*end_of_streamをとっていない*)
 
 (*メイン関数*)
 let eval_input () =

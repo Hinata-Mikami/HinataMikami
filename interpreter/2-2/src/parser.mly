@@ -13,6 +13,7 @@
 %token DSC
 %token EOF 
 %token FUN ARROW
+%token REC (*追加*)
 
 
 %nonassoc FUN ARROW
@@ -49,6 +50,8 @@ expr:
   | arith_expr { $1 } 
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
+  | LET REC var EQ expr IN expr {}
+  | LER REC var EQ expr {}  
 ;
 
 (*ここら辺は手探り*)

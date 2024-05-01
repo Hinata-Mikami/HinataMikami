@@ -30,17 +30,22 @@
 
 (*生成される木における位置が深いほど計算の優先順位が高い*)
 command:
-  | LET var EQ expr DSC  { CLet($2,$4) }
-  | expr DSC             { CExp $1 }
+  | LET var EQ expr command_end  { CLet($2,$4) }
+  | expr command_end             { CExp $1 }
 ;
+
+command_end:
+  | DSC  {  }
+(*  | DSC EOF {  }*)
 
 main: 
 expr EOF {$1}
 ;
 
+(*EQないよ*)
 expr:
   | arith_expr { $1 } 
-  | arith_expr LT arith_expr { EBin(OpLt, $1, $3) } (*LTの前に左右を評価*)
+  | arith_expr LT arith_expr { EBin(OpLt, $1, $3) } (*LTの前に左右を評価？*)
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr { ELet($2, $4, $6) }
   | ID { EVar $1 }
