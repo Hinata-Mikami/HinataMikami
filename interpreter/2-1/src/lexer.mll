@@ -26,8 +26,8 @@ rule token = parse
 | '/'         { DIV }
 | '('         { LPAR }
 | ')'         { RPAR }
-| "fun"       { FUN }
-| "->"        { ARROW }
+| "fun"       { FUN } (*追加*)
+| "->"        { ARROW } (*追加*)
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)

@@ -1,3 +1,4 @@
+(*変更なし*)
 open Syntax
 
 let string_of_position : Lexing.position -> string = fun pos -> 
@@ -51,6 +52,7 @@ let eval_input () =
   if Array.length Sys.argv > 1 then
     let file = Sys.argv.(1) in
     read_file file
+  (*そうでないときは標準入力を評価read_eval_point loop*)
   else repl()
 
 

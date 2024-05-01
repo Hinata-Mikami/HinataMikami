@@ -40,9 +40,7 @@ let rec eval (env : env) (expr : expr) =
     with
     | Not_found -> raise Variable_Not_Found
 
-  (*変数の定義*)
   (*let n = e1 in e2*)
-  (*局所定義：(n, e1)はこのスコープ外には反映されてほしくない*)
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) = 
     match eval env e1 with
        | (v1,_) -> eval ((n,v1) :: env) e2
@@ -53,22 +51,30 @@ let rec eval (env : env) (expr : expr) =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> (lookup_variable env n, env)
       | ELet (x, e1, e2) -> eval_let env x e1 e2
+      (*追加 fun x -> E *)
+      (*この評価結果を VFun とする*)
       | EFun (x, e) -> (VFun (x, e, env), env)
+      (*追加 E1 E2 : (fun x -> E) E2 *)
+      (*まず、E1: fun x -> E を評価する -> VFun -> v1*)
+      (*次に、 E1 は VFunであるはずなので、このとき
+        v1を評価したときの環境下でe2を評価し(v2)、評価結果を新たな環境に追加*)
       | EApp (e1, e2) -> 
         let v1, _ = eval env e1 in
         let v2, _ = eval env e2 in
         (match v1 with
           | VFun (x, e, env') ->
-              eval ((x, v2) :: env') e
+              eval ((x, v2) :: env') e 
           | _ -> raise Eval_error)
     
-
+(*次のprint_command_resultで使う*)
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) =
   match eval env e with
   | (v1,_) -> eval ((n,v1) :: env) e
 
-
+(*対話型シェルのようにcmdを実行し、実行結果等を表示しつつ、新たな環境envを返す関数*)
+(*main.mlの再帰関数loop_stdin env や loop_file env の再帰部分の引数に*)
+(*env -> command -> env*)
 let print_command_result (env : env) (cmd : command) : env =
   match cmd with
   | CExp expr -> 
