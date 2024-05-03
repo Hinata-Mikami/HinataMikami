@@ -10,7 +10,6 @@ exception Unexpected_Expression_at_eval_if
 exception Variable_Not_Found
 
 (*expr型の解析*)
-(*envを返す必要は全くない！！！*)
 let rec eval (env : env) (expr : expr) : value =
   (*binOpの解析*)
   let eval_bin_op (env : env) (op : binOp) (e1 : expr) (e2 : expr) =

@@ -10,8 +10,7 @@
 %token IF THEN ELSE
 %token ADD SUB MUL DIV EQ LT
 %token LPAR RPAR 
-%token DSC
-%token EOF 
+%token DSC EOF
 
 %nonassoc EQ LT
 %left ADD SUB
@@ -35,11 +34,11 @@ command:
 ;
 
 command_end:
-  | DSC  {  }
-(*  | DSC EOF {  }*)
+  | DSC { }
+  (*| DSC EOF { } *)
 
 main: 
-expr EOF {$1}
+expr EOF { $1 }
 ;
 
 expr:

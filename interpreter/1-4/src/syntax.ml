@@ -25,6 +25,10 @@ type command =
 type env = (name * value) list
 
 exception Eval_error
+exception Zero_Division
+exception Unexpected_Expression_at_binOp
+exception Unexpected_Expression_at_eval_if
+exception Variable_Not_Found
 
 let print_value : value -> unit = function 
   | VInt i -> print_int i 

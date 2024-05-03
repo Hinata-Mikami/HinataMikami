@@ -29,5 +29,5 @@ rule token = parse
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)
-| eof         { EOF }
+| eof         { exit 0 } (*https://www.fos.kuis.kyoto-u.ac.jp/~igarashi/class/isle4-09w/text.pdf*)
 | _           { raise (Error ("Unknown Token: " ^ Lexing.lexeme lexbuf))}
