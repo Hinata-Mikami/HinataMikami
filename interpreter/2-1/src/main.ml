@@ -1,59 +1,93 @@
-(*変更なし*)
 open Syntax
 
+(*要修正*)
 let string_of_position : Lexing.position -> string = fun pos -> 
   Printf.sprintf "[%s] L: %d, C: %d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
   
+  exception Eval_error
+  exception Zero_Division
+  exception Unexpected_Expression_at_binOp
+  exception Unexpected_Expression_at_eval_if
+  exception Variable_Not_Found
+  
+
 (*標準入力読み取り*)
+(*エラーで再帰が止まってほしくない*)
 let repl () =
   let lexbuf = Lexing.from_channel stdin in
+  (*ループ部分*)
   let rec loop_stdin env =
-    try 
-      let () = print_string "> " in 
-      let () = flush stdout in
-      let result = Parser.command Lexer.token lexbuf in
+    let () = print_string "> " in
+    let () = flush stdout in
+    
+    match Parser.command Lexer.token lexbuf with
+    | r -> (match Eval.print_command_result env r with
+            | env' -> loop_stdin env'
+            | exception Eval_error -> Printf.printf "exception: Eval_error\n"; loop_stdin env
+            | exception Zero_Division -> Printf.printf "exception: Zero_Division\n"; loop_stdin env
+            | exception Unexpected_Expression_at_binOp 
+                   -> Printf.printf "exception: Unexpected_Expression_at_binOp\n"; loop_stdin env 
+            | exception Unexpected_Expression_at_eval_if
+                   -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; loop_stdin env
+            | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; loop_stdin env
+            )
 
-      loop_stdin (Eval.print_command_result env result)
-
-    with
-    | Lexer.Error msg ->
+    | exception Lexer.Error msg ->
       Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
-      print_endline msg 
-  
-    | Parsing.Parse_error ->
+      print_endline msg;
+      loop_stdin env
+    | exception Parsing.Parse_error ->
       Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
-      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf)
-    in loop_stdin [];;
+      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
+      loop_stdin env
+
+  in loop_stdin []
 
 (*ファイル評価*)
-let read_file filename =
-    let op_file = open_in filename in
-    let lexbuf = Lexing.from_channel op_file in
+(*cmdのリストを受け取ってから実行?*)
 
-    let rec loop_file env = 
-      try   
-        let result = Parser.command Lexer.token lexbuf in
-
-        loop_file (Eval.print_command_result env result)
-    with
-      | End_of_file -> Printf.printf "End of File"; close_in op_file
-      | Lexer.Error msg ->
+let read_file op_file =
+  
+  let lexbuf = Lexing.from_channel op_file in
+  
+    (*ループ部分*)
+  let rec loop_file env= 
+    match Parser.command Lexer.token lexbuf with 
+    (*入力コマンドを実行し結果などをプリント->新たな環境を受け取る*)
+    | r -> 
+      (match Eval.print_command_result env r with
+        | env' -> loop_file env'
+        | exception Eval_error -> Printf.printf "exception: Eval_error\n";
+        | exception Zero_Division -> Printf.printf "exception: Zero_Division\n";
+        | exception Unexpected_Expression_at_binOp 
+                -> Printf.printf "exception: Unexpected_Expression_at_binOp\n";
+        | exception Unexpected_Expression_at_eval_if
+                -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; 
+        | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; 
+      )
+    (* | exception End_of_file -> Printf.printf "End of File"; *)
+    | exception Lexer.Error msg ->
           Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
-          print_endline msg 
-      | Parsing.Parse_error ->
+          print_endline msg;
+    | exception Parsing.Parse_error ->
           Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
-          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf) 
+          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
 
-  in loop_file []
+    in loop_file []
 
 
+(*メイン関数*)
 let eval_input () =
-  (* コマンドライン引数がある場合はファイルを評価 *)  
+  (*コマンドライン引数がある場合はファイルを評価 *)  
   if Array.length Sys.argv > 1 then
     let file = Sys.argv.(1) in
-    read_file file
+    let op_file = open_in file 
+    in read_file op_file;
+    close_in op_file;
+
   (*そうでないときは標準入力を評価read_eval_point loop*)
   else repl()
 
-
+(*随時実行*)
 let () = eval_input ()
+
