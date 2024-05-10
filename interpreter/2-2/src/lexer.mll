@@ -32,5 +32,5 @@ rule token = parse
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)
-| eof         { EOF }
+| eof         { exit 0 }
 | _           { raise (Error ("Unknown Token: " ^ Lexing.lexeme lexbuf))}
