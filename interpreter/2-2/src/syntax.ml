@@ -30,6 +30,7 @@ and value =
   | VInt  of int
   | VBool of bool 
   | VFun of name * expr * env
+  | VRFun of name * name * expr * env
 
 type command =
   | CExp of expr
