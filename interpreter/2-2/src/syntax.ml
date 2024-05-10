@@ -19,7 +19,7 @@ type expr =
   | EVar of name
   | ELet of name * expr * expr
   | ERLet of name * name * expr
-  | ERILet of name * name * expr
+  | ERILet of name * name * expr * expr
   | EFun of name * expr (* fun x -> E*)
   | EApp of expr * expr (* E E *)
 
