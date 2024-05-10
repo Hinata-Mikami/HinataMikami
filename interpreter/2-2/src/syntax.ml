@@ -4,7 +4,13 @@ type literal =
   | LInt of int 
   | LBool of bool 
 
-type binOp = OpAdd | OpSub | OpMul | OpDiv | OpEq | OpLt
+type binOp = 
+  | OpAdd 
+  | OpSub 
+  | OpMul 
+  | OpDiv 
+  | OpEq 
+  | OpLt
 
 type expr =
   | ELiteral of literal 
@@ -12,6 +18,8 @@ type expr =
   | EIf of expr * expr * expr 
   | EVar of name
   | ELet of name * expr * expr
+  | ERLet of name * name * expr
+  | ERILet of name * name * expr
   | EFun of name * expr (* fun x -> E*)
   | EApp of expr * expr (* E E *)
 
