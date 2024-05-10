@@ -1,6 +1,57 @@
-# dune init exe main
+# dune build
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Shared cache location: /home/hinata/.cache/dune/db
-# Workspace root: /home/hinata/code/interpreter/1-4
+# Workspace root: /home/hinata/code/interpreter/2-1
 # Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/hinata/.opam/default/bin/ocamlc.opt -config > /tmp/dune_3b4000_output
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/main.ml) > _build/default/src/.main.eobjs/dune__exe__Main.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/syntax.ml) > _build/default/src/.main.eobjs/dune__exe__Syntax.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Syntax.cmo -c -impl src/syntax.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Parser.cmi -c -intf src/parser.mli)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Syntax.cmx -c -impl src/syntax.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Eval.cmo -c -impl src/eval.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/byte/dune__exe__Lexer.cmo -c -impl src/lexer.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Eval.cmx -c -impl src/eval.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Parser.cmx -c -impl src/parser.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Lexer.cmx -c -impl src/lexer.ml)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o src/.main.eobjs/native/dune__exe__Main.cmx -c -impl src/main.ml)
+> File "src/main.ml", line 7, characters 0-20:
+> 7 | exception Eval_error
+>     ^^^^^^^^^^^^^^^^^^^^
+> Error (warning 38 [unused-extension]): exception Eval_error is never used to build values.
+> (However, this constructor appears in patterns.)
+>
+> File "src/main.ml", line 8, characters 0-23:
+> 8 | exception Zero_Division
+>     ^^^^^^^^^^^^^^^^^^^^^^^
+> Error (warning 38 [unused-extension]): exception Zero_Division is never used to build values.
+> (However, this constructor appears in patterns.)
+>
+> File "src/main.ml", line 9, characters 0-40:
+> 9 | exception Unexpected_Expression_at_binOp
+>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error (warning 38 [unused-extension]): exception Unexpected_Expression_at_binOp is never used to build values.
+> (However, this constructor appears in patterns.)
+>
+> File "src/main.ml", line 10, characters 0-42:
+> 10 | exception Unexpected_Expression_at_eval_if
+>      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error (warning 38 [unused-extension]): exception Unexpected_Expression_at_eval_if is never used to build values.
+> (However, this constructor appears in patterns.)
+>
+> File "src/main.ml", line 11, characters 0-28:
+> 11 | exception Variable_Not_Found
+>      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error (warning 38 [unused-extension]): exception Variable_Not_Found is never used to build values.
+> (However, this constructor appears in patterns.)
+[2]

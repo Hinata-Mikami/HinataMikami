@@ -1,25 +1,26 @@
-open Syntax
+(* open Syntax *)
 
 (*要修正*)
 let string_of_position : Lexing.position -> string = fun pos -> 
   Printf.sprintf "[%s] L: %d, C: %d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
-  
+
   exception Eval_error
   exception Zero_Division
   exception Unexpected_Expression_at_binOp
   exception Unexpected_Expression_at_eval_if
   exception Variable_Not_Found
-  
 
 (*標準入力読み取り*)
 (*エラーで再帰が止まってほしくない*)
 let repl () =
+
   let lexbuf = Lexing.from_channel stdin in
   (*ループ部分*)
   let rec loop_stdin env =
+
     let () = print_string "> " in
     let () = flush stdout in
-    
+
     match Parser.command Lexer.token lexbuf with
     | r -> (match Eval.print_command_result env r with
             | env' -> loop_stdin env'
@@ -65,7 +66,6 @@ let read_file op_file =
                 -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; 
         | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; 
       )
-    (* | exception End_of_file -> Printf.printf "End of File"; *)
     | exception Lexer.Error msg ->
           Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
           print_endline msg;
