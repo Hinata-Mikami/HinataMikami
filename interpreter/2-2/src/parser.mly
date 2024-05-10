@@ -49,7 +49,7 @@ expr:
   | arith_expr                  { $1 } 
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr     { ELet($2, $4, $6) }
-  | LET REC var var EQ rec_expr { ERLet($2,$3,$5) }
+  | LET REC var var EQ rec_expr { ERLet($3, $4, $6) }
   | LET REC var var rec_expr IN expr {ERILet($3,$4,$5,$7) } 
 ;
 
