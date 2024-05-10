@@ -64,7 +64,14 @@ let rec eval (env : env) (expr : expr) : value =
         (match v1 with
           | VFun (x, e, env') ->
               eval ((x, v2) :: env') e 
+          | VRFun (f, x, e, env') as v ->
+              let env'' = (x, v2)::(f, v) :: env' in
+              eval env'' e
           | _ -> raise Eval_error)
+      | ERLet (f, x, e) -> VRFun (f, x, e, env)
+      | ERILet (f, x, e1, e2) -> 
+          let env' = (f, VRFun(f, x, e1, env)) :: env in
+          eval env' e2
     
 (*次のprint_command_resultで使う*)
 (*CLet (n, e) : let n = e;;*)
