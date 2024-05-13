@@ -1,0 +1,24 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /home/hinata/.cache/dune/db
+# Workspace root: /home/hinata/code/interpreter/2-2
+# Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/hinata/.opam/default/bin/ocamlc.opt -config > /tmp/dune_d4346c_output
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamlyacc src/parser.mly)
+> /home/hinata/.opam/default/bin/ocamlyacc: e - the symbol `LER' is undefined
+[1]
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamllex -q -o src/lexer.ml src/lexer.mll)
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/main.ml) > _build/default/src/.main.eobjs/dune__exe__Main.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/eval.ml) > _build/default/src/.main.eobjs/dune__exe__Eval.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/syntax.ml) > _build/default/src/.main.eobjs/dune__exe__Syntax.impl.d
+$ (cd _build/default && /home/hinata/.opam/default/bin/ocamldep.opt -modules -impl src/lexer.ml) > _build/default/src/.main.eobjs/dune__exe__Lexer.impl.d
