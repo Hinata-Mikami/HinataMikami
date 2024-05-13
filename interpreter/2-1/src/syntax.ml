@@ -21,7 +21,7 @@ and env = (name * value) list
 and value =
   | VInt  of int
   | VBool of bool 
-  | VFun of name * expr * env
+  | VFun of name * expr * env (*fun式の評価結果のクロージャ (関数,環境)*)
 
 type command =
   | CExp of expr

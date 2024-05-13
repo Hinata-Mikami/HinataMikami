@@ -51,19 +51,20 @@ let rec eval (env : env) (expr : expr) : value =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> lookup_variable env n
       | ELet (x, e1, e2) -> eval_let env x e1 e2
+      (*資料参照*)
       (*追加 fun x -> E *)
       (*この評価結果を VFun とする*)
       | EFun (x, e) -> VFun (x, e, env)
       (*追加 E1 E2 : (fun x -> E) E2 *)
       (*まず、E1: fun x -> E を評価する -> VFun -> v1*)
       (*次に、 E1 は VFunであるはずなので、このとき
-        v1を評価したときの環境下でe2を評価し(v2)、評価結果を新たな環境に追加*)
+        v1を評価したときの環境下でe2を評価し(v2)、評価結果(x,v2)を環境oenvに追加*)
       | EApp (e1, e2) -> 
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
-          | VFun (x, e, env') ->
-              eval ((x, v2) :: env') e 
+          | VFun (x, e, oenv) ->
+              eval ((x, v2) :: oenv) e 
           | _ -> raise Eval_error)
     
 (*次のprint_command_resultで使う*)
