@@ -15,7 +15,7 @@
 %token FUN ARROW
 %token REC (*追加*)
 
-
+//下に行くほど結合が強い
 %nonassoc FUN ARROW
 %nonassoc LET IN
 %nonassoc IF THEN ELSE
@@ -49,7 +49,7 @@ expr:
   | arith_expr                  { $1 } 
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr     { ELet($2, $4, $6) }
-  | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x *)
+  | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x (= ・・・) in e*)
 ; (*let rec f = e の形は禁止*)
 
 (*let rec の中の表現*)

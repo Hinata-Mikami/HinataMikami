@@ -39,7 +39,7 @@ exception Eval_error
 let print_value : value -> unit = function 
   | VInt i -> print_int i 
   | VBool b -> print_string (string_of_bool b) 
-  | VFun (x, e, env) -> () (*未実装*)
+  | VFun (x, e, env) -> ()
   | VRFun (f, x, e, env) -> ()
 
 let value_of_literal : literal -> value = function 
