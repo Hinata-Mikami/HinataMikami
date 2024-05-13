@@ -49,13 +49,20 @@ expr:
   | arith_expr                  { $1 } 
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr     { ELet($2, $4, $6) }
-  | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x *)
+  | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } 
+  | MATCH expr WITH match_expr  { EMatch ($2, $4) } (*追加*)
 ; (*let rec f = e の形は禁止*)
 
 (*let rec の中の表現*)
 rec_expr:
   | EQ expr {$2} (*let rec f ... = expr in ...*)
   | var rec_expr { EFun($1, $2) } (*糖衣構文　fun x ->　fun y -> ・・・*)
+;
+
+match_expr:
+  | 
+
+
 
 (*%left を使用して整理*)
 arith_expr:
