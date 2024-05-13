@@ -12,6 +12,7 @@ type binOp =
   | OpEq 
   | OpLt
 
+(*endをつけないといけない理由：どこかでコンフリクトが起きる？実際のOCamlでも括弧をつけないといけないような…*)
 type expr =
   | ELiteral of literal 
   | EBin of binOp * expr * expr 
