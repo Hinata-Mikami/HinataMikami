@@ -51,28 +51,27 @@ let rec eval (env : env) (expr : expr) : value =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> lookup_variable env n
       | ELet (x, e1, e2) -> eval_let env x e1 e2
-      (*追加 fun x -> E *)
-      (*この評価結果を VFun とする*)
+      (*fix (fun f x -> e1)に対応する値VRFunを作る*)
+      (*最後にでき上がった環境の下でe2を評価する*)
+      | ERLet (f, x, e1, e2) -> 
+          let env' = (f, VRFun(f, x, e1, env)) :: env in
+          eval env' e2
       | EFun (x, e) -> VFun (x, e, env)
-      (*追加 E1 E2 : (fun x -> E) E2 *)
-      (*まず、E1: fun x -> E を評価する -> VFun -> v1*)
-      (*次に、 E1 は VFunであるはずなので、このとき
-        v1を評価したときの環境下でe2を評価し(v2)、評価結果を新たな環境に追加*)
+      (*関数適用*)
       | EApp (e1, e2) -> 
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
-          | VFun (x, e, env') ->
-              eval ((x, v2) :: env') e 
-          | VRFun (f, x, e, env') as v ->
-              let env'' = (x, v2)::(f, v) :: env' in
-              eval env'' e
+          | VFun (x, e, oenv) ->
+              eval ((x, v2) :: oenv) e 
+          (*fixのアイデアを使い再帰的に環境を追加していく関数*)
+          (*現在の環境で評価された(x,v2)と、再帰部分を環境に追加*)
+          | VRFun (f, x, e, oenv)  ->
+              let env' = (x,v2) :: (f, VRFun (f,x,e,oenv)) :: oenv in
+              eval env' e
           | _ -> raise Eval_error)
-      | ERLet (f, x, e) -> VRFun (f, x, e, env)
-      | ERILet (f, x, e1, e2) -> 
-          let env' = (f, VRFun(f, x, e1, env)) :: env in
-          eval env' e2
-    
+
+
 (*次のprint_command_resultで使う*)
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) : (value * env) =
@@ -90,7 +89,8 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
-     | VFun (_, _, _) -> () (*未実装*)
+     | VFun (_, _, _) -> ()
+     | VRFun (_,_,_,_) -> ()
      );
      env)
   (*CLet: let n = e;;*)
