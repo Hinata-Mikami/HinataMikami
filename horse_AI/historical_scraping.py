@@ -5,9 +5,9 @@ from bs4 import BeautifulSoup
 import time
 import csv
 #取得開始年
-year_start = 2013
+year_start = 2005
 #取得終了年
-year_end = 2023
+year_end = 2013
 
 for year in range(year_start, year_end):
     race_data_all = []
