@@ -11,6 +11,7 @@ type binOp =
   | OpDiv 
   | OpEq 
   | OpLt
+  | OpOr
 
 type expr =
   | ELiteral of literal 
@@ -36,9 +37,9 @@ and value =
   | VBool of bool 
   | VFun of name * expr * env
   | VRFun of name * name * expr * env
-  | VPair of expr * expr
+  | VPair of value * value
   | VNil
-  | VCons of expr * expr
+  | VCons of value * value
   | VRFunand of int * (name * name * expr) list * env
 
 type command =

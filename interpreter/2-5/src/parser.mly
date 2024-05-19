@@ -56,6 +56,7 @@ expr:
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr     { ELet($2, $4, $6) }
   | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x (= ・・・) in e*)
+  | LET REC var var rec_expr let_expr IN expr { ERLetand ([($3, $4, $5)] @ $6, $8 ) }
   | MATCH expr WITH match_expr { EMatch ($2, $4) }
   | LPAR expr COMMA expr RPAR { EPair ($2, $4) }
   | LBPAR RBPAR { ENil }
@@ -65,6 +66,11 @@ expr:
 rec_expr:
   | EQ expr {$2} (*let rec f ... = expr in ...*)
   | var rec_expr { EFun($1, $2) } (*糖衣構文　fun x ->　fun y -> ・・・*)
+
+let_expr :
+  | AND var var rec_expr let_expr { [($2, $3, $4)] @ $5 }
+  |  { [] }
+;
 
 (*%left を使用して整理*)
 arith_expr:
@@ -91,9 +97,9 @@ match_expr :
 pattern :
   | literal         { ELiteral $1 }
   | ID { EVar ($1) }
-  | LPAR expr COMMA expr RPAR { VPair ($2, $4) }
-  | LBPAR RBPAR { VNil }
-  | expr CONS expr { VCons ($1, $3) }
+  | LPAR expr COMMA expr RPAR { EPair ($2, $4) }
+  | LBPAR RBPAR { ENil }
+  | expr CONS expr { ECons ($1, $3) }
 ;
 
 atomic_expr: (*これ以降分解できない式*)

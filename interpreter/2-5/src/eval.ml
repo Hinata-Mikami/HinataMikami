@@ -22,7 +22,8 @@ let rec eval (env : env) (expr : expr) : value =
       | OpMul -> VInt (x * y)
       | OpDiv -> if y = 0 then raise Zero_Division else VInt (x / y)
       | OpEq -> VBool (x = y)
-      | OpLt -> VBool (x < y))
+      | OpLt -> VBool (x < y)
+      | OpOr -> raise Eval_error)
     | _ -> raise Unexpected_Expression_at_binOp
 
   in let eval_if (env : env) (e0 : expr) (e1 : expr) (e2 : expr) : value =
@@ -42,19 +43,19 @@ let rec eval (env : env) (expr : expr) : value =
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
        
-  in let rec find_match p v =
+  in let rec find_match (p : value) (v : value) : env option =
     match (p, v) with
     (VInt i1, VInt i2) ->
       if i1 = i2 then Some [] else None
     | (VBool b1, VBool b2) ->
        if b1 = b2 then Some [] else None
-    | (EVar v, (_ as t)) ->
+    (* | (EVar v, (_ as t)) ->
       Some [(v, t)]
     | ((_ as t), EVar v) ->
-      Some [(v, t)]
-    | (VPair (e1, e2), VPair (e3, e4)) ->
-      let first = find_match e1 e3 in
-      let second = find_match e2 e4 in
+      Some [(v, t)] *)
+    | (VPair (v1, v2), VPair (v3, v4)) ->
+      let first = find_match v1 v3 in
+      let second = find_match v2 v4 in
       (match (first, second) with
       (Some s1, Some s2) -> Some (s1 @ s2)
       | _ -> None)
@@ -72,18 +73,23 @@ let rec eval (env : env) (expr : expr) : value =
         (* ECons (EValue (VInt 1), ECons (EValue (VInt 3), ENil)) *)
       
   in let rec eval_match v e2 env evalf =
-    (match e2 with
-        EMatchpairend (p, e) ->
-          (match find_match p v with
-          Some s ->
-            evalf (s @ env) e
-          | None -> raise Eval_error)
-        | EBin (OpOr, EMatchpair (p, e), e') ->
-          (match find_match p v with
-          Some s ->
-            evalf (s @ env) e
-          | None -> eval_match v e' env evalf)
-        | _ -> raise Eval_error)
+    match e2 with
+      EMatchpairend (p, e) ->
+        (match find_match p v with
+        | Some s ->
+          evalf (s @ env) e
+        | None -> raise Eval_error)
+      | EBin (OpOr, EMatchpair (p, e), e') ->
+        (match find_match p v with
+        | Some s ->
+          evalf (s @ env) e
+        | None -> eval_match v e' env evalf)
+      | _ -> raise Eval_error
+
+  in let rec eval_env l l' oenv i =
+    match l with
+    [] -> oenv
+    | (f, x, e) :: rest -> (f, VRFunand (i, l', oenv)) :: (eval_env rest l' oenv (i + 1))
 
   in match expr with
       | ELiteral x -> value_of_literal x
@@ -106,20 +112,21 @@ let rec eval (env : env) (expr : expr) : value =
               eval env' e
           | _ -> raise Eval_error)
       | EMatch (e1, e2) ->
-        let v = eval_expr env e1 in
-        eval_match v e2 env eval_expr
-      | EPair (e1, e2) -> VPair (eval_expr env e1, eval_expr env e2)
+        let v = eval env e1 in
+        eval_match v e2 env eval
+      | EPair (e1, e2) -> VPair (eval env e1, eval env e2)
       | ENil -> VNil
       | ECons (e1, e2) ->
-        let v = eval_expr env e2 in
+        let v = eval env e2 in
         (match v with
-        VNil -> VCons (eval_expr env e1, v)
-        | Cons (e1', e2') -> VCons (eval_expr env e1, v)
+        VNil -> VCons (eval env e1, v)
+        | VCons (e1', e2') -> VCons (eval env e1, v)
         | _ -> raise Eval_error)
       | ERLetand (l, e) ->
         let l' = l in
         let env' = eval_env l l' env 0 in
-        eval_expr env' e
+        eval env' e
+      | _ -> raise Eval_error
 
 
 (*次のprint_command_resultで使う*)
