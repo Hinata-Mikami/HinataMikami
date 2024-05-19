@@ -46,25 +46,20 @@ let rec eval (env : env) (expr : expr) : value =
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
        
-  (*p1 -> v1*)     
+  (*match v with p -> ... *)     
   in let rec find_match (pv : value) (v : value) : env option =
     match (pv, v) with
-    (VInt i1, VInt i2) ->
-      if i1 = i2 then Some [] else None
-    | (VBool b1, VBool b2) ->
-       if b1 = b2 then Some [] else None
-    (* | (EVar v, (_ as t)) ->
-      Some [(v, t)]
-    | ((_ as t), EVar v) ->
-      Some [(v, t)] *)
+    | (VInt i1, VInt i2) -> if i1 = i2 then Some [] else None   (* int  ->  *)
+    | (VBool b1, VBool b2) -> if b1 = b2 then Some [] else None
+    (* | (EVar v, (_ as t)) -> Some [(v, t)] *)
+    (* | ((_ as t), EVar v) -> Some [(v, t)] *)
     | (VPair (v1, v2), VPair (v3, v4)) ->
       let first = find_match v1 v3 in
       let second = find_match v2 v4 in
       (match (first, second) with
       (Some s1, Some s2) -> Some (s1 @ s2)
       | _ -> None)
-    | (VNil, VNil) ->
-      Some []
+    | (VNil, VNil) -> Some []
     | (VCons (e1, e2) , VCons (e3, e4)) ->
       let element = find_match e1 e3 in
       let rest = find_match e2 e4 in
@@ -73,21 +68,25 @@ let rec eval (env : env) (expr : expr) : value =
       | _ -> None)
     | _ -> None
       
-      
-  in let rec eval_match v e2 env evalf =
+  (*match v with e2 -> value*)    
+  in let rec eval_match (v:value) (e2:expr) (env:env) : value=
     match e2 with
-      EMatchpairend (pe, e) ->
-        let pv = eval env pe in 
+      (*p1 -> e1 end;;*)
+      EMatchpairend (p, e) ->
+        (match e with
+        | EVar x -> eval ((x, v) :: env) e
+        | _ -> let pv = eval env p in
         (match find_match pv v with
-        | Some s ->
-          evalf (s @ env) e
-        | None -> raise Eval_error)
-      | EBin (OpOr, EMatchpair (pe, e), e') ->
-        let pv = eval env pe in
+        | Some s -> eval (s @ env) e
+        | None -> raise Eval_error))
+      (*p1 -> e1 | expr*)
+      | EBin (OpOr, EMatchpair (p, e), e') ->
+        (match e with
+        | EVar x -> eval ((x, v) :: env) e
+        | _ -> let pv = eval env p in
         (match find_match pv v with
-        | Some s ->
-          evalf (s @ env) e
-        | None -> eval_match v e' env evalf)
+        | Some s -> eval (s @ env) e
+        | None -> eval_match v e' env))
       | _ -> raise Eval_error
 
   in let rec eval_env l l' oenv i =
@@ -115,7 +114,7 @@ let rec eval (env : env) (expr : expr) : value =
               eval env' e
           | _ -> raise Eval_error)
       | EMatch (e1, e2) ->  let v = eval env e1 in
-                            eval_match v e2 env eval
+                            eval_match v e2 env
       | EPair (e1, e2) -> VPair (eval env e1, eval env e2)
       | ENil -> VNil
       | ECons (e1, e2) ->
