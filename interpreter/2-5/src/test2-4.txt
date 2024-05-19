@@ -1,0 +1,21 @@
+1 :: 2 :: 3 :: [];;
+
+(1, true);;
+
+match (1, 2) with
+  (x, y) -> x
+end;;
+
+match (1, (2, 3)) with
+  (x, (y, z)) -> z
+end;;
+
+match 1 :: 2 :: 3 :: [] with
+  h :: t -> h
+| [] -> 0
+end;;
+
+match 1 :: 2 :: 3 :: [] with
+  x :: y :: t -> t
+| z -> 0
+end;;

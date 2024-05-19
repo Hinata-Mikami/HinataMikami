@@ -1,0 +1,12 @@
+let f = fun x ->
+  match x with
+    1 -> 1
+  | true -> 2
+  | x -> x * 2
+  end;;
+
+f 1;;
+
+f true;;
+
+f 2;;

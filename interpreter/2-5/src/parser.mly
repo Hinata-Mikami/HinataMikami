@@ -70,7 +70,8 @@ expr:
   //[]
   | LBPAR RBPAR                               { ENil }
   //e1::e2
-  | expr CONS expr                            { ECons ($1, $3) };
+  | expr CONS expr                            { ECons ($1, $3) }
+;
 
 //let rec f x <rec_expr> in e
 rec_expr:
@@ -78,6 +79,7 @@ rec_expr:
   | EQ expr      {$2}
   // x2 <rec_expr> 糖衣構文の実装
   | var rec_expr { EFun($1, $2) } 
+;
 
 //let rec f x = e0 <let_expr> in e
 let_expr :

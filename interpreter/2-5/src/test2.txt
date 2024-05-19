@@ -1,3 +1,0 @@
-let rec fix f = fun x -> f (fix f) x in
-let fact = fix (fun f -> fun x -> if x < 1 then 1 else x * f (x - 1)) in
-fact 5;;
