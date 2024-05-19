@@ -18,9 +18,16 @@ type expr =
   | EIf of expr * expr * expr 
   | EVar of name
   | ELet of name * expr * expr
-  | ERLet of name * name * expr * expr (*資料参考:再帰表現*)
+  | ERLet of name * name * expr * expr
   | EFun of name * expr
   | EApp of expr * expr
+  | EMatch of expr * expr
+  | EMatchpair of expr * expr
+  | EMatchpairend of expr * expr
+  | EPair of expr * expr
+  | ENil
+  | ECons of expr * expr
+  | ERLetand of (name * name * expr) list * expr
 
 and env = (name * value) list
 
@@ -28,7 +35,11 @@ and value =
   | VInt  of int
   | VBool of bool 
   | VFun of name * expr * env
-  | VRFun of name * name * expr * env (*資料参考:ERLetを評価した値*)
+  | VRFun of name * name * expr * env
+  | VPair of expr * expr
+  | VNil
+  | VCons of expr * expr
+  | VRFunand of int * (name * name * expr) list * env
 
 type command =
   | CExp of expr
@@ -39,8 +50,7 @@ exception Eval_error
 let print_value : value -> unit = function 
   | VInt i -> print_int i 
   | VBool b -> print_string (string_of_bool b) 
-  | VFun (x, e, env) -> ()
-  | VRFun (f, x, e, env) -> ()
+  | _ -> ()
 
 let value_of_literal : literal -> value = function 
   | LInt i -> VInt i 

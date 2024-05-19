@@ -25,17 +25,14 @@ let rec eval (env : env) (expr : expr) : value =
       | OpLt -> VBool (x < y))
     | _ -> raise Unexpected_Expression_at_binOp
 
-  (*ifの解析*)
   in let eval_if (env : env) (e0 : expr) (e1 : expr) (e2 : expr) : value =
     match eval env e0 with
     | VBool true -> eval env e1
     | VBool false -> eval env e2
     | _ -> raise Unexpected_Expression_at_eval_if
 
-  (*変数に束縛された値を返す*)
   in let lookup_variable (env : env) (x : name) : value =
     try
-      (*encの中からxに対応するキーを返す*)
       List.assoc x env
     with
     | Not_found -> raise Variable_Not_Found
@@ -44,6 +41,49 @@ let rec eval (env : env) (expr : expr) : value =
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) : value = 
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
+       
+  in let rec find_match p v =
+    match (p, v) with
+    (VInt i1, VInt i2) ->
+      if i1 = i2 then Some [] else None
+    | (VBool b1, VBool b2) ->
+       if b1 = b2 then Some [] else None
+    | (EVar v, (_ as t)) ->
+      Some [(v, t)]
+    | ((_ as t), EVar v) ->
+      Some [(v, t)]
+    | (VPair (e1, e2), VPair (e3, e4)) ->
+      let first = find_match e1 e3 in
+      let second = find_match e2 e4 in
+      (match (first, second) with
+      (Some s1, Some s2) -> Some (s1 @ s2)
+      | _ -> None)
+    | (VNil, VNil) ->
+      Some []
+    | (VCons (e1, e2) , VCons (e3, e4)) ->
+      let element = find_match e1 e3 in
+      let rest = find_match e2 e4 in
+      (match (element, rest) with
+      (Some s1, Some s2) -> Some (s1 @ s2)
+      | _ -> None)
+    | _ -> None
+      
+        (* find_match (EValue (VCons (EVar "x", EVar "rest"))) (EValue (VCons (EValue (VInt 1), EValue (VCons (EValue (VInt 3), ENil))))) *)
+        (* ECons (EValue (VInt 1), ECons (EValue (VInt 3), ENil)) *)
+      
+  in let rec eval_match v e2 env evalf =
+    (match e2 with
+        EMatchpairend (p, e) ->
+          (match find_match p v with
+          Some s ->
+            evalf (s @ env) e
+          | None -> raise Eval_error)
+        | EBin (OpOr, EMatchpair (p, e), e') ->
+          (match find_match p v with
+          Some s ->
+            evalf (s @ env) e
+          | None -> eval_match v e' env evalf)
+        | _ -> raise Eval_error)
 
   in match expr with
       | ELiteral x -> value_of_literal x
@@ -51,25 +91,35 @@ let rec eval (env : env) (expr : expr) : value =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> lookup_variable env n
       | ELet (x, e1, e2) -> eval_let env x e1 e2
-      (*fix (fun f x -> e1)に対応する値VRFunを作る*)
-      (*最後にでき上がった環境の下でe2を評価する*)
       | ERLet (f, x, e1, e2) -> 
           let env' = (f, VRFun(f, x, e1, env)) :: env in
           eval env' e2
       | EFun (x, e) -> VFun (x, e, env)
-      (*関数適用*)
       | EApp (e1, e2) -> 
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
           | VFun (x, e, oenv) ->
               eval ((x, v2) :: oenv) e 
-          (*fixのアイデアを使い再帰的に環境を追加していく関数*)
-          (*現在の環境で評価された(x,v2)と、再帰部分を環境に追加*)
           | VRFun (f, x, e, oenv)  ->
               let env' = (x,v2) :: (f, VRFun (f,x,e,oenv)) :: oenv in
               eval env' e
           | _ -> raise Eval_error)
+      | EMatch (e1, e2) ->
+        let v = eval_expr env e1 in
+        eval_match v e2 env eval_expr
+      | EPair (e1, e2) -> VPair (eval_expr env e1, eval_expr env e2)
+      | ENil -> VNil
+      | ECons (e1, e2) ->
+        let v = eval_expr env e2 in
+        (match v with
+        VNil -> VCons (eval_expr env e1, v)
+        | Cons (e1', e2') -> VCons (eval_expr env e1, v)
+        | _ -> raise Eval_error)
+      | ERLetand (l, e) ->
+        let l' = l in
+        let env' = eval_env l l' env 0 in
+        eval_expr env' e
 
 
 (*次のprint_command_resultで使う*)
@@ -89,8 +139,7 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
-     | VFun (_, _, _) -> ()
-     | VRFun (_,_,_,_) -> ()
+     | _ -> ()
      );
      env)
   (*CLet: let n = e;;*)

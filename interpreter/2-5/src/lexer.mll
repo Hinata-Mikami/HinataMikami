@@ -28,7 +28,16 @@ rule token = parse
 | ')'         { RPAR }
 | "fun"       { FUN }
 | "->"        { ARROW }
-| "rec"       { REC } (*追加*)
+| "rec"       { REC }
+| "match"     { MATCH }
+| "with"      { WITH }
+| '|'         { OR }
+| "end"       { END }
+| ','         { COMMA }
+| '['         { LBPAR }
+| ']'         { RBPAR }
+| "::"        { CONS }
+| "and"       { AND }
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)

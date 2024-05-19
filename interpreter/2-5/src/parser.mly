@@ -13,13 +13,19 @@
 %token DSC
 %token EOF 
 %token FUN ARROW
-%token REC (*追加*)
+%token REC
+%token MATCH WITH OR END
+%token COMMA
+%token LBPAR RBPAR
+%token CONS
+%token AND
 
 //下に行くほど結合が強い
 %nonassoc FUN ARROW
 %nonassoc LET IN
 %nonassoc IF THEN ELSE
 %left EQ LT
+%right CONS
 %left ADD SUB
 %left MUL DIV
 %nonassoc INT ID LPAR RPAR
@@ -50,7 +56,10 @@ expr:
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | LET var EQ expr IN expr     { ELet($2, $4, $6) }
   | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x (= ・・・) in e*)
-; (*let rec f = e の形は禁止*)
+  | MATCH expr WITH match_expr { EMatch ($2, $4) }
+  | LPAR expr COMMA expr RPAR { EPair ($2, $4) }
+  | LBPAR RBPAR { ENil }
+  | expr CONS expr { ECons ($1, $3) };
 
 (*let rec の中の表現*)
 rec_expr:
@@ -72,6 +81,19 @@ arith_expr:
 app_expr:
   | app_expr atomic_expr { EApp($1,$2) } (*関数適用 E E*)
   | atomic_expr          { $1 }
+;
+
+match_expr :
+  | pattern ARROW expr END { EMatchpairend ($1, $3) }
+  | pattern ARROW expr OR match_expr { EBin (OpOr, EMatchpair ($1, $3), $5) }
+;
+
+pattern :
+  | literal         { ELiteral $1 }
+  | ID { EVar ($1) }
+  | LPAR expr COMMA expr RPAR { VPair ($2, $4) }
+  | LBPAR RBPAR { VNil }
+  | expr CONS expr { VCons ($1, $3) }
 ;
 
 atomic_expr: (*これ以降分解できない式*)
