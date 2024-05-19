@@ -51,8 +51,8 @@ exception Eval_error
 let rec print_value : value -> unit = function 
   | VInt i -> print_int i 
   | VBool b -> print_string (string_of_bool b)
-  | VPair (v1, v2) ->  
-  | VNil -> print_string ("[]")
+  (* | VPair (v1, v2) ->   *)
+  (* | VNil -> print_string ("[]") *)
   | _ -> ()
 
 let value_of_literal : literal -> value = function 
