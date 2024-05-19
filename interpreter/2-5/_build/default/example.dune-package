@@ -1,0 +1,4 @@
+(lang dune 3.15)
+(name example)
+(sections (lib .) (bin ../../bin) (doc ../../doc/example))
+(files (lib (META dune-package opam)) (bin (example)) (doc (README.md)))
