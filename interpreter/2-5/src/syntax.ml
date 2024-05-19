@@ -22,13 +22,13 @@ type expr =
   | ERLet of name * name * expr * expr
   | EFun of name * expr
   | EApp of expr * expr
-  | EMatch of expr * expr
-  | EMatchpair of expr * expr
-  | EMatchpairend of expr * expr
-  | EPair of expr * expr
-  | ENil
-  | ECons of expr * expr
-  | ERLetand of (name * name * expr) list * expr
+  | EMatch of expr * expr                             (*match e0 with ...*)
+  | EMatchpair of expr * expr                         (*p1 -> e1 | ...*)
+  | EMatchpairend of expr * expr                      (*p1 -> e1 end*)
+  | EPair of expr * expr                              (* (e1, e2) *)
+  | ENil                                              (* [] *)
+  | ECons of expr * expr                              (* e1 :: e2 *)
+  | ERLetand of (name * name * expr) list * expr      (* let f x = e0 and ... in e *)
 
 and env = (name * value) list
 
@@ -36,10 +36,10 @@ and value =
   | VInt  of int
   | VBool of bool 
   | VFun of name * expr * env
-  | VRFun of name * name * expr * env
-  | VPair of value * value
-  | VNil
-  | VCons of value * value
+  | VRFun of name * name * expr * env     
+  | VPair of value * value                            (* (v1, v2)*)              
+  | VNil                                              (* [] *)
+  | VCons of value * value                            (* v1 :: v2 *)
   | VRFunand of int * (name * name * expr) list * env
 
 type command =

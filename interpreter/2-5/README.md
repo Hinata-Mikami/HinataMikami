@@ -17,3 +17,6 @@ ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo main.cmo
 ## 実行方法
 $./main
 > (文字列を入力) ;; (Enter)
+
+または
+$./main test.txt (Enter)

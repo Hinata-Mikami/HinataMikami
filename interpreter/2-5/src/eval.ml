@@ -10,8 +10,9 @@ exception Unexpected_Expression_at_eval_if
 exception Variable_Not_Found
 
 let rec eval (env : env) (expr : expr) : value =
-  (*binOpの解析*)
-  let eval_bin_op (env : env) (op : binOp) (e1 : expr) (e2 : expr) =
+
+  (*binOp -> value*)
+  let eval_bin_op (env : env) (op : binOp) (e1 : expr) (e2 : expr) : value =
     let v1 = eval env e1 in
     let v2 = eval env e2 in
     match v1, v2 with
@@ -26,25 +27,28 @@ let rec eval (env : env) (expr : expr) : value =
       | OpOr -> raise Eval_error)
     | _ -> raise Unexpected_Expression_at_binOp
 
+  (*if e0 then e1 else e2 -> value*)
   in let eval_if (env : env) (e0 : expr) (e1 : expr) (e2 : expr) : value =
     match eval env e0 with
     | VBool true -> eval env e1
     | VBool false -> eval env e2
     | _ -> raise Unexpected_Expression_at_eval_if
 
+  (* (x, v)∊env ⇒ v *)
   in let lookup_variable (env : env) (x : name) : value =
     try
       List.assoc x env
     with
     | Not_found -> raise Variable_Not_Found
 
-  (*let n = e1 in e2*)
+  (*let n = e1 in e2-> value*)
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) : value = 
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
        
-  in let rec find_match (p : value) (v : value) : env option =
-    match (p, v) with
+  (*p1 -> v1*)     
+  in let rec find_match (pv : value) (v : value) : env option =
+    match (pv, v) with
     (VInt i1, VInt i2) ->
       if i1 = i2 then Some [] else None
     | (VBool b1, VBool b2) ->
@@ -69,18 +73,18 @@ let rec eval (env : env) (expr : expr) : value =
       | _ -> None)
     | _ -> None
       
-        (* find_match (EValue (VCons (EVar "x", EVar "rest"))) (EValue (VCons (EValue (VInt 1), EValue (VCons (EValue (VInt 3), ENil))))) *)
-        (* ECons (EValue (VInt 1), ECons (EValue (VInt 3), ENil)) *)
       
   in let rec eval_match v e2 env evalf =
     match e2 with
-      EMatchpairend (p, e) ->
-        (match find_match p v with
+      EMatchpairend (pe, e) ->
+        let pv = eval env pe in 
+        (match find_match pv v with
         | Some s ->
           evalf (s @ env) e
         | None -> raise Eval_error)
-      | EBin (OpOr, EMatchpair (p, e), e') ->
-        (match find_match p v with
+      | EBin (OpOr, EMatchpair (pe, e), e') ->
+        let pv = eval env pe in
+        (match find_match pv v with
         | Some s ->
           evalf (s @ env) e
         | None -> eval_match v e' env evalf)
@@ -105,38 +109,35 @@ let rec eval (env : env) (expr : expr) : value =
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
-          | VFun (x, e, oenv) ->
-              eval ((x, v2) :: oenv) e 
+          | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e 
           | VRFun (f, x, e, oenv)  ->
               let env' = (x,v2) :: (f, VRFun (f,x,e,oenv)) :: oenv in
               eval env' e
           | _ -> raise Eval_error)
-      | EMatch (e1, e2) ->
-        let v = eval env e1 in
-        eval_match v e2 env eval
+      | EMatch (e1, e2) ->  let v = eval env e1 in
+                            eval_match v e2 env eval
       | EPair (e1, e2) -> VPair (eval env e1, eval env e2)
       | ENil -> VNil
       | ECons (e1, e2) ->
         let v = eval env e2 in
         (match v with
-        VNil -> VCons (eval env e1, v)
+        | VNil -> VCons (eval env e1, v)
         | VCons (e1', e2') -> VCons (eval env e1, v)
         | _ -> raise Eval_error)
       | ERLetand (l, e) ->
         let l' = l in
-        let env' = eval_env l l' env 0 in
-        eval env' e
+        let env' = eval_env l l' env 0 in eval env' e
       | _ -> raise Eval_error
 
 
-(*次のprint_command_resultで使う*)
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
-(*対話型シェルのようにcmdを実行し、実行結果等を表示しつつ、新たな環境envを返す関数*)
-(*main.mlの再帰関数loop_stdin env や loop_file env の再帰部分の引数に*)
+
+(*対話型シェル：実行＋新たな環境envを返す関数*)
+(*main.mlの再帰部分の引数に*)
 (*env -> command -> env*)
 let print_command_result (env : env) (cmd : command) : env =
   match cmd with
@@ -149,7 +150,6 @@ let print_command_result (env : env) (cmd : command) : env =
      | _ -> ()
      );
      env)
-  (*CLet: let n = e;;*)
   | CLet (n, e) -> 
     print_string ("val "); print_string n; print_string (" = "); 
     let (v,e') = command_let env n e in print_value v; print_newline();

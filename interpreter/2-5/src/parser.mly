@@ -51,58 +51,81 @@ main:
 ;
 
 expr:
-  | FUN ID ARROW expr           { EFun($2,$4) }       (*関数抽象 fun x -> E*)
-  | arith_expr                  { $1 } 
-  | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
-  | LET var EQ expr IN expr     { ELet($2, $4, $6) }
-  | LET REC var var rec_expr IN expr {ERLet($3,$4,$5,$7) } (*追加 let rec f x (= ・・・) in e*)
+  //fun x -> E
+  | FUN ID ARROW expr                         { EFun($2,$4) }  
+  //算術表現     
+  | arith_expr                                { $1 } 
+  //if e1 then e2 else e3
+  | IF expr THEN expr ELSE expr               { EIf($2,$4,$6) }
+  //let x = e1 in e2
+  | LET var EQ expr IN expr                   { ELet($2, $4, $6) }
+  //let rec f x ... in e
+  | LET REC var var rec_expr IN expr          { ERLet($3,$4,$5,$7) }
+  //let rec f1 x ... and f2 x ... in e 
   | LET REC var var rec_expr let_expr IN expr { ERLetand ([($3, $4, $5)] @ $6, $8 ) }
-  | MATCH expr WITH match_expr { EMatch ($2, $4) }
-  | LPAR expr COMMA expr RPAR { EPair ($2, $4) }
-  | LBPAR RBPAR { ENil }
-  | expr CONS expr { ECons ($1, $3) };
+  //match e with ...
+  | MATCH expr WITH match_expr                { EMatch ($2, $4) }
+  //(e1, e2)
+  | LPAR expr COMMA expr RPAR                 { EPair ($2, $4) }
+  //[]
+  | LBPAR RBPAR                               { ENil }
+  //e1::e2
+  | expr CONS expr                            { ECons ($1, $3) };
 
-(*let rec の中の表現*)
+//let rec f x <rec_expr> in e
 rec_expr:
-  | EQ expr {$2} (*let rec f ... = expr in ...*)
-  | var rec_expr { EFun($1, $2) } (*糖衣構文　fun x ->　fun y -> ・・・*)
+  // = e0
+  | EQ expr      {$2}
+  // x2 <rec_expr> 糖衣構文の実装
+  | var rec_expr { EFun($1, $2) } 
 
+//let rec f x = e0 <let_expr> in e
 let_expr :
-  | AND var var rec_expr let_expr { [($2, $3, $4)] @ $5 }
-  |  { [] }
+  | AND var var rec_expr let_expr   { [($2, $3, $4)] @ $5 }
+  |                                 { [] }
 ;
 
-(*%left を使用して整理*)
+//算術演算
 arith_expr:
-  | arith_expr ADD    arith_expr { EBin(OpAdd,$1,$3) }
-  | arith_expr SUB    arith_expr { EBin(OpSub,$1,$3) }
-  | arith_expr MUL    arith_expr { EBin(OpMul,$1,$3) }
-  | arith_expr DIV    arith_expr { EBin(OpDiv,$1,$3) }
-  | arith_expr EQ     arith_expr { EBin(OpEq,$1,$3) }
-  | arith_expr LT     arith_expr { EBin(OpLt,$1,$3) }
-  | app_expr                     { $1 }  (*atomic_exprを含む＋関数適用を扱えるapp_expr*)
+  | arith_expr ADD arith_expr { EBin(OpAdd,$1,$3) }
+  | arith_expr SUB arith_expr { EBin(OpSub,$1,$3) }
+  | arith_expr MUL arith_expr { EBin(OpMul,$1,$3) }
+  | arith_expr DIV arith_expr { EBin(OpDiv,$1,$3) }
+  | arith_expr EQ  arith_expr { EBin(OpEq,$1,$3) }
+  | arith_expr LT  arith_expr { EBin(OpLt,$1,$3) }
+  //E or E E
+  | app_expr                  { $1 }
 ;
 
-(*関数適用+atomic expr*)
+//E or E E
 app_expr:
-  | app_expr atomic_expr { EApp($1,$2) } (*関数適用 E E*)
+  | app_expr atomic_expr { EApp($1,$2) }
   | atomic_expr          { $1 }
 ;
 
+//match e with ...
 match_expr :
-  | pattern ARROW expr END { EMatchpairend ($1, $3) }
-  | pattern ARROW expr OR match_expr { EBin (OpOr, EMatchpair ($1, $3), $5) }
+  // p1 -> e1 end
+  | pattern ARROW expr END            { EMatchpairend ($1, $3) }
+  // p1 -> e1 | ... 
+  | pattern ARROW expr OR match_expr  { EBin (OpOr, EMatchpair ($1, $3), $5) }
 ;
 
+//match e with <pattern> -> e | ...
 pattern :
-  | literal         { ELiteral $1 }
-  | ID { EVar ($1) }
-  | LPAR expr COMMA expr RPAR { EPair ($2, $4) }
-  | LBPAR RBPAR { ENil }
-  | expr CONS expr { ECons ($1, $3) }
+  //int,bool
+  | literal                     { ELiteral $1 }
+  //variable
+  | ID                          { EVar ($1) }
+  //(e1, e2)
+  | LPAR expr COMMA expr RPAR   { EPair ($2, $4) }
+  // []
+  | LBPAR RBPAR                 { ENil }
+  // e1 :: e2
+  | expr CONS expr              { ECons ($1, $3) }
 ;
 
-atomic_expr: (*これ以降分解できない式*)
+atomic_expr:
   | literal         { ELiteral $1 }
   | ID              { EVar($1) }
   | LPAR expr RPAR  { $2 }
