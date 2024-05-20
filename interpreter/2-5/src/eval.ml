@@ -146,8 +146,6 @@ let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
-(* let print_let (x : name) (v : value) : unit = 
-    print_string ("result : " ^ x ^ " = "); print_value v; print_newline() *)
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
