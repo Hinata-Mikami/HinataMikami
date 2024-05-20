@@ -59,11 +59,6 @@ exception Eval_error
 let rec print_value : value -> unit = function 
   | VInt i -> print_int i 
   | VBool b -> print_string (string_of_bool b)
-<<<<<<< HEAD
-  (* | VPair (v1, v2) ->   *)
-  (* | VNil -> print_string ("[]") *)
-  | _ -> ()
-=======
   | VFun (x, e, env) -> print_string "<fun>"
   | VRFun (f, x, e, env) -> print_string "<fun>"
   | VCons (v, rest) -> 
@@ -80,7 +75,6 @@ let rec print_value : value -> unit = function
         | [] -> raise Eval_error
         | v :: rest -> print_char '('; print_value v; print_tuple rest)
   | VRFunAnd (_, l, _) -> print_string "<fun>"
->>>>>>> 46e8a9f (2-4完成)
 
 let value_of_literal : literal -> value = function 
   | LInt i -> VInt i 

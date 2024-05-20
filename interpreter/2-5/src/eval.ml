@@ -141,14 +141,7 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
-<<<<<<< HEAD
-     | VPair (e1, e2) -> print_string "pair"
-     | VNil -> print_string "nil list"
-     | VCons (e1, e2) -> print_string "list"
-     | _ -> print_string "function"
-=======
      | _ -> print_value v; print_newline()
->>>>>>> 46e8a9f (2-4完成)
      );
      env)
   | CLet (n, e) -> 
