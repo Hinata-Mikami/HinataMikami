@@ -96,14 +96,17 @@ let rec eval (env : env) (expr : expr) : value =
             let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
             eval env' e
         (*2-5*)
+        (*l = (f, x, e) と oenv から (f1, l, oenv), ..., (fn, l, oenv)　を作成*)
         | VRFunAnd (i, l, oenv) -> 
-          (let rec make_env : int -> (name * name * expr) list -> env
-            = fun i -> function
-                | [] -> []
-                | (fi, _, _) :: rest -> (fi, VRFunAnd(i, l, oenv)) :: make_env (i + 1) rest in
-            let nenv = (make_env 0 l) @ oenv in
-            let (f, x, e) = List.nth l i in
-            eval ((x, v2) :: nenv) e)
+          (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
+            match l1 with
+              | [] -> []
+              | (fj, _, _) :: rest -> (fj, VRFunAnd(j, l, oenv)) :: make_env (j + 1) rest
+          (*作成した環境を既存の環境oenvに追加*)
+          in let nenv = (make_env 0 l) @ oenv
+          (*i番目の要素を取り出す*)
+          in let (f, x, e) = List.nth l i
+          in eval ((x, v2) :: nenv) e) (*i番目の変数名と値v2を環境に追加したうえでeを評価*)
         | _ -> raise Eval_error)
       (*2-3 match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
       | EMatch (e, pl) -> 
@@ -124,19 +127,17 @@ let rec eval (env : env) (expr : expr) : value =
         let v1 = eval env e1 
         and v2 = eval env e2 in
         VCons (v1, v2)
-        (* (match v2 with
-        | VNil -> VCons (v1, v2)
-        | VCons _ -> VCons (v1, v2)
-        | _ -> raise Eval_error) *)
       (*組の評価：すべての要素をvalueに変える*)
       | ETuple el -> VTuple (List.map (fun e -> eval env e) el)
       (*2-5*)
       | ERLetAnd (l, e) ->
+        (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
         let rec and_env (i: int) (l' : (name * name * expr) list) : env =
         match l' with
         | [] -> env
         | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
           let nenv = and_env 0 l 
+        (*環境の下でeを評価*)
         in eval nenv e
 
 
@@ -172,15 +173,17 @@ let print_command_result (env : env) (cmd : command) : env =
       print_let f (VRFun (f, x, e, env));
       print_newline(); 
       oenv
-  (*2-5*)
+  (*2-5 (f, x, e) list*)
   | CRLetAnd l ->
+      (*リストから環境を作成*)
       let rec and_env (i: int) (l1: (name * name * expr) list) : env =
       match l1 with
         | [] -> env
         | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
       let nenv = and_env 0 l in
+      (*コマンドラインに変数を表示*)
       let rec letand (l2 : (name * name * expr) list) : unit =
-      match l2 with
+        match l2 with
         | [] -> ()
         | (f, x, e) :: rest ->
             print_endline (f ^ " = <fun>");
