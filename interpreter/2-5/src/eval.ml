@@ -88,11 +88,19 @@ let rec eval (env : env) (expr : expr) : value =
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
-          | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e 
-          | VRFun (f, x, e, oenv)  ->
-              let env' = (x,v2) :: (f, VRFun (f,x,e,oenv)) :: oenv in
-              eval env' e
-          | _ -> raise Eval_error)
+        | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e
+        | VRFun (f, x, e, oenv) ->
+            let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
+            eval env' e
+        | VRFunAnd (i, l, oenv) -> 
+          (let rec make_env : int -> (name * name * expr) list -> env
+            = fun i -> function
+                | [] -> []
+                | (fi, _, _) :: rest -> (fi, VRFunAnd(i, l, oenv)) :: make_env (i + 1) rest in
+            let nenv = (make_env 0 l) @ oenv in
+            let (f, x, e) = List.nth l i in
+            eval ((x, v2) :: nenv) e)
+        | _ -> raise Eval_error)
       | EMatch (e, pl) -> 
         let v = eval env e in
         let rec match_to_value (v: value) (l: (pattern * expr) list) : value =
@@ -162,6 +170,6 @@ let print_command_result (env : env) (cmd : command) : env =
         | [] -> ()
         | (f, x, e) :: rest ->
             print_endline (f ^ " = <fun>");
-            letand rest; in
-      letand l;
+            letand rest;
+        in letand l;
       nenv
