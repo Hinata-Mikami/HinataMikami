@@ -140,12 +140,35 @@ let rec eval (env : env) (expr : expr) : value =
         in eval nenv e
 
 
-
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
+
+
+let print_types_of_tuple (l : value list) : unit =
+  match l with
+  | [] -> ()
+  | v :: rest ->
+    let rec string_of_value_type (l' :value list) : unit =
+      (match l' with
+      | [] -> ()
+      | v' :: rest' ->
+        (match v' with
+        | VInt _ -> print_string(" * int");(string_of_value_type rest')
+        | VBool _ -> print_string(" * bool");(string_of_value_type rest')
+        | _ -> print_string(" *  ");(string_of_value_type rest')
+        )
+      )
+      in 
+        (match v with
+        | VInt _ -> print_string("int");(string_of_value_type rest)
+        | VBool _ -> print_string("bool");(string_of_value_type rest)
+        | _ -> print_string(" ");(string_of_value_type rest)
+        )
+
+  
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
@@ -159,6 +182,8 @@ let print_command_result (env : env) (cmd : command) : env =
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
      | VCons _ -> print_string ("list = "); print_value v; print_newline()
+     | VNil -> print_string ("list = "); print_value v; print_newline()
+     | VTuple l -> print_types_of_tuple l; print_string (" = "); print_value v; print_newline()
      | _ -> print_value v; print_newline()
      );
      env)
