@@ -1,0 +1,8 @@
+let rec map f lst =
+    match lst with
+    [] -> []
+    | h::t -> (f h) :: (map f t)
+end
+
+in map (fun x -> x + 1) (0::(1::[]));;
+

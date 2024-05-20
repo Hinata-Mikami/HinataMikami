@@ -79,10 +79,10 @@ expr:
   | LET REC var var EQ expr and_expr expr { ERLetAnd ((($3, $4, $6) :: $7), $8) }
   //2-3 match e with ...
   | MATCH expr WITH match_pattern         { EMatch ($2, $4) }
-  //2-4 []
-  | LBPAR RBPAR                           { ENil }
-  //2-4 [e1; ...
-  | LBPAR expr lists                      { ECons ($2, $3) }
+  // //2-4 [] 
+  // | LBPAR RBPAR                           { ENil }
+  // //2-4 [e1; ...
+  // | LBPAR expr lists                      { ECons ($2, $3) }
   //2-4 e1::e2
   | expr CONS expr                        { ECons ($1, $3) }
 ;
@@ -164,6 +164,10 @@ atomic_expr:
   | ID                                    { EVar ($1) }
   | LPAR expr RPAR                        { $2 }
   | LPAR expr COMMA expr tuple            { ETuple ($2 :: $4 :: $5) } //2-4 (e1, e2, ...)
+  //2-4 [] 
+  | LBPAR RBPAR                           { ENil }
+  //2-4 [e1; ...
+  | LBPAR expr lists                      { ECons ($2, $3) }
 ;
 
 tuple:
