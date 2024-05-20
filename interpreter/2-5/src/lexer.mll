@@ -29,19 +29,22 @@ rule token = parse
 | "fun"       { FUN }
 | "->"        { ARROW }
 | "rec"       { REC }
+(*2-3*)
 | "match"     { MATCH }
 | "with"      { WITH }
 | '|'         { OR }
+| '_'         { WILD }
 | "end"       { END }
+(*2-4*)
 | ','         { COMMA }
 | '['         { LBPAR }
 | ']'         { RBPAR }
 | "::"        { CONS }
+(*2-5*)
 | "and"       { AND }
-| '_'         { WILD }
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)
-| ";"         { SSC } (*Single Semi-Colon*)
+| ";"         { SSC } (*Single Semi-Colon*) (*2-4*)
 | eof         { exit 0 }
 | _           { raise (Error ("Unknown Token: " ^ Lexing.lexeme lexbuf))}

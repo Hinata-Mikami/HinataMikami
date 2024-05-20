@@ -1,6 +1,6 @@
 open Syntax
 
-type command_result = Command_result of value * env
+(* type command_result = Command_result of value * env *)
 
 (*例外：デバッグ用*)
 exception Eval_error;;
@@ -45,34 +45,37 @@ let rec eval (env : env) (expr : expr) : value =
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
        
-  (*match v with p -> ... *)     
+  (*2-3 match v with p -> ... *)     
+  (* p v の型一致を確認し、一致ならSome 追加する環境を返す *)
   in let rec find_match (p : pattern ) (v : value) : env option =
     match p, v with
     | PInt i1, VInt i2 -> if i1 = i2 then Some [] else None
     | PBool b1, VBool b2 -> if b1 = b2 then Some [] else None
-    | PVar x, _ -> Some [(x, v)]
-    | PWild, _ -> Some []
-    | PCons(phead, prest), VCons(vhead, vrest) ->
-      let head = find_match phead vhead in
-      let rest = find_match prest vrest in
-      (match head, rest with
-        | Some env1, Some env2 -> Some (env1 @ env2)
+    | PVar x, _ -> Some [(x, v)] (*左側が変数xなら(x, v)を環境に追加*)
+    | PWild, _ -> Some [] (*ワイルドカードは必ず右側を評価*)
+    (*以下は2-4*)
+    (*リストの評価*)
+    | PCons(ph, prest), VCons(vh, vrest) ->
+      let h = find_match ph vh in (*先頭のパターンマッチの確認*)
+      let rest = find_match prest vrest in (*再帰的に2番目以降の要素のパターンマッチを確認*)
+      (match h, rest with
+        | Some env1, Some env2 -> Some (env1 @ env2) (*先頭もそれ以降もマッチ->新環境を連結*)
         | _ -> None)
-    | PNil, VNil -> Some []
-    | PTuple plist, VTuple vlist ->
-      let rec match_tuple (plist:pattern list) (vlist: value list) : env option =
-      match plist, vlist with
+    | PNil, VNil -> Some [] (* [] -> [] なら返す環境なし*)
+    (*組の評価 リストの時と同様*)
+    | PTuple pl, VTuple vl ->
+      let rec match_tuple (pl:pattern list) (vl: value list) : env option =
+      match pl, vl with
           | [], [] -> Some []
           | p :: prest , v :: vrest ->
-              let head = find_match p v in
+              let h = find_match p v in
               let rest = match_tuple prest vrest in
-              (match head, rest with
+              (match h, rest with
                 | Some env1, Some env2 -> Some (env1 @ env2)
                 | _ -> None)
           | _ -> None
-          in match_tuple plist vlist
+          in match_tuple pl vl
     | _ -> None
-
 
   in match expr with
       | ELiteral x -> value_of_literal x
@@ -92,6 +95,7 @@ let rec eval (env : env) (expr : expr) : value =
         | VRFun (f, x, e, oenv) ->
             let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
             eval env' e
+        (*2-5*)
         | VRFunAnd (i, l, oenv) -> 
           (let rec make_env : int -> (name * name * expr) list -> env
             = fun i -> function
@@ -101,8 +105,10 @@ let rec eval (env : env) (expr : expr) : value =
             let (f, x, e) = List.nth l i in
             eval ((x, v2) :: nenv) e)
         | _ -> raise Eval_error)
+      (*2-3 match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
       | EMatch (e, pl) -> 
         let v = eval env e in
+        (*マッチ時は情報を環境に追加してそのうえで->の右側を評価)*)
         let rec match_to_value (v: value) (l: (pattern * expr) list) : value =
           match l with
           | [] -> raise Eval_error
@@ -111,13 +117,20 @@ let rec eval (env : env) (expr : expr) : value =
             | Some nenv -> eval (nenv @ env) e'
             | None -> match_to_value v rest) 
           in match_to_value v pl
+      (*2-4*)
+      | ENil -> VNil
+      (*リストの評価：要素をvalueに変える*)          
       | ECons (e1, e2) ->
-        let v1 = eval env e1 and v2 = eval env e2 in
-        (match v2 with
+        let v1 = eval env e1 
+        and v2 = eval env e2 in
+        VCons (v1, v2)
+        (* (match v2 with
         | VNil -> VCons (v1, v2)
         | VCons _ -> VCons (v1, v2)
-        | _ -> raise Eval_error)
-      | ETuple elist -> VTuple (List.map (fun e -> eval env e) elist)
+        | _ -> raise Eval_error) *)
+      (*組の評価：すべての要素をvalueに変える*)
+      | ETuple el -> VTuple (List.map (fun e -> eval env e) el)
+      (*2-5*)
       | ERLetAnd (l, e) ->
         let rec and_env (i: int) (l' : (name * name * expr) list) : env =
         match l' with
@@ -125,7 +138,7 @@ let rec eval (env : env) (expr : expr) : value =
         | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
           let nenv = and_env 0 l 
         in eval nenv e
-      | ENil -> VNil
+
 
 
 (*CLet (n, e) : let n = e;;*)
@@ -159,6 +172,7 @@ let print_command_result (env : env) (cmd : command) : env =
       print_let f (VRFun (f, x, e, env));
       print_newline(); 
       oenv
+  (*2-5*)
   | CRLetAnd l ->
       let rec and_env (i: int) (l1: (name * name * expr) list) : env =
       match l1 with
