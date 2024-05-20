@@ -4,5 +4,5 @@ let rec map f lst =
     | h::t -> (f h) :: (map f t)
 end
 
-in map (fun x -> x + 1) (0::(1::[]));;
+in map (fun x -> x + 1) [0,1,2];;
 

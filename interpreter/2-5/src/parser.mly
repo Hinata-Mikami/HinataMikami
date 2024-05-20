@@ -8,14 +8,14 @@
 %token TRUE FALSE
 %token LET IN EQ
 %token IF THEN ELSE
-%token ADD SUB MUL DIV EQ LT
+%token ADD SUB MUL DIV LT
 %token LPAR RPAR 
 %token DSC
 %token SSC
 %token EOF 
 %token FUN ARROW
 %token REC
-%token MATCH WITH OR END
+%token MATCH WITH OR
 %token COMMA
 %token LBPAR RBPAR
 %token CONS
@@ -74,7 +74,7 @@ expr:
   //let x = e1 in e2
   | LET var EQ expr IN expr               { ELet($2, $4, $6) }
   //let rec f x ... in e
-  | LET REC var var rec_expr IN expr      { ERLet($3, $4, $5, $7) }
+  //| LET REC var var rec_expr IN expr      { ERLet($3, $4, $5, $7) }
   //2-5 let rec f1 x ... and f2 x ... in e 
   | LET REC var var EQ expr and_expr expr { ERLetAnd ((($3, $4, $6) :: $7), $8) }
   //2-3 match e with ...

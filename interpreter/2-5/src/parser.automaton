@@ -1,0 +1,2265 @@
+State 0:
+## Known stack suffix:
+##
+## LR(1) items:
+command' -> . command [ # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 113
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 131
+-- On command shift to state 133
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 1:
+## Known stack suffix:
+## TRUE
+## LR(1) items:
+literal -> TRUE . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production literal -> TRUE
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production literal -> TRUE
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 2:
+## Known stack suffix:
+## MATCH
+## LR(1) items:
+expr -> MATCH . expr WITH match_pattern [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 81
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 3:
+## Known stack suffix:
+## LPAR
+## LR(1) items:
+atomic_expr -> LPAR . expr RPAR [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+atomic_expr -> LPAR . expr COMMA expr tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 72
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 4:
+## Known stack suffix:
+## LET
+## LR(1) items:
+expr -> LET . var EQ expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> LET . REC var var rec_expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> LET . REC var var EQ expr and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On REC shift to state 5
+-- On ID shift to state 6
+-- On var shift to state 67
+## Reductions:
+
+State 5:
+## Known stack suffix:
+## LET REC
+## LR(1) items:
+expr -> LET REC . var var rec_expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> LET REC . var var EQ expr and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 7
+## Reductions:
+
+State 6:
+## Known stack suffix:
+## ID
+## LR(1) items:
+var -> ID . [ ID EQ ]
+## Transitions:
+## Reductions:
+-- On ID EQ
+--   reduce production var -> ID
+
+State 7:
+## Known stack suffix:
+## LET REC var
+## LR(1) items:
+expr -> LET REC var . var rec_expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> LET REC var . var EQ expr and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 8
+## Reductions:
+
+State 8:
+## Known stack suffix:
+## LET REC var var
+## LR(1) items:
+expr -> LET REC var var . rec_expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> LET REC var var . EQ expr and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On ID shift to state 6
+-- On EQ shift to state 9
+-- On var shift to state 60
+-- On rec_expr shift to state 64
+## Reductions:
+
+State 9:
+## Known stack suffix:
+## LET REC var var EQ
+## LR(1) items:
+expr -> LET REC var var EQ . expr and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+rec_expr -> EQ . expr [ IN ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 50
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 10:
+## Known stack suffix:
+## LBPAR
+## LR(1) items:
+atomic_expr -> LBPAR . RBPAR [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+atomic_expr -> LBPAR . expr lists [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On RBPAR shift to state 11
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 44
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 11:
+## Known stack suffix:
+## LBPAR RBPAR
+## LR(1) items:
+atomic_expr -> LBPAR RBPAR . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> LBPAR RBPAR
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> LBPAR RBPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 12:
+## Known stack suffix:
+## INT
+## LR(1) items:
+literal -> INT . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production literal -> INT
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production literal -> INT
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 13:
+## Known stack suffix:
+## IF
+## LR(1) items:
+expr -> IF . expr THEN expr ELSE expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 39
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 14:
+## Known stack suffix:
+## ID
+## LR(1) items:
+atomic_expr -> ID . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> ID
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> ID
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 15:
+## Known stack suffix:
+## FUN
+## LR(1) items:
+expr -> FUN . ID ARROW expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On ID shift to state 16
+## Reductions:
+
+State 16:
+## Known stack suffix:
+## FUN ID
+## LR(1) items:
+expr -> FUN ID . ARROW expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On ARROW shift to state 17
+## Reductions:
+
+State 17:
+## Known stack suffix:
+## FUN ID ARROW
+## LR(1) items:
+expr -> FUN ID ARROW . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 20
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 18:
+## Known stack suffix:
+## FALSE
+## LR(1) items:
+literal -> FALSE . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production literal -> FALSE
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production literal -> FALSE
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 19:
+## Known stack suffix:
+## literal
+## LR(1) items:
+atomic_expr -> literal . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> literal
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> literal
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 20:
+## Known stack suffix:
+## FUN ID ARROW expr
+## LR(1) items:
+expr -> FUN ID ARROW expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> FUN ID ARROW expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> FUN ID ARROW expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 21:
+## Known stack suffix:
+## expr CONS
+## LR(1) items:
+expr -> expr CONS . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 22
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 22:
+## Known stack suffix:
+## expr CONS expr
+## LR(1) items:
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr CONS expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> expr CONS expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> expr CONS expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 23:
+## Known stack suffix:
+## atomic_expr
+## LR(1) items:
+app_expr -> atomic_expr . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production app_expr -> atomic_expr
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production app_expr -> atomic_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 24:
+## Known stack suffix:
+## arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+expr -> arith_expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On SUB shift to state 25
+-- On MUL shift to state 27
+-- On LT shift to state 33
+-- On EQ shift to state 37
+-- On DIV shift to state 31
+-- On ADD shift to state 35
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production expr -> arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production expr -> arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 25:
+## Known stack suffix:
+## arith_expr SUB
+## LR(1) items:
+arith_expr -> arith_expr SUB . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 26
+-- On app_expr shift to state 29
+## Reductions:
+
+State 26:
+## Known stack suffix:
+## arith_expr SUB arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr SUB arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On MUL shift to state 27
+-- On DIV shift to state 31
+## Reductions:
+-- On WITH THEN SUB SSC RPAR RBPAR OR LT IN EQ EOF END ELSE DSC CONS COMMA AND ADD #
+--   reduce production arith_expr -> arith_expr SUB arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr SUB arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 27:
+## Known stack suffix:
+## arith_expr MUL
+## LR(1) items:
+arith_expr -> arith_expr MUL . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 28
+-- On app_expr shift to state 29
+## Reductions:
+
+State 28:
+## Known stack suffix:
+## arith_expr MUL arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr MUL arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production arith_expr -> arith_expr MUL arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr MUL arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 29:
+## Known stack suffix:
+## app_expr
+## LR(1) items:
+app_expr -> app_expr . atomic_expr [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> app_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 30
+## Reductions:
+-- On WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production arith_expr -> app_expr
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> app_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 30:
+## Known stack suffix:
+## app_expr atomic_expr
+## LR(1) items:
+app_expr -> app_expr atomic_expr . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production app_expr -> app_expr atomic_expr
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production app_expr -> app_expr atomic_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 31:
+## Known stack suffix:
+## arith_expr DIV
+## LR(1) items:
+arith_expr -> arith_expr DIV . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 32
+-- On app_expr shift to state 29
+## Reductions:
+
+State 32:
+## Known stack suffix:
+## arith_expr DIV arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr DIV arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production arith_expr -> arith_expr DIV arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr DIV arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 33:
+## Known stack suffix:
+## arith_expr LT
+## LR(1) items:
+arith_expr -> arith_expr LT . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 34
+-- On app_expr shift to state 29
+## Reductions:
+
+State 34:
+## Known stack suffix:
+## arith_expr LT arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr LT arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On SUB shift to state 25
+-- On MUL shift to state 27
+-- On DIV shift to state 31
+-- On ADD shift to state 35
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR LT IN EQ EOF END ELSE DSC CONS COMMA AND #
+--   reduce production arith_expr -> arith_expr LT arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr LT arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 35:
+## Known stack suffix:
+## arith_expr ADD
+## LR(1) items:
+arith_expr -> arith_expr ADD . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 36
+-- On app_expr shift to state 29
+## Reductions:
+
+State 36:
+## Known stack suffix:
+## arith_expr ADD arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr ADD arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On MUL shift to state 27
+-- On DIV shift to state 31
+## Reductions:
+-- On WITH THEN SUB SSC RPAR RBPAR OR LT IN EQ EOF END ELSE DSC CONS COMMA AND ADD #
+--   reduce production arith_expr -> arith_expr ADD arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr ADD arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 37:
+## Known stack suffix:
+## arith_expr EQ
+## LR(1) items:
+arith_expr -> arith_expr EQ . arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On LPAR shift to state 3
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On ID shift to state 14
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 38
+-- On app_expr shift to state 29
+## Reductions:
+
+State 38:
+## Known stack suffix:
+## arith_expr EQ arith_expr
+## LR(1) items:
+arith_expr -> arith_expr . ADD arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . SUB arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . MUL arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . DIV arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . EQ arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr EQ arith_expr . [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+arith_expr -> arith_expr . LT arith_expr [ WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On SUB shift to state 25
+-- On MUL shift to state 27
+-- On DIV shift to state 31
+-- On ADD shift to state 35
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR LT IN EQ EOF END ELSE DSC CONS COMMA AND #
+--   reduce production arith_expr -> arith_expr EQ arith_expr
+** End-of-stream conflict on WITH THEN SUB SSC RPAR RBPAR OR MUL LT IN EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production arith_expr -> arith_expr EQ arith_expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 39:
+## Known stack suffix:
+## IF expr
+## LR(1) items:
+expr -> IF expr . THEN expr ELSE expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ THEN CONS ]
+## Transitions:
+-- On THEN shift to state 40
+-- On CONS shift to state 21
+## Reductions:
+
+State 40:
+## Known stack suffix:
+## IF expr THEN
+## LR(1) items:
+expr -> IF expr THEN . expr ELSE expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 41
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 41:
+## Known stack suffix:
+## IF expr THEN expr
+## LR(1) items:
+expr -> IF expr THEN expr . ELSE expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ ELSE CONS ]
+## Transitions:
+-- On ELSE shift to state 42
+-- On CONS shift to state 21
+## Reductions:
+
+State 42:
+## Known stack suffix:
+## IF expr THEN expr ELSE
+## LR(1) items:
+expr -> IF expr THEN expr ELSE . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 43
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 43:
+## Known stack suffix:
+## IF expr THEN expr ELSE expr
+## LR(1) items:
+expr -> IF expr THEN expr ELSE expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> IF expr THEN expr ELSE expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> IF expr THEN expr ELSE expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 44:
+## Known stack suffix:
+## LBPAR expr
+## LR(1) items:
+atomic_expr -> LBPAR expr . lists [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+expr -> expr . CONS expr [ SSC RBPAR CONS ]
+## Transitions:
+-- On SSC shift to state 45
+-- On RBPAR shift to state 47
+-- On CONS shift to state 21
+-- On lists shift to state 49
+## Reductions:
+
+State 45:
+## Known stack suffix:
+## SSC
+## LR(1) items:
+lists -> SSC . expr lists [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 46
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 46:
+## Known stack suffix:
+## SSC expr
+## LR(1) items:
+expr -> expr . CONS expr [ SSC RBPAR CONS ]
+lists -> SSC expr . lists [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On SSC shift to state 45
+-- On RBPAR shift to state 47
+-- On CONS shift to state 21
+-- On lists shift to state 48
+## Reductions:
+
+State 47:
+## Known stack suffix:
+## RBPAR
+## LR(1) items:
+lists -> RBPAR . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production lists -> RBPAR
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production lists -> RBPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 48:
+## Known stack suffix:
+## SSC expr lists
+## LR(1) items:
+lists -> SSC expr lists . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production lists -> SSC expr lists
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production lists -> SSC expr lists
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 49:
+## Known stack suffix:
+## LBPAR expr lists
+## LR(1) items:
+atomic_expr -> LBPAR expr lists . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> LBPAR expr lists
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> LBPAR expr lists
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 50:
+## Known stack suffix:
+## LET REC var var EQ expr
+## LR(1) items:
+expr -> LET REC var var EQ expr . and_expr expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ IN CONS AND ]
+rec_expr -> EQ expr . [ IN ]
+## Transitions:
+-- On CONS shift to state 21
+-- On AND shift to state 51
+-- On and_expr shift to state 58
+## Reductions:
+-- On IN
+--   reduce production rec_expr -> EQ expr
+
+State 51:
+## Known stack suffix:
+## AND
+## LR(1) items:
+and_expr -> AND . var var EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 52
+## Reductions:
+
+State 52:
+## Known stack suffix:
+## AND var
+## LR(1) items:
+and_expr -> AND var . var EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 53
+## Reductions:
+
+State 53:
+## Known stack suffix:
+## AND var var
+## LR(1) items:
+and_expr -> AND var var . EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On EQ shift to state 54
+## Reductions:
+
+State 54:
+## Known stack suffix:
+## AND var var EQ
+## LR(1) items:
+and_expr -> AND var var EQ . expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 55
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 55:
+## Known stack suffix:
+## AND var var EQ expr
+## LR(1) items:
+and_expr -> AND var var EQ expr . and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+expr -> expr . CONS expr [ IN CONS AND ]
+## Transitions:
+-- On IN shift to state 56
+-- On CONS shift to state 21
+-- On AND shift to state 51
+-- On and_expr shift to state 57
+## Reductions:
+
+State 56:
+## Known stack suffix:
+## IN
+## LR(1) items:
+and_expr -> IN . [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+## Reductions:
+-- On TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE
+--   reduce production and_expr -> IN
+
+State 57:
+## Known stack suffix:
+## AND var var EQ expr and_expr
+## LR(1) items:
+and_expr -> AND var var EQ expr and_expr . [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+## Reductions:
+-- On TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE
+--   reduce production and_expr -> AND var var EQ expr and_expr
+
+State 58:
+## Known stack suffix:
+## LET REC var var EQ expr and_expr
+## LR(1) items:
+expr -> LET REC var var EQ expr and_expr . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 59
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 59:
+## Known stack suffix:
+## LET REC var var EQ expr and_expr expr
+## LR(1) items:
+expr -> LET REC var var EQ expr and_expr expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> LET REC var var EQ expr and_expr expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> LET REC var var EQ expr and_expr expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 60:
+## Known stack suffix:
+## var
+## LR(1) items:
+rec_expr -> var . rec_expr [ IN ]
+## Transitions:
+-- On ID shift to state 6
+-- On EQ shift to state 61
+-- On var shift to state 60
+-- On rec_expr shift to state 63
+## Reductions:
+
+State 61:
+## Known stack suffix:
+## EQ
+## LR(1) items:
+rec_expr -> EQ . expr [ IN ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 62
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 62:
+## Known stack suffix:
+## EQ expr
+## LR(1) items:
+expr -> expr . CONS expr [ IN CONS ]
+rec_expr -> EQ expr . [ IN ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On IN
+--   reduce production rec_expr -> EQ expr
+
+State 63:
+## Known stack suffix:
+## var rec_expr
+## LR(1) items:
+rec_expr -> var rec_expr . [ IN ]
+## Transitions:
+## Reductions:
+-- On IN
+--   reduce production rec_expr -> var rec_expr
+
+State 64:
+## Known stack suffix:
+## LET REC var var rec_expr
+## LR(1) items:
+expr -> LET REC var var rec_expr . IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On IN shift to state 65
+## Reductions:
+
+State 65:
+## Known stack suffix:
+## LET REC var var rec_expr IN
+## LR(1) items:
+expr -> LET REC var var rec_expr IN . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 66
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 66:
+## Known stack suffix:
+## LET REC var var rec_expr IN expr
+## LR(1) items:
+expr -> LET REC var var rec_expr IN expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> LET REC var var rec_expr IN expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> LET REC var var rec_expr IN expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 67:
+## Known stack suffix:
+## LET var
+## LR(1) items:
+expr -> LET var . EQ expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On EQ shift to state 68
+## Reductions:
+
+State 68:
+## Known stack suffix:
+## LET var EQ
+## LR(1) items:
+expr -> LET var EQ . expr IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 69
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 69:
+## Known stack suffix:
+## LET var EQ expr
+## LR(1) items:
+expr -> LET var EQ expr . IN expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ IN CONS ]
+## Transitions:
+-- On IN shift to state 70
+-- On CONS shift to state 21
+## Reductions:
+
+State 70:
+## Known stack suffix:
+## LET var EQ expr IN
+## LR(1) items:
+expr -> LET var EQ expr IN . expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 71
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 71:
+## Known stack suffix:
+## LET var EQ expr IN expr
+## LR(1) items:
+expr -> LET var EQ expr IN expr . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC COMMA AND #
+--   reduce production expr -> LET var EQ expr IN expr
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> LET var EQ expr IN expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 72:
+## Known stack suffix:
+## LPAR expr
+## LR(1) items:
+atomic_expr -> LPAR expr . RPAR [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+atomic_expr -> LPAR expr . COMMA expr tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+expr -> expr . CONS expr [ RPAR CONS COMMA ]
+## Transitions:
+-- On RPAR shift to state 73
+-- On CONS shift to state 21
+-- On COMMA shift to state 74
+## Reductions:
+
+State 73:
+## Known stack suffix:
+## LPAR expr RPAR
+## LR(1) items:
+atomic_expr -> LPAR expr RPAR . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> LPAR expr RPAR
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> LPAR expr RPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 74:
+## Known stack suffix:
+## LPAR expr COMMA
+## LR(1) items:
+atomic_expr -> LPAR expr COMMA . expr tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 75
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 75:
+## Known stack suffix:
+## LPAR expr COMMA expr
+## LR(1) items:
+atomic_expr -> LPAR expr COMMA expr . tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+expr -> expr . CONS expr [ RPAR CONS COMMA ]
+## Transitions:
+-- On RPAR shift to state 76
+-- On CONS shift to state 21
+-- On COMMA shift to state 77
+-- On tuple shift to state 80
+## Reductions:
+
+State 76:
+## Known stack suffix:
+## RPAR
+## LR(1) items:
+tuple -> RPAR . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production tuple -> RPAR
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production tuple -> RPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 77:
+## Known stack suffix:
+## COMMA
+## LR(1) items:
+tuple -> COMMA . expr tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 78
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 78:
+## Known stack suffix:
+## COMMA expr
+## LR(1) items:
+expr -> expr . CONS expr [ RPAR CONS COMMA ]
+tuple -> COMMA expr . tuple [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+-- On RPAR shift to state 76
+-- On CONS shift to state 21
+-- On COMMA shift to state 77
+-- On tuple shift to state 79
+## Reductions:
+
+State 79:
+## Known stack suffix:
+## COMMA expr tuple
+## LR(1) items:
+tuple -> COMMA expr tuple . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production tuple -> COMMA expr tuple
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production tuple -> COMMA expr tuple
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 80:
+## Known stack suffix:
+## LPAR expr COMMA expr tuple
+## LR(1) items:
+atomic_expr -> LPAR expr COMMA expr tuple . [ WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD # ]
+## Transitions:
+## Reductions:
+-- On WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD #
+--   reduce production atomic_expr -> LPAR expr COMMA expr tuple
+** End-of-stream conflict on WITH TRUE THEN SUB SSC RPAR RBPAR OR MUL LT LPAR LBPAR INT IN ID FALSE EQ EOF END ELSE DSC DIV CONS COMMA AND ADD
+**   There is a tension between
+**   (1) reducing production atomic_expr -> LPAR expr COMMA expr tuple
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 81:
+## Known stack suffix:
+## MATCH expr
+## LR(1) items:
+expr -> MATCH expr . WITH match_pattern [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+expr -> expr . CONS expr [ WITH CONS ]
+## Transitions:
+-- On WITH shift to state 82
+-- On CONS shift to state 21
+## Reductions:
+
+State 82:
+## Known stack suffix:
+## MATCH expr WITH
+## LR(1) items:
+expr -> MATCH expr WITH . match_pattern [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 101
+-- On match_pattern shift to state 112
+## Reductions:
+
+State 83:
+## Known stack suffix:
+## WILD
+## LR(1) items:
+pattern -> WILD . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> WILD
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> WILD
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 84:
+## Known stack suffix:
+## TRUE
+## LR(1) items:
+pattern -> TRUE . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> TRUE
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> TRUE
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 85:
+## Known stack suffix:
+## LPAR
+## LR(1) items:
+pattern -> LPAR . pattern COMMA pattern ptuple [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 91
+## Reductions:
+
+State 86:
+## Known stack suffix:
+## LBPAR
+## LR(1) items:
+pattern -> LBPAR . RBPAR [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On RBPAR shift to state 87
+## Reductions:
+
+State 87:
+## Known stack suffix:
+## LBPAR RBPAR
+## LR(1) items:
+pattern -> LBPAR RBPAR . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> LBPAR RBPAR
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> LBPAR RBPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 88:
+## Known stack suffix:
+## INT
+## LR(1) items:
+pattern -> INT . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> INT
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> INT
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 89:
+## Known stack suffix:
+## ID
+## LR(1) items:
+pattern -> ID . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> ID
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> ID
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 90:
+## Known stack suffix:
+## FALSE
+## LR(1) items:
+pattern -> FALSE . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> FALSE
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> FALSE
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 91:
+## Known stack suffix:
+## LPAR pattern
+## LR(1) items:
+pattern -> LPAR pattern . COMMA pattern ptuple [ RPAR CONS COMMA ARROW # ]
+pattern -> pattern . CONS pattern [ CONS COMMA ]
+## Transitions:
+-- On CONS shift to state 92
+-- On COMMA shift to state 94
+## Reductions:
+
+State 92:
+## Known stack suffix:
+## pattern CONS
+## LR(1) items:
+pattern -> pattern CONS . pattern [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 93
+## Reductions:
+
+State 93:
+## Known stack suffix:
+## pattern CONS pattern
+## LR(1) items:
+pattern -> pattern . CONS pattern [ RPAR CONS COMMA ARROW # ]
+pattern -> pattern CONS pattern . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On CONS shift to state 92
+## Reductions:
+-- On RPAR COMMA ARROW #
+--   reduce production pattern -> pattern CONS pattern
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> pattern CONS pattern
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 94:
+## Known stack suffix:
+## LPAR pattern COMMA
+## LR(1) items:
+pattern -> LPAR pattern COMMA . pattern ptuple [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 95
+## Reductions:
+
+State 95:
+## Known stack suffix:
+## LPAR pattern COMMA pattern
+## LR(1) items:
+pattern -> LPAR pattern COMMA pattern . ptuple [ RPAR CONS COMMA ARROW # ]
+pattern -> pattern . CONS pattern [ RPAR CONS COMMA ]
+## Transitions:
+-- On RPAR shift to state 96
+-- On CONS shift to state 92
+-- On COMMA shift to state 97
+-- On ptuple shift to state 100
+## Reductions:
+
+State 96:
+## Known stack suffix:
+## RPAR
+## LR(1) items:
+ptuple -> RPAR . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production ptuple -> RPAR
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production ptuple -> RPAR
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 97:
+## Known stack suffix:
+## COMMA
+## LR(1) items:
+ptuple -> COMMA . pattern ptuple [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 98
+## Reductions:
+
+State 98:
+## Known stack suffix:
+## COMMA pattern
+## LR(1) items:
+pattern -> pattern . CONS pattern [ RPAR CONS COMMA ]
+ptuple -> COMMA pattern . ptuple [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+-- On RPAR shift to state 96
+-- On CONS shift to state 92
+-- On COMMA shift to state 97
+-- On ptuple shift to state 99
+## Reductions:
+
+State 99:
+## Known stack suffix:
+## COMMA pattern ptuple
+## LR(1) items:
+ptuple -> COMMA pattern ptuple . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production ptuple -> COMMA pattern ptuple
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production ptuple -> COMMA pattern ptuple
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 100:
+## Known stack suffix:
+## LPAR pattern COMMA pattern ptuple
+## LR(1) items:
+pattern -> LPAR pattern COMMA pattern ptuple . [ RPAR CONS COMMA ARROW # ]
+## Transitions:
+## Reductions:
+-- On RPAR CONS COMMA ARROW #
+--   reduce production pattern -> LPAR pattern COMMA pattern ptuple
+** End-of-stream conflict on RPAR CONS COMMA ARROW
+**   There is a tension between
+**   (1) reducing production pattern -> LPAR pattern COMMA pattern ptuple
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 101:
+## Known stack suffix:
+## pattern
+## LR(1) items:
+match_pattern -> pattern . ARROW expr patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+match_pattern -> pattern . ARROW expr END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+pattern -> pattern . CONS pattern [ CONS ARROW ]
+## Transitions:
+-- On CONS shift to state 92
+-- On ARROW shift to state 102
+## Reductions:
+
+State 102:
+## Known stack suffix:
+## pattern ARROW
+## LR(1) items:
+match_pattern -> pattern ARROW . expr patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+match_pattern -> pattern ARROW . expr END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 103
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 103:
+## Known stack suffix:
+## pattern ARROW expr
+## LR(1) items:
+expr -> expr . CONS expr [ OR END CONS ]
+match_pattern -> pattern ARROW expr . patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+match_pattern -> pattern ARROW expr . END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On OR shift to state 104
+-- On END shift to state 110
+-- On CONS shift to state 21
+-- On patterns shift to state 111
+## Reductions:
+
+State 104:
+## Known stack suffix:
+## OR
+## LR(1) items:
+patterns -> OR . pattern ARROW expr patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+patterns -> OR . pattern ARROW expr END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 105
+## Reductions:
+
+State 105:
+## Known stack suffix:
+## OR pattern
+## LR(1) items:
+pattern -> pattern . CONS pattern [ CONS ARROW ]
+patterns -> OR pattern . ARROW expr patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+patterns -> OR pattern . ARROW expr END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On CONS shift to state 92
+-- On ARROW shift to state 106
+## Reductions:
+
+State 106:
+## Known stack suffix:
+## OR pattern ARROW
+## LR(1) items:
+patterns -> OR pattern ARROW . expr patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+patterns -> OR pattern ARROW . expr END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 107
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 107:
+## Known stack suffix:
+## OR pattern ARROW expr
+## LR(1) items:
+expr -> expr . CONS expr [ OR END CONS ]
+patterns -> OR pattern ARROW expr . patterns [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+patterns -> OR pattern ARROW expr . END [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+-- On OR shift to state 104
+-- On END shift to state 108
+-- On CONS shift to state 21
+-- On patterns shift to state 109
+## Reductions:
+
+State 108:
+## Known stack suffix:
+## OR pattern ARROW expr END
+## LR(1) items:
+patterns -> OR pattern ARROW expr END . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production patterns -> OR pattern ARROW expr END
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production patterns -> OR pattern ARROW expr END
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 109:
+## Known stack suffix:
+## OR pattern ARROW expr patterns
+## LR(1) items:
+patterns -> OR pattern ARROW expr patterns . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production patterns -> OR pattern ARROW expr patterns
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production patterns -> OR pattern ARROW expr patterns
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 110:
+## Known stack suffix:
+## pattern ARROW expr END
+## LR(1) items:
+match_pattern -> pattern ARROW expr END . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production match_pattern -> pattern ARROW expr END
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production match_pattern -> pattern ARROW expr END
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 111:
+## Known stack suffix:
+## pattern ARROW expr patterns
+## LR(1) items:
+match_pattern -> pattern ARROW expr patterns . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production match_pattern -> pattern ARROW expr patterns
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production match_pattern -> pattern ARROW expr patterns
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 112:
+## Known stack suffix:
+## MATCH expr WITH match_pattern
+## LR(1) items:
+expr -> MATCH expr WITH match_pattern . [ WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND # ]
+## Transitions:
+## Reductions:
+-- On WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND #
+--   reduce production expr -> MATCH expr WITH match_pattern
+** End-of-stream conflict on WITH THEN SSC RPAR RBPAR OR IN EOF END ELSE DSC CONS COMMA AND
+**   There is a tension between
+**   (1) reducing production expr -> MATCH expr WITH match_pattern
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 113:
+## Known stack suffix:
+## LET
+## LR(1) items:
+command -> LET . var EQ expr DSC [ # ]
+command -> LET . REC var var EQ expr and_command [ # ]
+expr -> LET . var EQ expr IN expr [ DSC CONS ]
+expr -> LET . REC var var rec_expr IN expr [ DSC CONS ]
+expr -> LET . REC var var EQ expr and_expr expr [ DSC CONS ]
+## Transitions:
+-- On REC shift to state 114
+-- On ID shift to state 6
+-- On var shift to state 127
+## Reductions:
+
+State 114:
+## Known stack suffix:
+## LET REC
+## LR(1) items:
+command -> LET REC . var var EQ expr and_command [ # ]
+expr -> LET REC . var var rec_expr IN expr [ DSC CONS ]
+expr -> LET REC . var var EQ expr and_expr expr [ DSC CONS ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 115
+## Reductions:
+
+State 115:
+## Known stack suffix:
+## LET REC var
+## LR(1) items:
+command -> LET REC var . var EQ expr and_command [ # ]
+expr -> LET REC var . var rec_expr IN expr [ DSC CONS ]
+expr -> LET REC var . var EQ expr and_expr expr [ DSC CONS ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 116
+## Reductions:
+
+State 116:
+## Known stack suffix:
+## LET REC var var
+## LR(1) items:
+command -> LET REC var var . EQ expr and_command [ # ]
+expr -> LET REC var var . rec_expr IN expr [ DSC CONS ]
+expr -> LET REC var var . EQ expr and_expr expr [ DSC CONS ]
+## Transitions:
+-- On ID shift to state 6
+-- On EQ shift to state 117
+-- On var shift to state 60
+-- On rec_expr shift to state 64
+## Reductions:
+
+State 117:
+## Known stack suffix:
+## LET REC var var EQ
+## LR(1) items:
+command -> LET REC var var EQ . expr and_command [ # ]
+expr -> LET REC var var EQ . expr and_expr expr [ DSC CONS ]
+rec_expr -> EQ . expr [ IN ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 118
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 118:
+## Known stack suffix:
+## LET REC var var EQ expr
+## LR(1) items:
+command -> LET REC var var EQ expr . and_command [ # ]
+expr -> LET REC var var EQ expr . and_expr expr [ DSC CONS ]
+expr -> expr . CONS expr [ IN DSC CONS AND ]
+rec_expr -> EQ expr . [ IN ]
+## Transitions:
+-- On DSC shift to state 119
+-- On CONS shift to state 21
+-- On AND shift to state 120
+-- On and_expr shift to state 58
+-- On and_command shift to state 126
+## Reductions:
+-- On IN
+--   reduce production rec_expr -> EQ expr
+
+State 119:
+## Known stack suffix:
+## DSC
+## LR(1) items:
+and_command -> DSC . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production and_command -> DSC
+
+State 120:
+## Known stack suffix:
+## AND
+## LR(1) items:
+and_command -> AND . var var EQ expr and_command [ # ]
+and_expr -> AND . var var EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 121
+## Reductions:
+
+State 121:
+## Known stack suffix:
+## AND var
+## LR(1) items:
+and_command -> AND var . var EQ expr and_command [ # ]
+and_expr -> AND var . var EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On ID shift to state 6
+-- On var shift to state 122
+## Reductions:
+
+State 122:
+## Known stack suffix:
+## AND var var
+## LR(1) items:
+and_command -> AND var var . EQ expr and_command [ # ]
+and_expr -> AND var var . EQ expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On EQ shift to state 123
+## Reductions:
+
+State 123:
+## Known stack suffix:
+## AND var var EQ
+## LR(1) items:
+and_command -> AND var var EQ . expr and_command [ # ]
+and_expr -> AND var var EQ . expr and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 124
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 124:
+## Known stack suffix:
+## AND var var EQ expr
+## LR(1) items:
+and_command -> AND var var EQ expr . and_command [ # ]
+and_expr -> AND var var EQ expr . and_expr [ TRUE MATCH LPAR LET LBPAR INT IF ID FUN FALSE ]
+expr -> expr . CONS expr [ IN DSC CONS AND ]
+## Transitions:
+-- On IN shift to state 56
+-- On DSC shift to state 119
+-- On CONS shift to state 21
+-- On AND shift to state 120
+-- On and_expr shift to state 57
+-- On and_command shift to state 125
+## Reductions:
+
+State 125:
+## Known stack suffix:
+## AND var var EQ expr and_command
+## LR(1) items:
+and_command -> AND var var EQ expr and_command . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production and_command -> AND var var EQ expr and_command
+
+State 126:
+## Known stack suffix:
+## LET REC var var EQ expr and_command
+## LR(1) items:
+command -> LET REC var var EQ expr and_command . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production command -> LET REC var var EQ expr and_command
+
+State 127:
+## Known stack suffix:
+## LET var
+## LR(1) items:
+command -> LET var . EQ expr DSC [ # ]
+expr -> LET var . EQ expr IN expr [ DSC CONS ]
+## Transitions:
+-- On EQ shift to state 128
+## Reductions:
+
+State 128:
+## Known stack suffix:
+## LET var EQ
+## LR(1) items:
+command -> LET var EQ . expr DSC [ # ]
+expr -> LET var EQ . expr IN expr [ DSC CONS ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 129
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 129:
+## Known stack suffix:
+## LET var EQ expr
+## LR(1) items:
+command -> LET var EQ expr . DSC [ # ]
+expr -> LET var EQ expr . IN expr [ DSC CONS ]
+expr -> expr . CONS expr [ IN DSC CONS ]
+## Transitions:
+-- On IN shift to state 70
+-- On DSC shift to state 130
+-- On CONS shift to state 21
+## Reductions:
+
+State 130:
+## Known stack suffix:
+## LET var EQ expr DSC
+## LR(1) items:
+command -> LET var EQ expr DSC . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production command -> LET var EQ expr DSC
+
+State 131:
+## Known stack suffix:
+## expr
+## LR(1) items:
+command -> expr . DSC [ # ]
+expr -> expr . CONS expr [ DSC CONS ]
+## Transitions:
+-- On DSC shift to state 132
+-- On CONS shift to state 21
+## Reductions:
+
+State 132:
+## Known stack suffix:
+## expr DSC
+## LR(1) items:
+command -> expr DSC . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production command -> expr DSC
+
+State 133:
+## Known stack suffix:
+## command
+## LR(1) items:
+command' -> command . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   accept command
+
+State 134:
+## Known stack suffix:
+##
+## LR(1) items:
+expr' -> . expr [ # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On literal shift to state 19
+-- On expr shift to state 135
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 135:
+## Known stack suffix:
+## expr
+## LR(1) items:
+expr' -> expr . [ # ]
+expr -> expr . CONS expr [ CONS # ]
+## Transitions:
+-- On CONS shift to state 21
+## Reductions:
+-- On #
+--   accept expr
+** End-of-stream conflict on CONS
+**   There is a tension between
+**   (1) accepting expr
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
+State 136:
+## Known stack suffix:
+##
+## LR(1) items:
+main' -> . main [ # ]
+## Transitions:
+-- On TRUE shift to state 1
+-- On MATCH shift to state 2
+-- On LPAR shift to state 3
+-- On LET shift to state 4
+-- On LBPAR shift to state 10
+-- On INT shift to state 12
+-- On IF shift to state 13
+-- On ID shift to state 14
+-- On FUN shift to state 15
+-- On FALSE shift to state 18
+-- On main shift to state 137
+-- On literal shift to state 19
+-- On expr shift to state 138
+-- On atomic_expr shift to state 23
+-- On arith_expr shift to state 24
+-- On app_expr shift to state 29
+## Reductions:
+
+State 137:
+## Known stack suffix:
+## main
+## LR(1) items:
+main' -> main . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   accept main
+
+State 138:
+## Known stack suffix:
+## expr
+## LR(1) items:
+expr -> expr . CONS expr [ EOF CONS ]
+main -> expr . EOF [ # ]
+## Transitions:
+-- On EOF shift to state 139
+-- On CONS shift to state 21
+## Reductions:
+
+State 139:
+## Known stack suffix:
+## expr EOF
+## LR(1) items:
+main -> expr EOF . [ # ]
+## Transitions:
+## Reductions:
+-- On #
+--   reduce production main -> expr EOF
+
+State 140:
+## Known stack suffix:
+##
+## LR(1) items:
+pattern' -> . pattern [ # ]
+## Transitions:
+-- On WILD shift to state 83
+-- On TRUE shift to state 84
+-- On LPAR shift to state 85
+-- On LBPAR shift to state 86
+-- On INT shift to state 88
+-- On ID shift to state 89
+-- On FALSE shift to state 90
+-- On pattern shift to state 141
+## Reductions:
+
+State 141:
+## Known stack suffix:
+## pattern
+## LR(1) items:
+pattern' -> pattern . [ # ]
+pattern -> pattern . CONS pattern [ CONS # ]
+## Transitions:
+-- On CONS shift to state 92
+## Reductions:
+-- On #
+--   accept pattern
+** End-of-stream conflict on CONS
+**   There is a tension between
+**   (1) accepting pattern
+**   without even requesting a lookahead token, and
+**   (2) testing whether the lookahead token is a member of the above set.
+
