@@ -95,14 +95,14 @@ let rec eval (env : env) (expr : expr) : value =
           | _ -> raise Eval_error)
       | EMatch (e, pl) -> 
         let v = eval env e in
-        let rec match_to_value : value -> (pattern * expr) list -> value
-          = fun v -> function
-            | [] -> raise Eval_error
-            | (p, e') :: rest ->
-              (match find_match p v with
-              | Some nenv -> eval (nenv @ env) e'
-              | None -> match_to_value v rest) in
-            match_to_value v pl
+        let rec match_to_value (v: value) (l: (pattern * expr) list) : value =
+          match l with
+          | [] -> raise Eval_error
+          | (p, e') :: rest ->
+            (match find_match p v with
+            | Some nenv -> eval (nenv @ env) e'
+            | None -> match_to_value v rest) 
+          in match_to_value v pl
       | ECons (e1, e2) ->
         let v1 = eval env e1 and v2 = eval env e2 in
         (match v2 with
@@ -111,12 +111,12 @@ let rec eval (env : env) (expr : expr) : value =
         | _ -> raise Eval_error)
       | ETuple elist -> VTuple (List.map (fun e -> eval env e) elist)
       | ERLetAnd (l, e) ->
-        let rec and_env : int -> (name * name * expr) list -> env
-        = fun i -> function
-          | [] -> env
-          | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
-            let nenv = and_env 0 l in
-            eval nenv e
+        let rec and_env (i: int) (l' : (name * name * expr) list) : env =
+        match l' with
+        | [] -> env
+        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
+          let nenv = and_env 0 l 
+        in eval nenv e
       | ENil -> VNil
 
 
@@ -125,10 +125,8 @@ let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
-  let print_let : name -> value -> unit
-  = fun x v ->
-    print_string ("result : " ^ x ^ " = ");
-    print_value v
+let print_let (x : name) (v : value) : unit = 
+    print_string ("result : " ^ x ^ " = "); print_value v; print_newline()
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
@@ -154,13 +152,13 @@ let print_command_result (env : env) (cmd : command) : env =
       print_newline(); 
       oenv
   | CRLetAnd l ->
-      let rec and_env : int -> (name * name * expr) list -> env
-      = fun i -> function
+      let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+      match l1 with
         | [] -> env
         | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
       let nenv = and_env 0 l in
-      let rec letand : (name * name * expr) list -> unit
-      = function
+      let rec letand (l2 : (name * name * expr) list) : unit =
+      match l2 with
         | [] -> ()
         | (f, x, e) :: rest ->
             print_endline (f ^ " = <fun>");
