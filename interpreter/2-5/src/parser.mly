@@ -104,8 +104,6 @@ and_expr :
   | IN                                    { [] }
 ;
 
-
-
 //算術演算・関数適用
 arith_expr:
   | arith_expr ADD arith_expr             { EBin(OpAdd,$1,$3) }

@@ -131,11 +131,11 @@ let rec eval (env : env) (expr : expr) : value =
       (*2-5*)
       | ERLetAnd (l, e) ->
         (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
-        let rec and_env (i: int) (l' : (name * name * expr) list) : env =
+        let rec make_env (i: int) (l' : (name * name * expr) list) : env =
         match l' with
         | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
-          let nenv = and_env 0 l 
+        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (make_env (i + 1) rest) in
+          let nenv = make_env 0 l 
         (*環境の下でeを評価*)
         in eval nenv e
 
@@ -200,11 +200,10 @@ let print_command_result (env : env) (cmd : command) : env =
         | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
       let nenv = and_env 0 l in
       (*コマンドラインに変数を表示*)
-      let rec letand (l2 : (name * name * expr) list) : unit =
+      let rec printfun (l2 : (name * name * expr) list) : unit =
         match l2 with
         | [] -> ()
         | (f, x, e) :: rest ->
-            print_endline (f ^ " = <fun>");
-            letand rest;
-        in letand l;
+            print_endline (f ^ " = <fun>"); printfun rest;
+        in printfun l;
       nenv
