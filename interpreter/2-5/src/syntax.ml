@@ -54,7 +54,7 @@ and pattern =
 type command =
   | CExp of expr
   | CLet of name * expr
-  | CRLet of name * name * expr
+  (* | CRLet of name * name * expr *)
   | CRLetAnd of (name * name * expr) list   (*2-5*)
 
 exception Eval_error

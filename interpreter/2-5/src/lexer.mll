@@ -34,7 +34,7 @@ rule token = parse
 | "with"      { WITH }
 | '|'         { OR }
 | '_'         { WILD }
-| "end"       { END }
+| "end"       { END } 
 (*2-4*)
 | ','         { COMMA }
 | '['         { LBPAR }

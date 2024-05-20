@@ -120,7 +120,6 @@ let rec eval (env : env) (expr : expr) : value =
             | Some nenv -> eval (nenv @ env) e'
             | None -> match_to_value v rest) 
           in match_to_value v pl
-      (*2-4*)
       | ENil -> VNil
       (*リストの評価：要素をvalueに変える*)          
       | ECons (e1, e2) ->
@@ -147,8 +146,8 @@ let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
-let print_let (x : name) (v : value) : unit = 
-    print_string ("result : " ^ x ^ " = "); print_value v; print_newline()
+(* let print_let (x : name) (v : value) : unit = 
+    print_string ("result : " ^ x ^ " = "); print_value v; print_newline() *)
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
@@ -161,6 +160,7 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
+     | VCons _ -> print_string ("list = "); print_value v; print_newline()
      | _ -> print_value v; print_newline()
      );
      env)
@@ -168,11 +168,6 @@ let print_command_result (env : env) (cmd : command) : env =
     print_string ("val "); print_string n; print_string (" = "); 
     let (v,e') = command_let env n e in print_value v; print_newline();
     e'
-  | CRLet (f, x, e) -> 
-      let oenv = (f, VRFun (f, x, e, env)) :: env in
-      print_let f (VRFun (f, x, e, env));
-      print_newline(); 
-      oenv
   (*2-5 (f, x, e) list*)
   | CRLetAnd l ->
       (*リストから環境を作成*)

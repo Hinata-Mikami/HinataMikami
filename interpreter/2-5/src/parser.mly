@@ -136,6 +136,8 @@ patterns:
   | OR pattern ARROW expr END             { ($2,$4) :: [] }
 ;
 
+//2-3 end をなくすと、p -> e ... に続く表現が, patterns なのか, match文の外の表現なのかわからなくなり、shift/reduce conflictを起こす。
+
 //match e with <pattern> -> e | ...
 pattern :
   //int,bool
