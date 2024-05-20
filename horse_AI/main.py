@@ -1,5 +1,5 @@
 import horseresults_scrape
-import preds_scrape
+import peds_scrape
 import results_scrape
 import return_scrape
 
