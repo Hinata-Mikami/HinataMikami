@@ -38,6 +38,7 @@ rule token = parse
 | ']'         { RBPAR }
 | "::"        { CONS }
 | "and"       { AND }
+| '_'         { WILD }
 | digit+ as n { INT (int_of_string n) }
 | ident  as n { ID n }
 | ";;"        { DSC } (*Double Semi-Colon*)

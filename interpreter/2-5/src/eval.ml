@@ -23,8 +23,7 @@ let rec eval (env : env) (expr : expr) : value =
       | OpMul -> VInt (x * y)
       | OpDiv -> if y = 0 then raise Zero_Division else VInt (x / y)
       | OpEq -> VBool (x = y)
-      | OpLt -> VBool (x < y)
-      | OpOr -> raise Eval_error)
+      | OpLt -> VBool (x < y))
     | _ -> raise Unexpected_Expression_at_binOp
 
   (*if e0 then e1 else e2 -> value*)
@@ -47,52 +46,33 @@ let rec eval (env : env) (expr : expr) : value =
        | v1 -> eval ((n,v1) :: env) e2
        
   (*match v with p -> ... *)     
-  in let rec find_match (pv : value) (v : value) : env option =
-    match (pv, v) with
-    | (VInt i1, VInt i2) -> if i1 = i2 then Some [] else None   (* int  ->  *)
-    | (VBool b1, VBool b2) -> if b1 = b2 then Some [] else None
-    (* | (EVar v, (_ as t)) -> Some [(v, t)] *)
-    (* | ((_ as t), EVar v) -> Some [(v, t)] *)
-    | (VPair (v1, v2), VPair (v3, v4)) ->
-      let first = find_match v1 v3 in
-      let second = find_match v2 v4 in
-      (match (first, second) with
-      (Some s1, Some s2) -> Some (s1 @ s2)
-      | _ -> None)
-    | (VNil, VNil) -> Some []
-    | (VCons (e1, e2) , VCons (e3, e4)) ->
-      let element = find_match e1 e3 in
-      let rest = find_match e2 e4 in
-      (match (element, rest) with
-      (Some s1, Some s2) -> Some (s1 @ s2)
-      | _ -> None)
+  in let rec find_match (p : pattern ) (v : value) : env option =
+    match p, v with
+    | PInt i1, VInt i2 -> if i1 = i2 then Some [] else None
+    | PBool b1, VBool b2 -> if b1 = b2 then Some [] else None
+    | PVar x, _ -> Some [(x, v)]
+    | PWild, _ -> Some []
+    | PCons(phead, prest), VCons(vhead, vrest) ->
+      let head = find_match phead vhead in
+      let rest = find_match prest vrest in
+      (match head, rest with
+        | Some env1, Some env2 -> Some (env1 @ env2)
+        | _ -> None)
+    | PNil, VNil -> Some []
+    | PTuple plist, VTuple vlist ->
+      let rec match_tuple (plist:pattern list) (vlist: value list) : env option =
+      match plist, vlist with
+          | [], [] -> Some []
+          | p :: prest , v :: vrest ->
+              let head = find_match p v in
+              let rest = match_tuple prest vrest in
+              (match head, rest with
+                | Some env1, Some env2 -> Some (env1 @ env2)
+                | _ -> None)
+          | _ -> None
+          in match_tuple plist vlist
     | _ -> None
-      
-  (*match v with e2 -> value*)    
-  in let rec eval_match (v:value) (e2:expr) (env:env) : value=
-    match e2 with
-      (*p1 -> e1 end;;*)
-      EMatchpairend (p, e) ->
-        (match e with
-        | EVar x -> eval ((x, v) :: env) e
-        | _ -> let pv = eval env p in
-        (match find_match pv v with
-        | Some s -> eval (s @ env) e
-        | None -> raise Eval_error))
-      (*p1 -> e1 | expr*)
-      | EBin (OpOr, EMatchpair (p, e), e') ->
-        (match e with
-        | EVar x -> eval ((x, v) :: env) e
-        | _ -> let pv = eval env p in
-        (match find_match pv v with
-        | Some s -> eval (s @ env) e
-        | None -> eval_match v e' env))
-      | _ -> raise Eval_error
 
-  in let rec eval_env l l' oenv i =
-    match l with
-    [] -> oenv
-    | (f, x, e) :: rest -> (f, VRFunand (i, l', oenv)) :: (eval_env rest l' oenv (i + 1))
 
   in match expr with
       | ELiteral x -> value_of_literal x
@@ -113,20 +93,31 @@ let rec eval (env : env) (expr : expr) : value =
               let env' = (x,v2) :: (f, VRFun (f,x,e,oenv)) :: oenv in
               eval env' e
           | _ -> raise Eval_error)
-      | EMatch (e1, e2) ->  let v = eval env e1 in
-                            eval_match v e2 env
-      | EPair (e1, e2) -> VPair (eval env e1, eval env e2)
-      | ENil -> VNil
+      | EMatch (e, pl) -> 
+        let v = eval env e in
+        let rec match_to_value : value -> (pattern * expr) list -> value
+          = fun v -> function
+            | [] -> raise Eval_error
+            | (p, e') :: rest ->
+              (match find_match p v with
+              | Some nenv -> eval (nenv @ env) e'
+              | None -> match_to_value v rest) in
+            match_to_value v pl
       | ECons (e1, e2) ->
-        let v = eval env e2 in
-        (match v with
-        | VNil -> VCons (eval env e1, v)
-        | VCons (e1', e2') -> VCons (eval env e1, v)
+        let v1 = eval env e1 and v2 = eval env e2 in
+        (match v2 with
+        | VNil -> VCons (v1, v2)
+        | VCons _ -> VCons (v1, v2)
         | _ -> raise Eval_error)
-      | ERLetand (l, e) ->
-        let l' = l in
-        let env' = eval_env l l' env 0 in eval env' e
-      | _ -> raise Eval_error
+      | ETuple elist -> VTuple (List.map (fun e -> eval env e) elist)
+      | ERLetAnd (l, e) ->
+        let rec and_env : int -> (name * name * expr) list -> env
+        = fun i -> function
+          | [] -> env
+          | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
+            let nenv = and_env 0 l in
+            eval nenv e
+      | ENil -> VNil
 
 
 (*CLet (n, e) : let n = e;;*)
@@ -134,6 +125,10 @@ let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match eval env e with
   | v1 -> (v1, ((n,v1) :: env))
 
+  let print_let : name -> value -> unit
+  = fun x v ->
+    print_string ("result : " ^ x ^ " = ");
+    print_value v
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
@@ -146,13 +141,36 @@ let print_command_result (env : env) (cmd : command) : env =
      (match v with
      | VInt _ -> print_string ("int = "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
+<<<<<<< HEAD
      | VPair (e1, e2) -> print_string "pair"
      | VNil -> print_string "nil list"
      | VCons (e1, e2) -> print_string "list"
      | _ -> print_string "function"
+=======
+     | _ -> print_value v; print_newline()
+>>>>>>> 46e8a9f (2-4完成)
      );
      env)
   | CLet (n, e) -> 
     print_string ("val "); print_string n; print_string (" = "); 
     let (v,e') = command_let env n e in print_value v; print_newline();
     e'
+  | CRLet (f, x, e) -> 
+      let oenv = (f, VRFun (f, x, e, env)) :: env in
+      print_let f (VRFun (f, x, e, env));
+      print_newline(); 
+      oenv
+  | CRLetAnd l ->
+      let rec and_env : int -> (name * name * expr) list -> env
+      = fun i -> function
+        | [] -> env
+        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
+      let nenv = and_env 0 l in
+      let rec letand : (name * name * expr) list -> unit
+      = function
+        | [] -> ()
+        | (f, x, e) :: rest ->
+            print_endline (f ^ " = <fun>");
+            letand rest; in
+      letand l;
+      nenv

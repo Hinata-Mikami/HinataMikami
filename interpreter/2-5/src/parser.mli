@@ -25,6 +25,7 @@ type token =
   | LPAR
   | RPAR
   | DSC
+  | SSC
   | EOF
   | FUN
   | ARROW
@@ -38,6 +39,7 @@ type token =
   | RBPAR
   | CONS
   | AND
+  | WILD
 
 val main :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Syntax.expr
@@ -45,3 +47,5 @@ val expr :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Syntax.expr
 val command :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Syntax.command
+val pattern :
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Syntax.pattern

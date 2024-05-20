@@ -11,6 +11,7 @@
 %token ADD SUB MUL DIV EQ LT
 %token LPAR RPAR 
 %token DSC
+%token SSC
 %token EOF 
 %token FUN ARROW
 %token REC
@@ -19,6 +20,8 @@
 %token LBPAR RBPAR
 %token CONS
 %token AND
+%token WILD
+%token END
 
 //下に行くほど結合が強い
 %nonassoc FUN ARROW
@@ -38,107 +41,139 @@
 
 %start command
 %type <Syntax.command> command
+
+
+%start pattern
+%type <Syntax.pattern> pattern
 %% 
 
 
 command:
-  | LET var EQ expr DSC  { CLet($2,$4) }
-  | expr DSC             { CExp $1 }
+  | LET var EQ expr DSC                   { CLet ($2, $4) }
+  | LET REC var var EQ expr and_command   { CRLetAnd (($3, $4, $6) :: $7) }
+  | expr DSC                              { CExp $1 }
+;
+
+and_command:
+  | AND var var EQ expr and_command       { ($2,$3,$5) :: $6 }
+  | DSC                                   { [] }
 ;
 
 main: 
-  | expr EOF {$1}
+  | expr EOF                              { $1 }
 ;
 
 expr:
   //fun x -> E
-  | FUN ID ARROW expr                         { EFun($2,$4) }  
-  //算術表現     
-  | arith_expr                                { $1 } 
+  | FUN ID ARROW expr                     { EFun($2,$4) }  
+  //算術表現・関数適用     
+  | arith_expr                            { $1 } 
   //if e1 then e2 else e3
-  | IF expr THEN expr ELSE expr               { EIf($2,$4,$6) }
+  | IF expr THEN expr ELSE expr           { EIf($2, $4, $6) }
   //let x = e1 in e2
-  | LET var EQ expr IN expr                   { ELet($2, $4, $6) }
+  | LET var EQ expr IN expr               { ELet($2, $4, $6) }
   //let rec f x ... in e
-  | LET REC var var rec_expr IN expr          { ERLet($3,$4,$5,$7) }
+  | LET REC var var rec_expr IN expr      { ERLet($3, $4, $5, $7) }
   //let rec f1 x ... and f2 x ... in e 
-  | LET REC var var rec_expr let_expr IN expr { ERLetand ([($3, $4, $5)] @ $6, $8 ) }
+  | LET REC var var EQ expr and_expr expr { ERLetAnd ((($3, $4, $6) :: $7), $8) }
   //match e with ...
-  | MATCH expr WITH match_expr                { EMatch ($2, $4) }
-  //(e1, e2)
-  | LPAR expr COMMA expr RPAR                 { EPair ($2, $4) }
+  | MATCH expr WITH match_pattern         { EMatch ($2, $4) }
   //[]
-  | LBPAR RBPAR                               { ENil }
+  | LBPAR RBPAR                           { ENil }
+  | LBPAR expr lists                      { ECons ($2, $3) }
   //e1::e2
-  | expr CONS expr                            { ECons ($1, $3) }
+  | expr CONS expr                        { ECons ($1, $3) }
 ;
 
 //let rec f x <rec_expr> in e
 rec_expr:
   // = e0
-  | EQ expr      {$2}
+  | EQ expr                               { $2 }
   // x2 <rec_expr> 糖衣構文の実装
-  | var rec_expr { EFun($1, $2) } 
+  | var rec_expr                          { EFun($1, $2) } 
 ;
 
-//let rec f x = e0 <let_expr> in e
-let_expr :
-  | AND var var rec_expr let_expr   { [($2, $3, $4)] @ $5 }
-  |                                 { [] }
+//let rec f x = e0 <and_expr> in e
+and_expr :
+  | AND var var EQ expr and_expr          { ($2, $3, $5) :: $6 }
+  | IN                                    { [] }
 ;
 
-//算術演算
+lists:
+  | SSC expr lists                        { ECons($2,$3) }
+  | RBPAR                                 { ENil }
+;
+
+//算術演算・関数適用
 arith_expr:
-  | arith_expr ADD arith_expr { EBin(OpAdd,$1,$3) }
-  | arith_expr SUB arith_expr { EBin(OpSub,$1,$3) }
-  | arith_expr MUL arith_expr { EBin(OpMul,$1,$3) }
-  | arith_expr DIV arith_expr { EBin(OpDiv,$1,$3) }
-  | arith_expr EQ  arith_expr { EBin(OpEq,$1,$3) }
-  | arith_expr LT  arith_expr { EBin(OpLt,$1,$3) }
+  | arith_expr ADD arith_expr             { EBin(OpAdd,$1,$3) }
+  | arith_expr SUB arith_expr             { EBin(OpSub,$1,$3) }
+  | arith_expr MUL arith_expr             { EBin(OpMul,$1,$3) }
+  | arith_expr DIV arith_expr             { EBin(OpDiv,$1,$3) }
+  | arith_expr EQ  arith_expr             { EBin(OpEq,$1,$3) }
+  | arith_expr LT  arith_expr             { EBin(OpLt,$1,$3) }
   //E or E E
-  | app_expr                  { $1 }
+  | app_expr                              { $1 }
 ;
 
 //E or E E
 app_expr:
-  | app_expr atomic_expr { EApp($1,$2) }
-  | atomic_expr          { $1 }
+  | app_expr atomic_expr                  { EApp($1,$2) }
+  | atomic_expr                           { $1 }
 ;
 
 //match e with ...
-match_expr :
-  // p1 -> e1 end
-  | pattern ARROW expr END            { EMatchpairend ($1, $3) }
-  // p1 -> e1 | ... 
-  | pattern ARROW expr OR match_expr  { EBin (OpOr, EMatchpair ($1, $3), $5) }
+match_pattern:
+  | pattern ARROW expr patterns           { ($1,$3) :: $4 }
+  | pattern ARROW expr END                { [($1,$3)] }
+;
+
+patterns:
+  | OR pattern ARROW expr patterns        { ($2,$4) :: $5 }
+  | OR pattern ARROW expr END             { ($2,$4) :: [] }
 ;
 
 //match e with <pattern> -> e | ...
 pattern :
   //int,bool
-  | literal                     { ELiteral $1 }
+  | INT                                   { PInt $1 }
+  | TRUE                                  { PBool true }
+  | FALSE                                 { PBool false }
   //variable
-  | ID                          { EVar ($1) }
+  | ID                                    { PVar ($1) }
   //(e1, e2)
-  | LPAR expr COMMA expr RPAR   { EPair ($2, $4) }
+  | LPAR pattern COMMA pattern ptuple     { PTuple ($2 :: $4 :: $5) }
   // []
-  | LBPAR RBPAR                 { ENil }
+  | LBPAR RBPAR                           { PNil }
   // e1 :: e2
-  | expr CONS expr              { ECons ($1, $3) }
+  | pattern CONS pattern                  { PCons ($1, $3) }
+  | WILD                                  { PWild }
 ;
 
+ptuple:
+  | COMMA pattern ptuple                  { $2 :: $3 }
+  | RPAR                                  { [] }
+;
+
+
 atomic_expr:
-  | literal         { ELiteral $1 }
-  | ID              { EVar($1) }
-  | LPAR expr RPAR  { $2 }
+  | literal                               { ELiteral $1 }
+  | ID                                    { EVar ($1) }
+  | LPAR expr RPAR                        { $2 }
+  | LPAR expr COMMA expr tuple            { ETuple ($2 :: $4 :: $5) }
+;
+
+tuple:
+  | COMMA expr tuple                      { $2 :: $3 }
+  | RPAR                                  { [] }
 ;
 
 literal: 
-  | INT   { LInt $1 } 
-  | TRUE  { LBool true } 
-  | FALSE { LBool false } 
+  | INT                                   { LInt $1 } 
+  | TRUE                                  { LBool true } 
+  | FALSE                                 { LBool false } 
 ;
 
 var:
-  | ID  { $1 } 
+  | ID                                    { $1 } 
 ;
