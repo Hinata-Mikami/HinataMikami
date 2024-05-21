@@ -14,6 +14,7 @@ from urllib.request import urlopen
 import optuna.integration.lightgbm as lgb_o
 from itertools import combinations, permutations
 import matplotlib.pyplot as plt
+from io import StringIO
 
 class HorseResults:
     @staticmethod

@@ -13,6 +13,7 @@ from urllib.request import urlopen
 import optuna.integration.lightgbm as lgb_o
 from itertools import combinations, permutations
 import matplotlib.pyplot as plt
+from io import StringIO
 
 class Results:
     @staticmethod
@@ -31,14 +32,16 @@ class Results:
         #race_idをkeyにしてDataFrame型を格納
         race_results = {}
         for race_id in tqdm(race_id_list):
-            time.sleep(1)
+            #time.sleep(1)
+            print(race_id)
             try:
                 url = "https://db.netkeiba.com/race/" + race_id
                 # スクレイピング
                 html = requests.get(url)
                 html.encoding = "EUC-JP"
+                html_io = StringIO(html.string)
                 # メインとなるテーブルデータを取得
-                df = pd.read_html(html.text)[0]
+                df = pd.read_html(html_io)
                 # 列名に半角スペースがあれば除去する
                 df = df.rename(columns=lambda x: x.replace(' ', ''))
                 # 天候、レースの種類、コースの長さ、馬場の状態、日付をスクレイピング
@@ -81,6 +84,15 @@ class Results:
                 #インデックスをrace_idにする
                 df.index = [race_id] * len(df)
                 race_results[race_id] = df
+                
+            #リクエストを投げすぎるとエラーになることがあるため
+            #失敗したら10秒待機してリトライする
+            except requests.exceptions.RequestException as e:
+                print(f"Error: {e}")
+                print("Retrying in 10 seconds...")
+                time.sleep(10)  # 10秒待機
+                html=requests.get(url)
+
             #存在しないrace_idを飛ばす
             except IndexError:
                 continue

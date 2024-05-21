@@ -34,13 +34,12 @@ results = pd.read_pickle('results.pickle')
 horse_id_list = results['horse_id'].unique()
 horse_results = hr.HorseResults.scrape(horse_id_list)
 horse_results #jupyterで出力
-
 horse_results.to_pickle('horse_results.pickle')
 
 peds = pe.Peds.scrape(horse_id_list)
-peds
 peds.to_pickle('peds.pickle')
+peds
 
 return_tables = rt.Return.scrape(horse_id_list)
-return_tables
 return_tables.to_pickle('return_tables.pickle')
+return_tables
