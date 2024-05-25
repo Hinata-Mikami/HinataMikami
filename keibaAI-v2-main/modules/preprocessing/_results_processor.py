@@ -19,7 +19,8 @@ class ResultsProcessor(AbstractDataProcessor):
         
         # 着順の前処理
         df = self._preprocess_rank(df)
-        
+
+
         # 性齢を性と年齢に分ける
         # サイト上のテーブルに存在する列名は、ResultsColsクラスで定数化している。
         df["性"] = df[Cols.SEX_AGE].map(lambda x: str(x)[0])
@@ -32,6 +33,7 @@ class ResultsProcessor(AbstractDataProcessor):
         # errors='coerce'で、"計不"など変換できない時に欠損値にする
         df['体重'] = pd.to_numeric(df['体重'], errors='coerce')
         df['体重変化'] = pd.to_numeric(df['体重変化'], errors='coerce')
+        df[Cols.TANSHO_ODDS] = pd.to_numeric(df[Cols.TANSHO_ODDS], errors='coerce')    
 
         # 各列を数値型に変換
         df[Cols.TANSHO_ODDS] = df[Cols.TANSHO_ODDS].astype(float)
