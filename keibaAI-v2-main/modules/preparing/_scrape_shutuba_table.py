@@ -122,7 +122,8 @@ def scrape_horse_id_list(race_id_list: list) -> list:
         query = '?race_id=' + race_id
         url = UrlPaths.SHUTUBA_TABLE + query
         html = urlopen(url)
-        soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+        soup = BeautifulSoup(html, "html.parser", from_encoding='utf-8')
+#        soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
         horse_td_list = soup.find_all("td", attrs={'class': 'HorseInfo'})
         for td in horse_td_list:
             horse_id = re.findall(r'\d+', td.find('a')['href'])[0]
