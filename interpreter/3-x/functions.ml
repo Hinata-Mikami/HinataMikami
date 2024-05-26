@@ -28,13 +28,10 @@ let rec print_value (v: value) : unit =
         | v :: rest -> print_char '('; print_value v; print_tuple rest)
   | VRFunAnd (_, l, _) -> print_string "<fun>"
 
-
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match Eval.eval env e with
   | v1 -> (v1, ((n,v1) :: env))
-
-
 
 let print_types_of_tuple (l : value list) : unit =
   match l with
@@ -56,8 +53,6 @@ let print_types_of_tuple (l : value list) : unit =
         | VBool _ -> print_string("bool");(string_of_value_type rest)
         | _ -> print_string(" ");(string_of_value_type rest)
         )
-
-  
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
@@ -97,7 +92,6 @@ let print_command_result (env : env) (cmd : command) : env =
         in printfun l;
       nenv
 
-
 let repl () =
 
   let lexbuf = Lexing.from_channel stdin in
@@ -131,7 +125,6 @@ let repl () =
   
   in loop_stdin []
 
-
 let read_file op_file =
   
   let lexbuf = Lexing.from_channel op_file in
@@ -157,4 +150,44 @@ let read_file op_file =
         Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
   
   in loop_file []
-  
+
+
+(*型代入:ty_subst と t を受け取り、
+  tがTInt, TBoolのときはそのまま
+  TFun(T1,t2) -> t1とt2を再帰的に型代入
+  TVar n -> nがリストに存在するとき、置き換え
+            存在しない -> そのまま返す*)
+let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
+  match t with
+  | TInt -> TInt
+  | TBool -> TBool
+  | TFun(t1, t2) -> TFun(apply_ty_subst s t1, apply_ty_subst s t2)
+  | TVar n -> 
+    (match s with
+    | [] -> t
+    | (n', t') :: rest when n' = n -> t'
+    | (n', t') :: rest -> apply_ty_subst rest t
+    )
+
+(*s1とs2の合成*)
+(*s2のすべての(n,t)についてs1の型を代入してl2を作る
+  次に、重複をなくすためにs1のうちs2に含まれるものを削除したリストl1を作る
+  *)
+
+let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
+  let rec make_l2 s2 =
+    match s2 with
+    | [] -> []
+    | (n, t) :: rest -> (n, apply_ty_subst s1 t) :: (make_l2 rest)
+    in let l2 = make_l2 s2
+  in
+  let rec make_l1 s1 = 
+    match s1 with
+    | [] -> []
+    | (n, t) :: rest ->
+      (match List.assoc_opt n s2 with
+      | Some x -> make_l1 rest
+      | None -> (n, t) :: (make_l1 rest)
+      )
+  in let l1 = make_l1 s1
+in l2 @ l1
