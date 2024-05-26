@@ -1,0 +1,8 @@
+ty_unify [(TyFun (TyVar "alpha", TyVar "beta"), TyFun (TyBool, TyVar "gamma"))];;
+
+ty_unify [(TyFun (TyVar "alpha", TyVar "beta"), TyFun (TyBool, TyVar "alpha"))];;
+
+ty_unify [(TyFun (TyVar "alpha", TyVar "beta"), TyFun (TyVar "beta", TyBool))];;
+
+ty_unify [(TyFun (TyVar "alpha", TyVar "alpha"), TyFun (TyBool, TyVar "gamma"))];;
+

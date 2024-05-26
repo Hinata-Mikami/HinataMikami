@@ -50,11 +50,10 @@
 
 command:
   | LET var EQ expr DSC                   { CLet ($2, $4) }
-  | LET REC var var EQ expr and_command   { CRLetAnd (($3, $4, $6) :: $7) } //2-5
+  | LET REC var var EQ expr and_command   { CRLetAnd (($3, $4, $6) :: $7) }
   | expr DSC                              { CExp $1 }
 ;
 
-//2-5 command and以降
 and_command:
   | AND var var EQ expr and_command       { ($2,$3,$5) :: $6 }
   | DSC                                   { [] }
@@ -73,31 +72,14 @@ expr:
   | IF expr THEN expr ELSE expr           { EIf($2, $4, $6) }
   //let x = e1 in e2
   | LET var EQ expr IN expr               { ELet($2, $4, $6) }
-  //let rec f x ... in e
-  //| LET REC var var rec_expr IN expr      { ERLet($3, $4, $5, $7) }
-  //2-5 let rec f1 x ... and f2 x ... in e 
+  //let rec f1 x ... and f2 x ... in e (let rec x = e1 in e を含む)
   | LET REC var var EQ expr and_expr expr { ERLetAnd ((($3, $4, $6) :: $7), $8) }
-  //2-3 match e with ...
+  //match e with ...
   | MATCH expr WITH match_pattern         { EMatch ($2, $4) }
-  // //2-4 [] 
-  // | LBPAR RBPAR                           { ENil }
-  // //2-4 [e1; ...
-  // | LBPAR expr lists                      { ECons ($2, $3) }
-  //2-4 e1::e2
+  // e1 :: e2
   | expr CONS expr                        { ECons ($1, $3) }
 ;
 
-
-
-//let rec f x <rec_expr> in e
-rec_expr:
-  // = e0
-  | EQ expr                               { $2 }
-  // x2 <rec_expr> 糖衣構文の実装
-  | var rec_expr                          { EFun($1, $2) } 
-;
-
-//2-5
 //let rec f x = e0 <and_expr> in e
 and_expr :
   | AND var var EQ expr and_expr          { ($2, $3, $5) :: $6 }
@@ -122,7 +104,6 @@ app_expr:
   | atomic_expr                           { $1 }
 ;
 
-//2-3
 //match e with ...
 match_pattern:
   | pattern ARROW expr patterns           { ($1,$3) :: $4 }
@@ -134,7 +115,6 @@ patterns:
   | OR pattern ARROW expr END             { ($2,$4) :: [] }
 ;
 
-//2-3 end をなくすと、p -> e ... に続く表現が, patterns なのか, match文の外の表現なのかわからなくなり、shift/reduce conflictを起こす。
 
 //match e with <pattern> -> e | ...
 pattern :
@@ -163,10 +143,11 @@ atomic_expr:
   | literal                               { ELiteral $1 }
   | ID                                    { EVar ($1) }
   | LPAR expr RPAR                        { $2 }
-  | LPAR expr COMMA expr tuple            { ETuple ($2 :: $4 :: $5) } //2-4 (e1, e2, ...)
-  //2-4 [] 
+  //(e1, e2, ...)
+  | LPAR expr COMMA expr tuple            { ETuple ($2 :: $4 :: $5) }  
+  //[] 
   | LBPAR RBPAR                           { ENil }
-  //2-4 [e1; ...
+  //[e1; ...
   | LBPAR expr lists                      { ECons ($2, $3) }
 ;
 

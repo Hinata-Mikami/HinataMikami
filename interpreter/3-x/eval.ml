@@ -1,8 +1,5 @@
 open Syntax
 
-(* type command_result = Command_result of value * env *)
-
-(*例外：デバッグ用*)
 exception Eval_error;;
 exception Zero_Division;;
 exception Unexpected_Expression_at_binOp
@@ -45,7 +42,7 @@ let rec eval (env : env) (expr : expr) : value =
     match eval env e1 with
        | v1 -> eval ((n,v1) :: env) e2
        
-  (*2-3 match v with p -> ... *)     
+  (*match v with p -> ... *)     
   (* p v の型一致を確認し、一致ならSome 追加する環境を返す *)
   in let rec find_match (p : pattern ) (v : value) : env option =
     match p, v with
@@ -53,7 +50,6 @@ let rec eval (env : env) (expr : expr) : value =
     | PBool b1, VBool b2 -> if b1 = b2 then Some [] else None
     | PVar x, _ -> Some [(x, v)] (*左側が変数xなら(x, v)を環境に追加*)
     | PWild, _ -> Some [] (*ワイルドカードは必ず右側を評価*)
-    (*以下は2-4*)
     (*リストの評価*)
     | PCons(ph, prest), VCons(vh, vrest) ->
       let h = find_match ph vh in (*先頭のパターンマッチの確認*)
@@ -83,9 +79,9 @@ let rec eval (env : env) (expr : expr) : value =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> lookup_variable env n
       | ELet (x, e1, e2) -> eval_let env x e1 e2
-      | ERLet (f, x, e1, e2) -> 
+      (* | ERLet (f, x, e1, e2) -> 
           let env' = (f, VRFun(f, x, e1, env)) :: env in
-          eval env' e2
+          eval env' e2 *)
       | EFun (x, e) -> VFun (x, e, env)
       | EApp (e1, e2) -> 
         let v1 = eval env e1 in
@@ -95,7 +91,6 @@ let rec eval (env : env) (expr : expr) : value =
         | VRFun (f, x, e, oenv) ->
             let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
             eval env' e
-        (*2-5*)
         (*l = (f, x, e) と oenv から (f1, l, oenv), ..., (fn, l, oenv)　を作成*)
         | VRFunAnd (i, l, oenv) -> 
           (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
@@ -108,7 +103,7 @@ let rec eval (env : env) (expr : expr) : value =
           in let (f, x, e) = List.nth l i
           in eval ((x, v2) :: nenv) e) (*i番目の変数名と値v2を環境に追加したうえでeを評価*)
         | _ -> raise Eval_error)
-      (*2-3 match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
+      (*match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
       | EMatch (e, pl) -> 
         let v = eval env e in
         (*マッチ時は情報を環境に追加してそのうえで->の右側を評価)*)
@@ -128,7 +123,6 @@ let rec eval (env : env) (expr : expr) : value =
         VCons (v1, v2)
       (*組の評価：すべての要素をvalueに変える*)
       | ETuple el -> VTuple (List.map (fun e -> eval env e) el)
-      (*2-5*)
       | ERLetAnd (l, e) ->
         (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
         let rec make_env (i: int) (l' : (name * name * expr) list) : env =
@@ -191,7 +185,7 @@ let print_command_result (env : env) (cmd : command) : env =
     print_string ("val "); print_string n; print_string (" = "); 
     let (v,e') = command_let env n e in print_value v; print_newline();
     e'
-  (*2-5 (f, x, e) list*)
+  (* (f, x, e) list*)
   | CRLetAnd l ->
       (*リストから環境を作成*)
       let rec and_env (i: int) (l1: (name * name * expr) list) : env =

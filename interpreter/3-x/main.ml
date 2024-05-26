@@ -1,14 +1,8 @@
-(* open Syntax *)
-
-(*要修正*)
-let string_of_position : Lexing.position -> string = fun pos -> 
-  Printf.sprintf "[%s] L: %d, C: %d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
-
-  exception Eval_error
-  exception Zero_Division
-  exception Unexpected_Expression_at_binOp
-  exception Unexpected_Expression_at_eval_if
-  exception Variable_Not_Found
+exception Eval_error
+exception Zero_Division
+exception Unexpected_Expression_at_binOp
+exception Unexpected_Expression_at_eval_if
+exception Variable_Not_Found
 
 (*標準入力読み取り*)
 (*エラーで再帰が止まってほしくない*)
@@ -18,7 +12,7 @@ let repl () =
   (*ループ部分*)
   let rec loop_stdin env =
 
-    let () = print_string "> " in
+    let () = print_string "# " in
     let () = flush stdout in
 
     match Parser.command Lexer.token lexbuf with
@@ -34,19 +28,17 @@ let repl () =
             )
 
     | exception Lexer.Error msg ->
-      Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
+      Printf.printf "Lexing Error\n" ;
       print_endline msg;
       loop_stdin env
     | exception Parsing.Parse_error ->
-      Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
+      Printf.printf "Parse Error"; 
       Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
       loop_stdin env
 
   in loop_stdin []
 
 (*ファイル評価*)
-(*cmdのリストを受け取ってから実行?*)
-
 let read_file op_file =
   
   let lexbuf = Lexing.from_channel op_file in
@@ -67,10 +59,10 @@ let read_file op_file =
         | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; 
       )
     | exception Lexer.Error msg ->
-          Printf.printf "Lexing Errorat at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf);
+          Printf.printf "Lexing Error\n";
           print_endline msg;
     | exception Parsing.Parse_error ->
-          Printf.printf "Parse Error at %s" (string_of_position @@ Lexing.lexeme_start_p lexbuf); 
+          Printf.printf "Parse Error"; 
           Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
 
     in loop_file []

@@ -1,0 +1,20 @@
+fun x ->
+  match x with
+    (a, b) -> a
+  end;;
+
+
+  fun x ->
+  match x with
+    (a, h :: t) -> h
+  end;;
+
+
+  fun x ->
+  match x with
+    (a, h :: t) -> h
+  | (a, []) -> a * 2
+  end;;
+
+
+  fun x -> match x with end;;
