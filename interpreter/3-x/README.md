@@ -14,6 +14,11 @@ ocamlc -c main.ml
 ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo functions.cmo main.cmo
 '''''
 
+typeに関する関数のみ実行
+'''''
+ocaml
+#use "types.ml"
+'''''
 
 ## 実行方法
 $./main

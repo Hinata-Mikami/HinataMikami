@@ -54,13 +54,15 @@ type command =
   | CLet of name * expr
   | CRLetAnd of (name * name * expr) list
 
-(*型を表すデータ型*)
+(* 型を表すデータ型
 type ty =
-  | TInt
-  | TBool
-  | TFun of ty * ty
+  | TyInt
+  | TyBool
+  | TyFun of ty * ty
   (*型変数*)
-  | TVar of name                        
+  | TyVar of name                        
 
 (*型代入 型変数に型tyを代入*)
 and ty_subst = (name * ty) list
+
+and ty_constraints = (ty * ty) list *)
