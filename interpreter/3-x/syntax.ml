@@ -53,31 +53,3 @@ type command =
   | CExp of expr
   | CLet of name * expr
   | CRLetAnd of (name * name * expr) list
-
-exception Eval_error
-
-let rec print_value (v: value) : unit =
-  match v with
-  | VInt i -> print_int i 
-  | VBool b -> print_string (string_of_bool b)
-  | VFun (x, e, env) -> print_string "<fun>"
-  | VRFun (f, x, e, env) -> print_string "<fun>"
-  | VCons (v, rest) -> 
-    (match rest with
-    | VNil -> print_value v; print_string " :: "; print_string "[]"
-    | _ -> print_value v; print_string " :: ("; print_value rest; print_string ")" )
-  | VNil -> print_string "[]"
-  | VTuple vlist ->
-      (*組を表示する関数*)
-      let rec print_tuple (vl : value list) : unit =
-      match vl with
-        | [] -> print_char ')'
-        | v :: rest -> print_string ", "; print_value v; print_tuple rest; in
-      (match vlist with
-        | [] -> raise Eval_error
-        | v :: rest -> print_char '('; print_value v; print_tuple rest)
-  | VRFunAnd (_, l, _) -> print_string "<fun>"
-
-let value_of_literal : literal -> value = function 
-  | LInt i -> VInt i 
-  | LBool b -> VBool b 

@@ -9,8 +9,9 @@ ocamlc -c parser.mli
 ocamlc -c parser.ml
 ocamlc -c lexer.ml
 ocamlc -c eval.ml
+ocamlc -c functions.ml
 ocamlc -c main.ml
-ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo main.cmo
+ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo functions.cmo main.cmo
 '''''
 
 
@@ -19,4 +20,4 @@ $./main
 > (文字列を入力) ;; (Enter)
 
 または
-$./main test.txt (Enter)
+$./main test.txt (Enter)./main

@@ -6,6 +6,11 @@ exception Unexpected_Expression_at_binOp
 exception Unexpected_Expression_at_eval_if
 exception Variable_Not_Found
 
+let value_of_literal (l:  literal) : value = 
+  match l with
+  | LInt i -> VInt i 
+  | LBool b -> VBool b
+
 let rec eval (env : env) (expr : expr) : value =
 
   (*binOp -> value*)
@@ -132,72 +137,3 @@ let rec eval (env : env) (expr : expr) : value =
           let nenv = make_env 0 l 
         (*環境の下でeを評価*)
         in eval nenv e
-
-
-(*CLet (n, e) : let n = e;;*)
-let command_let (env : env) (n : name) (e : expr) : (value * env) =
-  match eval env e with
-  | v1 -> (v1, ((n,v1) :: env))
-
-
-
-let print_types_of_tuple (l : value list) : unit =
-  match l with
-  | [] -> ()
-  | v :: rest ->
-    let rec string_of_value_type (l' :value list) : unit =
-      (match l' with
-      | [] -> ()
-      | v' :: rest' ->
-        (match v' with
-        | VInt _ -> print_string(" * int");(string_of_value_type rest')
-        | VBool _ -> print_string(" * bool");(string_of_value_type rest')
-        | _ -> print_string(" *  ");(string_of_value_type rest')
-        )
-      )
-      in 
-        (match v with
-        | VInt _ -> print_string("int");(string_of_value_type rest)
-        | VBool _ -> print_string("bool");(string_of_value_type rest)
-        | _ -> print_string(" ");(string_of_value_type rest)
-        )
-
-  
-
-(*対話型シェル：実行＋新たな環境envを返す関数*)
-(*main.mlの再帰部分の引数に*)
-(*env -> command -> env*)
-let print_command_result (env : env) (cmd : command) : env =
-  match cmd with
-  | CExp expr -> 
-    (match eval env expr with
-     | v -> print_string (" ― : "); 
-     (match v with
-     | VInt _ -> print_string ("int = "); print_value v; print_newline()
-     | VBool _ -> print_string ("bool = "); print_value v; print_newline()
-     | VCons _ -> print_string ("list = "); print_value v; print_newline()
-     | VNil -> print_string ("list = "); print_value v; print_newline()
-     | VTuple l -> print_types_of_tuple l; print_string (" = "); print_value v; print_newline()
-     | _ -> print_value v; print_newline()
-     );
-     env)
-  | CLet (n, e) -> 
-    print_string ("val "); print_string n; print_string (" = "); 
-    let (v,e') = command_let env n e in print_value v; print_newline();
-    e'
-  (* (f, x, e) list*)
-  | CRLetAnd l ->
-      (*リストから環境を作成*)
-      let rec and_env (i: int) (l1: (name * name * expr) list) : env =
-      match l1 with
-        | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
-      let nenv = and_env 0 l in
-      (*コマンドラインに変数を表示*)
-      let rec printfun (l2 : (name * name * expr) list) : unit =
-        match l2 with
-        | [] -> ()
-        | (f, x, e) :: rest ->
-            print_endline (f ^ " = <fun>"); printfun rest;
-        in printfun l;
-      nenv
