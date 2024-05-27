@@ -1,4 +1,5 @@
 type name = string 
+type ty_var = name
 
 (*型を表すデータ型*)
 type ty =
@@ -6,10 +7,10 @@ type ty =
   | TyBool
   | TyFun of ty * ty
   (*型変数*)
-  | TyVar of name                        
+  | TyVar of ty_var                        
 
 (*型代入 型変数に型tyを代入*)
-and ty_subst = (name * ty) list
+and ty_subst = (ty_var * ty) list
 
 and ty_constraints = (ty * ty) list
 
