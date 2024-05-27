@@ -9,21 +9,21 @@ exception Type_error
 
 
 type name = string 
-
+type ty_var = name
 (*型を表すデータ型*)
 type ty =
   | TyInt
   | TyBool
   | TyFun of ty * ty
   (*型変数*)
-  | TyVar of name                        
+  | TyVar of ty_var                       
 
 (*型代入 型変数に型tyを代入*)
-and ty_subst = (name * ty) list
+and ty_subst = (ty_var * ty) list
 
 and ty_constraints = (ty * ty) list
 
-and ty_env = (name * ty) list
+and ty_env = (name* ty) list
 
 (*型代入*)
 let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
@@ -65,7 +65,7 @@ let rec check_var_fault (s : string) (t : ty) : bool =
   | TyVar n -> if n = s then true else false
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
             
-            
+(*制約の単一化*)  
 let rec ty_unify (c : ty_constraints) : ty_subst =
   match c with
   (*unify {} = {}*)
@@ -85,8 +85,131 @@ let rec ty_unify (c : ty_constraints) : ty_subst =
 
 
 
+(* カウンタを保持する参照を作成 *)
+let counter = ref 0
+
+(* 新しい型変数名を生成する関数 *)
+let new_ty_var () =
+  (* カウンタの値を取得 *)
+  let current_count = !counter in
+  (* カウンタをインクリメント *)
+  counter := current_count + 1;
+  (* 新しい型変数名を生成して返す *)
+  "t" ^ string_of_int current_count
 
 
+
+(*制約の収集*)
+let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
+  match e with
+  (*定数*)
+  | ELiteral x 
+    ->(match (Eval.value_of_literal x) with
+      (*1 -> int型, 制約{}*)
+      | VInt _ -> (TyInt, [])
+      (*true -> bool型, 制約{}*)
+      | VBool _ -> (TyBool, [])
+      | _ -> raise Type_error
+      )
+  (*変数 : 型環境を検索・それに従う(なければエラー)*)
+  | EVar x
+    ->(match List.assoc_opt x t_e with
+      | Some x' -> (x', [])
+      | None -> raise Type_error
+      )
+  (*let式：現型環境でe1の型(t1)と制約(c1)を求める 
+    -> (x, t1) :: 現環境 -> e2の型(t2)と制約(c2)
+    -> (t2, c1@c2*)
+  | ELet (x, e1, e2)
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
+      (t2, c1 @ c2)
+  (*if式 -> すべてのeについて、(ti, ci)
+         -> (t2, {t1=bool, t2=t3} U c1 U c2 U c3)*)
+  | EIf (e1, e2, e3)
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints t_e e2 in
+      let (t3, c3) = gather_ty_constraints t_e e3 in
+      (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
+  (*関数抽象：新たな型変数αを用意し、(x, α)::現環境
+    -> eの型(t)と制約(c)を求める
+  　-> (α->t(TyFun), c)*)
+  | EFun (x, e)
+    ->let a = new_ty_var () in
+      let new_ty_env = (x, TyVar a) :: t_e in
+      let (t, c) = gather_ty_constraints new_ty_env e in
+      (TyFun (TyVar a, t), c)
+  (*関数適用：それぞれの型と制約(ti, ci)
+            -> 新たな型変数α
+            -> (α, {t1=t2 -> α} U c1 U c2)*)
+  | EApp (e1, e2) 
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints t_e e2 in 
+      let a = new_ty_var () in
+      (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
+  (*再帰関数let rec f x = e1 in e2*)
+  | ERLetAnd (l, e2)
+    ->( match l with
+        | (f, x, e1) :: []
+          ->let a = new_ty_var () in
+            let b = new_ty_var () in
+            let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
+            let new_env = (x, TyVar a) :: gamma in
+            let (t1, c1) = gather_ty_constraints new_env e1 in
+            let (t2, c2) = gather_ty_constraints new_env e2 in
+            (t2, [(t1, TyVar b)] @ c1 @ c2)
+        | _ -> raise Type_error (*一旦 andを含むものは許さない *)
+      )
+  | _ -> raise Type_error
+
+
+let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
+  let (t, c) = gather_ty_constraints t_e e in
+  let t_s = ty_unify c in
+  (apply_ty_subst t_s t, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) t_e)
+
+
+let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
+  match cmd with
+  | CExp e ->
+    let (t, t_e') = infer_expr t_e e in
+    (t_e', t_e')
+  | CLet (n, e) ->
+    let (t, t_e') = infer_expr t_e e in
+    let newenv = (n, t) :: t_e' in
+    ([(n, t)], newenv)
+  | CRLetAnd l ->
+      let l' = (List.map (fun (f, x, e) ->
+        let s1 = new_ty_var () in
+        let s2 = new_ty_var () in
+        (f, x, e, s1, s2)) l) in
+      let t_e' = (List.map (fun (f, x, e, s1, s2) ->
+        (f, TyFun (TyVar s1, TyVar s2))) l') @ t_e in
+      let newenv = List.fold_left (fun list (f, x, e, s1, s2) ->
+        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
+        (f, tl) :: tenvl @ list) [] l' in
+      let newenv' = (List.map (fun (f, x, e, s1, s2) ->
+        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
+        (f, tl))) l' in
+      (newenv', newenv)
+
+let rec print_type : ty -> unit =
+  fun t ->
+  match t with
+  | TyInt -> print_string "int"
+  | TyBool -> print_string "bool"
+  | TyFun (t1, t2) -> print_type t1; print_string " -> "; print_type t2
+  | TyVar s -> print_string s
+
+  
+let rec print_command_type : ty_env -> unit =
+  fun l ->
+  match l with
+  | [] -> print_string ";"
+  | (name, t) :: [] ->
+    print_string (name ^ ": "); print_type t; print_string ";";
+  | (name, t) :: rest ->
+    print_string (name ^ ": "); print_type t; print_string "; "; print_command_type rest
 
 
 
@@ -112,10 +235,12 @@ let rec print_value (v: value) : unit =
         | v :: rest -> print_char '('; print_value v; print_tuple rest)
   | VRFunAnd (_, l, _) -> print_string "<fun>"
 
+
 (*CLet (n, e) : let n = e;;*)
 let command_let (env : env) (n : name) (e : expr) : (value * env) =
   match Eval.eval env e with
   | v1 -> (v1, ((n,v1) :: env))
+
 
 let print_types_of_tuple (l : value list) : unit =
   match l with
@@ -138,6 +263,7 @@ let print_types_of_tuple (l : value list) : unit =
         | _ -> print_string(" ");(string_of_value_type rest)
         )
 
+
 (*対話型シェル：実行＋新たな環境envを返す関数*)
 (*main.mlの再帰部分の引数に*)
 (*env -> command -> env*)
@@ -147,7 +273,7 @@ let print_command_result (env : env) (cmd : command) : env =
     (match Eval.eval env expr with
      | v -> print_string (" ― : "); 
      (match v with
-     | VInt _ -> print_string ("int = "); print_value v; print_newline()
+     | VInt _ -> print_string ("int "); print_value v; print_newline()
      | VBool _ -> print_string ("bool = "); print_value v; print_newline()
      | VCons _ -> print_string ("list = "); print_value v; print_newline()
      | VNil -> print_string ("list = "); print_value v; print_newline()
