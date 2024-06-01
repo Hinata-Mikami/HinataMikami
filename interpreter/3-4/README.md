@@ -89,22 +89,19 @@ let rec check_var_fault (s : string) (t : ty) : bool =
 ### unify
 型制約 `C : ty_constraints = (ty * ty) list`を受け取り、型制約の単一化を行う関数。  
 単一化は以下のルールに基づいている。  
--a
--b
+1. unify {} = {}
+2. unify ( {s = s} U c) = unify c
+3. unify ({ s1->t1 = s2->t2 } U c) = unify ({ s1=s2, t1=t2 } U c)
+4. unify ({s = t} U C) = unify ({t = s} U C) = unify (( C[s ↦ t] )∘[s ↦ t])
+   (ただし、tはsを含んではいけない)
 ```OCaml
 let rec ty_unify (c : ty_constraints) : ty_subst =
   match c with
-  (*unify {} = {}*)
-  | [] -> []
-  (*unify ( {s = s} U c) = unify c *)
-  | (t1, t2) :: rest when t1 = t2 -> ty_unify rest
-  (*unify ({ s1->t1 = s2->t2 } U c) = unify ({ s1=s2, t1=t2 } U c)*)
-  | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)
-  (*unify ({s = t} U C) = unify ({t = s} U C) = unify (( C[s ↦ t] )∘[s ↦ t]) *)
-  (*tはsを含まない -> t が s を含む場合はエラーを投げる*)
+  | [] -> []  (*1*)
+  | (t1, t2) :: rest when t1 = t2 -> ty_unify rest  (*2*)
+  | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)  (*3*)
   | (TyVar s, t) :: rest | (t, TyVar s) :: rest ->
     if check_var_fault s t then raise Type_error
-    (*C(rest)の各要素(t1,t2)においてsにtを代入する*)
     else compose_ty_subst
     (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
   | _ -> raise Type_error
