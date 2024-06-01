@@ -49,7 +49,7 @@ let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
 型代入の合成を行う関数。リスト`s1, s2 = ty_subst = (ty_var * ty) list`を受け取り、合成したリストを返す。  
 `make_l2`関数では、型代入`s1`を`s2`の各要素`(t_v, t)`に行い、`l2`を得る。  
 次に、`make_l1`関数で、型代入`s1`の各要素のうち既に`s2`に代入したものを削除したリスト`l1`を作成する。  
-最後に、l2とl1を結合する。
+最後に、`l2`と`l1`を結合する。
 ```OCaml
 let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
   let rec make_l2 s2 =
