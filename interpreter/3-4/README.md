@@ -119,12 +119,17 @@ let new_ty_var () =
 ```
 
 ### gather_ty_constraints
-型環境`ty_env = (name * ty) list`を受け取り、 `型`expr`に含まれる型制約を収集し、型と型制約の組`ty * ty_constraints` を返す関数。
+型環境`t_e : ty_env = (name * ty) list`を受け取り、 `型`expr`に含まれる型制約を収集し、`expr`の型と収集した型制約の組`ty * ty_constraints` を返す関数。
 `expr`によって場合分けを行う。
 1. ELiteral x
    定数のときは,それ自身の型と空の制約を返す。`x`を`value`に直したうえで返り値を求める。
 2. EVar x
    変数のときは、型環境からxの型を検索する。存在する場合はそれと空の制約を返す。存在しない場合は `Error : Unbound value x`を投げる。
+3. ELet (x, e1, e2) (let x = e1 in e2)
+   `(t1, c1) = (e1の型, 収集した制約)`としたうえで、`t_e` に `(x, t1)` を追加。そのうえで `e2` の型 `t2` と 型制約 `c2` を求める。
+   この式の最終的な型は`t2`。型制約は `c1 @ c2`
+
+   
 ```OCaml
 let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   match e with
@@ -134,10 +139,10 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       | VBool _ -> (TyBool, [])
       )
   (*変数 : 型環境を検索・それに従う(なければエラー)*)
-  | EVar x
+  | EVar x  (*2*)
     ->(match List.assoc_opt x t_e with
       | Some x' -> (x', [])
-      | None -> raise Type_error
+      | None -> raise (Error (" : Unbound variable "^x))
       )
   (*let式：現型環境でe1の型(t1)と制約(c1)を求める 
     -> (x, t1) :: 現環境 -> e2の型(t2)と制約(c2)
