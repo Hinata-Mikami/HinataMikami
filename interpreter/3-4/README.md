@@ -134,6 +134,9 @@ let new_ty_var () =
 5. EFun (x, e) (fun x -> e)  
    新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。  
    fun式全体の型は `a -> t` つまり `[TyFun (TyVar a, t)]`。fun式全体の制約は`c`。
+6. EApp (e1, e2) (e1 e2)
+   `e1`・`e2`それぞれの型`t1`・`t2`と制約`c1`・`c2`を求める。
+   新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[t1 = TyFun (t2, TyVar a)] @ c1 @ c2`
 
    
 ```OCaml
@@ -158,23 +161,19 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       let (t2, c2) = gather_ty_constraints t_e e2 in
       let (t3, c3) = gather_ty_constraints t_e e3 in
       (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
-  (*関数抽象：新たな型変数αを用意し、(x, α)::現環境
-    -> eの型(t)と制約(c)を求める
-  　-> (α->t(TyFun), c)*)
-  | EFun (x, e)
+  | EFun (x, e) (*5*)
     ->let a = new_ty_var () in
       let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
       (TyFun (TyVar a, t), c)
   (*関数適用：それぞれの型と制約(ti, ci)
             -> 新たな型変数α
             -> (α, {t1=t2 -> α} U c1 U c2)*)
-  | EApp (e1, e2) 
+  | EApp (e1, e2) (*6*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints t_e e2 in 
       let a = new_ty_var () in
       (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
-  (*再帰関数let rec f x = e1 in e2*)
-  | ERLetAnd (l, e2)
+  | ERLetAnd (l, e2) (*7*)
     ->( match l with
         | (f, x, e1) :: []
           ->let a = new_ty_var () in
