@@ -86,14 +86,14 @@ let rec check_var_fault (s : string) (t : ty) : bool =
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
 ```
 
-### unify
+### ty_unify
 型制約 `C : ty_constraints = (ty * ty) list`を受け取り、型制約の単一化を行う関数。  
 単一化は以下のルールに基づいている。  
 1. unify {} = {}
 2. unify ( {s = s} U c) = unify c
 3. unify ({ s1->t1 = s2->t2 } U c) = unify ({ s1=s2, t1=t2 } U c)
 4. unify ({s = t} U C) = unify ({t = s} U C) = unify (( C[s ↦ t] )∘[s ↦ t])
-   (tはsを含んではいけないため、`check_var_fault s t`を行った後、`[(s, t)]`を型制約の残り`rest = (ty * ty) list`のそれぞれの`ty`に代入し、さらに`[(s, t)]`を連結する。
+   （tはsを含んではいけないため、`check_var_fault s t`を行った後、`[(s, t)]`を型制約の残り`rest = (ty * ty) list`のそれぞれの`ty`に代入し、さらに`[(s, t)]`を連結する。）
 ```OCaml
 let rec ty_unify (c : ty_constraints) : ty_subst =
   match c with
