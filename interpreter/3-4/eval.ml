@@ -93,9 +93,9 @@ let rec eval (env : env) (expr : expr) : value =
         let v2 = eval env e2 in
         (match v1 with
         | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e
-        | VRFun (f, x, e, oenv) ->
+        (* | VRFun (f, x, e, oenv) ->
             let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
-            eval env' e
+            eval env' e *)
         (*l = (f, x, e) と oenv から (f1, l, oenv), ..., (fn, l, oenv)　を作成*)
         | VRFunAnd (i, l, oenv) -> 
           (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =

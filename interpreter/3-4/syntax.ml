@@ -32,7 +32,7 @@ and value =
   | VInt  of int
   | VBool of bool 
   | VFun of name * expr * env
-  | VRFun of name * name * expr * env     
+  (* | VRFun of name * name * expr * env      *)
   | VTuple of value list                              (*(v1, v2, ...)*)              
   | VNil                                              (*[] *)
   | VCons of value * value                            (*v1 :: v2 *)
@@ -54,15 +54,21 @@ type command =
   | CLet of name * expr
   | CRLetAnd of (name * name * expr) list
 
-(* 型を表すデータ型
+
+type ty_var = name
+
+(*型を表すデータ型*)
 type ty =
   | TyInt
   | TyBool
   | TyFun of ty * ty
   (*型変数*)
-  | TyVar of name                        
+  | TyVar of ty_var                       
 
 (*型代入 型変数に型tyを代入*)
-and ty_subst = (name * ty) list
+and ty_subst = (ty_var * ty) list
 
-and ty_constraints = (ty * ty) list *)
+and ty_constraints = (ty * ty) list
+
+and ty_env = (name* ty) list
+

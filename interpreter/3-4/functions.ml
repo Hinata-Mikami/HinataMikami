@@ -8,23 +8,6 @@ exception Variable_Not_Found
 exception Type_error
 
 
-type name = string 
-type ty_var = name
-(*型を表すデータ型*)
-type ty =
-  | TyInt
-  | TyBool
-  | TyFun of ty * ty
-  (*型変数*)
-  | TyVar of ty_var                       
-
-(*型代入 型変数に型tyを代入*)
-and ty_subst = (ty_var * ty) list
-
-and ty_constraints = (ty * ty) list
-
-and ty_env = (name* ty) list
-
 (*型代入*)
 let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
   match t with
@@ -37,7 +20,8 @@ let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
     | (s', t') :: rest when s' = n -> t'
     | (s', t') :: rest -> apply_ty_subst rest t
     )
-            
+
+
 (*s1とs2の合成*)
 let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
   let rec make_l2 s2 =
@@ -56,7 +40,8 @@ let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
       )
   in let l1 = make_l1 s1
 in l2 @ l1
-            
+
+
 (*tがsを含んでいるかどうかを確認する関数*)
 let rec check_var_fault (s : string) (t : ty) : bool =
   match t with
@@ -64,7 +49,8 @@ let rec check_var_fault (s : string) (t : ty) : bool =
   | TyBool -> false
   | TyVar n -> if n = s then true else false
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
-            
+
+  
 (*制約の単一化*)  
 let rec ty_unify (c : ty_constraints) : ty_subst =
   match c with
@@ -84,7 +70,6 @@ let rec ty_unify (c : ty_constraints) : ty_subst =
   | _ -> raise Type_error
 
 
-
 (* カウンタを保持する参照を作成 *)
 let counter = ref 0
 
@@ -96,7 +81,6 @@ let new_ty_var () =
   counter := current_count + 1;
   (* 新しい型変数名を生成して返す *)
   "t" ^ string_of_int current_count
-
 
 
 (*制約の収集*)
@@ -163,12 +147,14 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   | _ -> raise Type_error
 
 
+(*型推論の実装：expr*)
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
   let (t, c) = gather_ty_constraints t_e e in
   let t_s = ty_unify c in
   (apply_ty_subst t_s t, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) t_e)
 
 
+(*型推論の実装：command*)
 let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
@@ -212,13 +198,12 @@ let rec print_command_type : ty_env -> unit =
     print_string (name ^ ": "); print_type t; print_string "; "; print_command_type rest
 
 
-
 let rec print_value (v: value) : unit =
   match v with
   | VInt i -> print_int i 
   | VBool b -> print_string (string_of_bool b)
   | VFun (x, e, env) -> print_string "<fun>"
-  | VRFun (f, x, e, env) -> print_string "<fun>"
+  (* | VRFun (f, x, e, env) -> print_string "<fun>" *)
   | VCons (v, rest) -> 
     (match rest with
     | VNil -> print_value v; print_string " :: "; print_string "[]"
