@@ -117,3 +117,70 @@ let new_ty_var () =
   counter := current_count + 1;
   "t" ^ string_of_int current_count
 ```
+
+### gather_ty_constraints
+型環境`ty_env = (name * ty) list`を受け取り、 `型`expr`に含まれる型制約を収集し、型と型制約の組`ty * ty_constraints` を返す関数。
+`expr`によって場合分けを行う。
+1. ELiteral x
+   定数のときは,それ自身の型と空の制約を返す。`x`を`value`に直したうえで返り値を求める。
+2. EVar x
+   変数のときは、型環境からxの型を検索する。存在する場合はそれと空の制約を返す。存在しない場合は `Error : Unbound value x`を投げる。
+```OCaml
+let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
+  match e with
+  | ELiteral x  (*1*) 
+    ->(match (Eval.value_of_literal x) with
+      | VInt _ -> (TyInt, [])
+      | VBool _ -> (TyBool, [])
+      )
+  (*変数 : 型環境を検索・それに従う(なければエラー)*)
+  | EVar x
+    ->(match List.assoc_opt x t_e with
+      | Some x' -> (x', [])
+      | None -> raise Type_error
+      )
+  (*let式：現型環境でe1の型(t1)と制約(c1)を求める 
+    -> (x, t1) :: 現環境 -> e2の型(t2)と制約(c2)
+    -> (t2, c1@c2*)
+  | ELet (x, e1, e2)
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
+      (t2, c1 @ c2)
+  (*if式 -> すべてのeについて、(ti, ci)
+         -> (t2, {t1=bool, t2=t3} U c1 U c2 U c3)*)
+  | EIf (e1, e2, e3)
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints t_e e2 in
+      let (t3, c3) = gather_ty_constraints t_e e3 in
+      (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
+  (*関数抽象：新たな型変数αを用意し、(x, α)::現環境
+    -> eの型(t)と制約(c)を求める
+  　-> (α->t(TyFun), c)*)
+  | EFun (x, e)
+    ->let a = new_ty_var () in
+      let new_ty_env = (x, TyVar a) :: t_e in
+      let (t, c) = gather_ty_constraints new_ty_env e in
+      (TyFun (TyVar a, t), c)
+  (*関数適用：それぞれの型と制約(ti, ci)
+            -> 新たな型変数α
+            -> (α, {t1=t2 -> α} U c1 U c2)*)
+  | EApp (e1, e2) 
+    ->let (t1, c1) = gather_ty_constraints t_e e1 in
+      let (t2, c2) = gather_ty_constraints t_e e2 in 
+      let a = new_ty_var () in
+      (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
+  (*再帰関数let rec f x = e1 in e2*)
+  | ERLetAnd (l, e2)
+    ->( match l with
+        | (f, x, e1) :: []
+          ->let a = new_ty_var () in
+            let b = new_ty_var () in
+            let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
+            let new_env = (x, TyVar a) :: gamma in
+            let (t1, c1) = gather_ty_constraints new_env e1 in
+            let (t2, c2) = gather_ty_constraints new_env e2 in
+            (t2, [(t1, TyVar b)] @ c1 @ c2)
+        | _ -> raise Type_error (*一旦 andを含むものは許さない *)
+      )
+  | _ -> raise Type_error
+```
