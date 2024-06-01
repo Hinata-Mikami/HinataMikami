@@ -29,7 +29,7 @@ $./main test.txt
 ## functions.ml
 ### apply_ty_subst
 型代入を行う関数。
-`t_s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、型リスト`t_s`のうち適当なものを`t`に代入する。  
+`t_s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、型代入リスト`t_s`のうち適当なものを`t`に代入する。  
 具体的には、`t = TyVar tv`において`tv`がリスト`t_s`に含まれる組`(t_v', t')`の第1要素に既に存在するとき、`t_v`を`t_v'`に置き換える。  `t = TyFun (t1 t2)`のときは、再帰的に`t1`、`t2`に対して型代入を行う。
 ```OCaml
 let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
@@ -46,22 +46,25 @@ let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
 ```
 
 ### compose_ty_subst
-
+型代入の合成を行う関数。リスト`s1, s2 = ty_subst = (ty_var * ty) list`を受け取り、合成したリストを返す。  
+`make_l2`関数では、型代入`s1`を`s2`の各要素`(t_v, t)`に行い、`l2`を得る。  
+次に、`make_l1`関数で、型代入`s1`の各要素のうち既に`s2`に代入したものを削除したリスト`l1`を作成する。  
+最後に、l2とl1を結合する。
 ```OCaml
 let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
   let rec make_l2 s2 =
     match s2 with
     | [] -> []
-    | (s, t) :: rest -> (s, apply_ty_subst s1 t) :: (make_l2 rest)
+    | (t_v, t) :: rest -> (t_v, apply_ty_subst s1 t) :: (make_l2 rest)
   in let l2 = make_l2 s2
   in
   let rec make_l1 s1 = 
     match s1 with
     | [] -> []
-    | (s, t) :: rest ->
-      (match List.assoc_opt s s2 with
+    | (t_v, t) :: rest ->
+      (match List.assoc_opt t_v s2 with
       | Some x -> make_l1 rest
-      | None -> (s, t) :: (make_l1 rest)
+      | None -> (t_v, t) :: (make_l1 rest)
       )
   in let l1 = make_l1 s1
 in l2 @ l1
