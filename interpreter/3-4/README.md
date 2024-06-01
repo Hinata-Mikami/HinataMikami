@@ -29,7 +29,8 @@ $./main test.txt
 ## functions.ml
 ### apply_ty_subst
 型代入を行う関数。
-`t_s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、`t_s`の型リストのうち適当なものを`t`に代入する。  具体的には、`t = TyVar tv`において`tv`がリスト`t_s`に含まれる組`(t_v', t')`の第1要素に既に存在するとき、`t_v`を`t_v'`に書き換える。
+`t_s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、型リスト`t_s`のうち適当なものを`t`に代入する。
+具体的には、`t = TyVar tv`において`tv`がリスト`t_s`に含まれる組`(t_v', t')`の第1要素に既に存在するとき、`t_v`を`t_v'`に書き換える。
 ```OCaml
 let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
   match t with
