@@ -121,13 +121,19 @@ let new_ty_var () =
 ### gather_ty_constraints
 型環境`t_e : ty_env = (name * ty) list`を受け取り、 `型`expr`に含まれる型制約を収集し、`expr`の型と収集した型制約の組`ty * ty_constraints` を返す関数。
 `expr`によって場合分けを行う。
-1. ELiteral x
+1. ELiteral x  
    定数のときは,それ自身の型と空の制約を返す。`x`を`value`に直したうえで返り値を求める。
-2. EVar x
+2. EVar x  
    変数のときは、型環境からxの型を検索する。存在する場合はそれと空の制約を返す。存在しない場合は `Error : Unbound value x`を投げる。
-3. ELet (x, e1, e2) (let x = e1 in e2)
-   `(t1, c1) = (e1の型, 収集した制約)`としたうえで、`t_e` に `(x, t1)` を追加。そのうえで `e2` の型 `t2` と 型制約 `c2` を求める。
-   この式の最終的な型は`t2`。型制約は `c1 @ c2`
+3. ELet (x, e1, e2) (let x = e1 in e2)  
+   `(t1, c1) = (e1の型, 収集した制約)`としたうえで、`t_e` に `(x, t1)` を追加。そのうえで `e2` の型 `t2` と 型制約 `c2` を求める。  
+   この式の最終的な型は`t2`。型制約は `c1 @ c2`。
+4. EIf (e1, e2, e3) (if e1 then e2 else e3)
+   すべての`ei`について、型と制約`(ti, ci)`を求める。
+   最終的な型と制約は `(t2, {t1=bool, t2=t3} U c1 U c2 U c3)`。
+5. EFun (x, e) (fun x -> e)
+   新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。
+   fun式全体の型は `a -> t` つまり `[TyFun (TyVar a, t)]`。fun式全体の制約は`c`。
 
    
 ```OCaml
@@ -138,22 +144,16 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       | VInt _ -> (TyInt, [])
       | VBool _ -> (TyBool, [])
       )
-  (*変数 : 型環境を検索・それに従う(なければエラー)*)
   | EVar x  (*2*)
     ->(match List.assoc_opt x t_e with
       | Some x' -> (x', [])
       | None -> raise (Error (" : Unbound variable "^x))
       )
-  (*let式：現型環境でe1の型(t1)と制約(c1)を求める 
-    -> (x, t1) :: 現環境 -> e2の型(t2)と制約(c2)
-    -> (t2, c1@c2*)
-  | ELet (x, e1, e2)
+  | ELet (x, e1, e2)  (*3*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
       (t2, c1 @ c2)
-  (*if式 -> すべてのeについて、(ti, ci)
-         -> (t2, {t1=bool, t2=t3} U c1 U c2 U c3)*)
-  | EIf (e1, e2, e3)
+  | EIf (e1, e2, e3) (*4*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints t_e e2 in
       let (t3, c3) = gather_ty_constraints t_e e3 in
@@ -163,8 +163,7 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   　-> (α->t(TyFun), c)*)
   | EFun (x, e)
     ->let a = new_ty_var () in
-      let new_ty_env = (x, TyVar a) :: t_e in
-      let (t, c) = gather_ty_constraints new_ty_env e in
+      let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
       (TyFun (TyVar a, t), c)
   (*関数適用：それぞれの型と制約(ti, ci)
             -> 新たな型変数α
