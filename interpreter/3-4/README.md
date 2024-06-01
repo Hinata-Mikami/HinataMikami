@@ -144,6 +144,7 @@ let new_ty_var () =
    `gamma`の下で`e2`の型`t2`と制約`c2`を求める  
    式全体の型は`t2`、制約は`{t1=β}∪C1∪C2`つまり`[(t1, TyVar b)] @ c1 @ c2`  
 
+今後の改善  
 let rec f x = e1 and ...　の形は一旦認めていない。  
 ETuple, ENil, EConsは未実装。
    
