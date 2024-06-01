@@ -28,17 +28,18 @@ $./main test.txt
 
 ## functions.ml
 ### apply_ty_subst
-
+型代入を行う関数。
+`s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、型`t`(具体的には、`t = TyVar tv`のとき、 )が
 ```OCaml
 let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
   match t with
   | TyInt -> TyInt
   | TyBool -> TyBool
   | TyFun(t1, t2) -> TyFun(apply_ty_subst s t1, apply_ty_subst s t2)
-  | TyVar n -> 
+  | TyVar t_v -> 
     (match s with
-    | [] -> t
-    | (s', t') :: rest when s' = n -> t'
-    | (s', t') :: rest -> apply_ty_subst rest t
+    | [] -> t_v
+    | (s', t') :: rest when s' = t_v -> t'
+    | (s', t') :: rest -> apply_ty_subst rest t_v
     )
 ```
