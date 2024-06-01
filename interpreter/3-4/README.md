@@ -128,11 +128,11 @@ let new_ty_var () =
 3. ELet (x, e1, e2) (let x = e1 in e2)  
    `(t1, c1) = (e1の型, 収集した制約)`としたうえで、`t_e` に `(x, t1)` を追加。そのうえで `e2` の型 `t2` と 型制約 `c2` を求める。  
    この式の最終的な型は`t2`。型制約は `c1 @ c2`。
-4. EIf (e1, e2, e3) (if e1 then e2 else e3)
+4. EIf (e1, e2, e3) (if e1 then e2 else e3)  
    すべての`ei`について、型と制約`(ti, ci)`を求める。
    最終的な型と制約は `(t2, {t1=bool, t2=t3} U c1 U c2 U c3)`。
-5. EFun (x, e) (fun x -> e)
-   新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。
+5. EFun (x, e) (fun x -> e)  
+   新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。  
    fun式全体の型は `a -> t` つまり `[TyFun (TyVar a, t)]`。fun式全体の制約は`c`。
 
    
