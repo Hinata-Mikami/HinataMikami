@@ -43,5 +43,26 @@ let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
     | (t_v', t') :: rest when t_v' = t_v -> t'
     | (t_v', t') :: rest -> apply_ty_subst rest t
     )
-    )
+```
+
+### compose_ty_subst
+
+```OCaml
+let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
+  let rec make_l2 s2 =
+    match s2 with
+    | [] -> []
+    | (s, t) :: rest -> (s, apply_ty_subst s1 t) :: (make_l2 rest)
+  in let l2 = make_l2 s2
+  in
+  let rec make_l1 s1 = 
+    match s1 with
+    | [] -> []
+    | (s, t) :: rest ->
+      (match List.assoc_opt s s2 with
+      | Some x -> make_l1 rest
+      | None -> (s, t) :: (make_l1 rest)
+      )
+  in let l1 = make_l1 s1
+in l2 @ l1
 ```
