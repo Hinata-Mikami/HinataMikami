@@ -134,9 +134,15 @@ let new_ty_var () =
 5. EFun (x, e) (fun x -> e)  
    新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。  
    fun式全体の型は `a -> t` つまり `[TyFun (TyVar a, t)]`。fun式全体の制約は`c`。
-6. EApp (e1, e2) (e1 e2)
+6. EApp (e1, e2) (e1 e2)  
    `e1`・`e2`それぞれの型`t1`・`t2`と制約`c1`・`c2`を求める。
-   新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[t1 = TyFun (t2, TyVar a)] @ c1 @ c2`
+   新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[(t1, TyFun (t2, TyVar a))] @ c1 @ c2`
+7. ERLetAnd (l, e2) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e2)`  
+   -新たな型変数`a`,`b`を導入
+   -`t_e`に`f`と`a → b`の対応を追加した型環境`gamma = (f, TyFun (TyVar a, TyVar b)) :: t_e`
+   -さらに`x`と`a`の対応`(x, TyVar a)`を追加した型環境`new_ty_env`で`e1`の型`t1`と制約`c1`を求める
+   -`gamma`の下で`e2`の型`t2`と制約`c2`を求める
+   -式全体の型は`t2`、制約は`{t1=β}∪C1∪C2`つまり`[(t1, TyVar b)] @ c1 @ c2`
 
    
 ```OCaml
@@ -179,9 +185,9 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
           ->let a = new_ty_var () in
             let b = new_ty_var () in
             let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
-            let new_env = (x, TyVar a) :: gamma in
-            let (t1, c1) = gather_ty_constraints new_env e1 in
-            let (t2, c2) = gather_ty_constraints new_env e2 in
+            let new_ty_env = (x, TyVar a) :: gamma in
+            let (t1, c1) = gather_ty_constraints new_ty_env e1 in
+            let (t2, c2) = gather_ty_constraints gamma e2 in
             (t2, [(t1, TyVar b)] @ c1 @ c2)
         | _ -> raise Type_error (*一旦 andを含むものは許さない *)
       )
