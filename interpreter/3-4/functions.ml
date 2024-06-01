@@ -6,143 +6,110 @@ exception Unexpected_Expression_at_binOp
 exception Unexpected_Expression_at_eval_if
 exception Variable_Not_Found
 exception Type_error
+exception Error of string
 
 
-(*型代入*)
-let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
+let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
   match t with
   | TyInt -> TyInt
   | TyBool -> TyBool
-  | TyFun(t1, t2) -> TyFun(apply_ty_subst s t1, apply_ty_subst s t2)
-  | TyVar n -> 
-    (match s with
+  | TyFun(t1, t2) -> TyFun(apply_ty_subst t_s t1, apply_ty_subst t_s t2)
+  | TyVar t_v -> 
+    (match t_s with
     | [] -> t
-    | (s', t') :: rest when s' = n -> t'
-    | (s', t') :: rest -> apply_ty_subst rest t
+    | (t_v', t') :: rest when t_v' = t_v -> t'
+    | (t_v', t') :: rest -> apply_ty_subst rest t
     )
 
 
-(*s1とs2の合成*)
 let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
   let rec make_l2 s2 =
     match s2 with
     | [] -> []
-    | (s, t) :: rest -> (s, apply_ty_subst s1 t) :: (make_l2 rest)
+    | (t_v, t) :: rest -> (t_v, apply_ty_subst s1 t) :: (make_l2 rest)
   in let l2 = make_l2 s2
   in
   let rec make_l1 s1 = 
     match s1 with
     | [] -> []
-    | (s, t) :: rest ->
-      (match List.assoc_opt s s2 with
+    | (t_v, t) :: rest ->
+      (match List.assoc_opt t_v s2 with
       | Some x -> make_l1 rest
-      | None -> (s, t) :: (make_l1 rest)
+      | None -> (t_v, t) :: (make_l1 rest)
       )
   in let l1 = make_l1 s1
 in l2 @ l1
 
 
-(*tがsを含んでいるかどうかを確認する関数*)
 let rec check_var_fault (s : string) (t : ty) : bool =
   match t with
   | TyInt -> false
   | TyBool -> false
-  | TyVar n -> if n = s then true else false
+  | TyVar t_v -> if t_v = s then true else false
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
 
   
-(*制約の単一化*)  
-let rec ty_unify (c : ty_constraints) : ty_subst =
-  match c with
-  (*unify {} = {}*)
-  | [] -> []
-  (*unify ( {s = s} U c) = unify c *)
-  | (t1, t2) :: rest when t1 = t2 -> ty_unify rest
-  (*unify ({ s1->t1 = s2->t2 } U c) = unify ({ s1=s2, t1=t2 } U c)*)
-  | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)
-  (*unify ({s = t} U C) = unify ({t = s} U C) = unify (( C[s ↦ t] )∘[s ↦ t]) *)
-  (*tはsを含まない -> t が s を含む場合はエラーを投げる*)
-  | (TyVar s, t) :: rest | (t, TyVar s) :: rest ->
-    if check_var_fault s t then raise Type_error
-    (*C(rest)の各要素(t1,t2)においてsにtを代入する*)
-    else compose_ty_subst
-    (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
-  | _ -> raise Type_error
+  let rec ty_unify (c : ty_constraints) : ty_subst =
+    match c with
+    | [] -> []  (*1*)
+    | (t1, t2) :: rest when t1 = t2 -> ty_unify rest  (*2*)
+    | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)  (*3*)
+    | (TyVar s, t) :: rest | (t, TyVar s) :: rest -> (*4*)
+      if check_var_fault s t then raise Type_error
+      else compose_ty_subst
+      (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
+    | _ -> raise Type_error
 
 
-(* カウンタを保持する参照を作成 *)
 let counter = ref 0
-
-(* 新しい型変数名を生成する関数 *)
 let new_ty_var () =
-  (* カウンタの値を取得 *)
   let current_count = !counter in
-  (* カウンタをインクリメント *)
   counter := current_count + 1;
-  (* 新しい型変数名を生成して返す *)
   "t" ^ string_of_int current_count
 
 
-(*制約の収集*)
 let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   match e with
-  (*定数*)
-  | ELiteral x 
+  | ELiteral x  (*1*) 
     ->(match (Eval.value_of_literal x) with
-      (*1 -> int型, 制約{}*)
       | VInt _ -> (TyInt, [])
-      (*true -> bool型, 制約{}*)
       | VBool _ -> (TyBool, [])
       | _ -> raise Type_error
       )
-  (*変数 : 型環境を検索・それに従う(なければエラー)*)
-  | EVar x
+  | EVar x  (*2*)
     ->(match List.assoc_opt x t_e with
       | Some x' -> (x', [])
-      | None -> raise Type_error
+      | None -> raise (Error (" : Unbound variable "^x))
       )
-  (*let式：現型環境でe1の型(t1)と制約(c1)を求める 
-    -> (x, t1) :: 現環境 -> e2の型(t2)と制約(c2)
-    -> (t2, c1@c2*)
-  | ELet (x, e1, e2)
+  | ELet (x, e1, e2)  (*3*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
       (t2, c1 @ c2)
-  (*if式 -> すべてのeについて、(ti, ci)
-         -> (t2, {t1=bool, t2=t3} U c1 U c2 U c3)*)
-  | EIf (e1, e2, e3)
+  | EIf (e1, e2, e3) (*4*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints t_e e2 in
       let (t3, c3) = gather_ty_constraints t_e e3 in
       (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
-  (*関数抽象：新たな型変数αを用意し、(x, α)::現環境
-    -> eの型(t)と制約(c)を求める
-  　-> (α->t(TyFun), c)*)
-  | EFun (x, e)
+  | EFun (x, e) (*5*)
     ->let a = new_ty_var () in
-      let new_ty_env = (x, TyVar a) :: t_e in
-      let (t, c) = gather_ty_constraints new_ty_env e in
+      let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
       (TyFun (TyVar a, t), c)
-  (*関数適用：それぞれの型と制約(ti, ci)
-            -> 新たな型変数α
-            -> (α, {t1=t2 -> α} U c1 U c2)*)
-  | EApp (e1, e2) 
+  | EApp (e1, e2) (*6*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints t_e e2 in 
       let a = new_ty_var () in
       (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
-  (*再帰関数let rec f x = e1 in e2*)
-  | ERLetAnd (l, e2)
+  | ERLetAnd (l, e2) (*7*)
     ->( match l with
-        | (f, x, e1) :: []
-          ->let a = new_ty_var () in
-            let b = new_ty_var () in
-            let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
-            let new_env = (x, TyVar a) :: gamma in
-            let (t1, c1) = gather_ty_constraints new_env e1 in
-            let (t2, c2) = gather_ty_constraints new_env e2 in
+      | (f, x, e1) :: []
+        ->let a = new_ty_var () in
+          let b = new_ty_var () in
+          let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
+          let new_ty_env = (x, TyVar a) :: gamma in
+          let (t1, c1) = gather_ty_constraints new_ty_env e1 in
+          let (t2, c2) = gather_ty_constraints gamma e2 in
             (t2, [(t1, TyVar b)] @ c1 @ c2)
-        | _ -> raise Type_error (*一旦 andを含むものは許さない *)
+      | _ -> raise Type_error
       )
   | _ -> raise Type_error
 
