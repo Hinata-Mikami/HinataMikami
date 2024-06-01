@@ -137,7 +137,7 @@ let new_ty_var () =
 6. EApp (e1, e2) (e1 e2)  
    `e1`・`e2`それぞれの型`t1`・`t2`と制約`c1`・`c2`を求める。
    新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[(t1, TyFun (t2, TyVar a))] @ c1 @ c2`
-7. ERLetAnd (l, e2) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e2)`  
+7. ERLetAnd (l, e2) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e2)  
    新たな型変数`a`,`b`を導入  
    `t_e`に`f`と`a → b`の対応を追加した型環境`gamma = (f, TyFun (TyVar a, TyVar b)) :: t_e`  
    さらに`x`と`a`の対応`(x, TyVar a)`を追加した型環境`new_ty_env`で`e1`の型`t1`と制約`c1`を求める  
