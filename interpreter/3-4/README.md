@@ -174,9 +174,6 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     ->let a = new_ty_var () in
       let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
       (TyFun (TyVar a, t), c)
-  (*関数適用：それぞれの型と制約(ti, ci)
-            -> 新たな型変数α
-            -> (α, {t1=t2 -> α} U c1 U c2)*)
   | EApp (e1, e2) (*6*)
     ->let (t1, c1) = gather_ty_constraints t_e e1 in
       let (t2, c2) = gather_ty_constraints t_e e2 in 
@@ -192,7 +189,7 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
             let (t1, c1) = gather_ty_constraints new_ty_env e1 in
             let (t2, c2) = gather_ty_constraints gamma e2 in
             (t2, [(t1, TyVar b)] @ c1 @ c2)
-        | _ -> raise Type_error (*一旦 andを含むものは許さない *)
+        | _ -> raise Type_error
       )
   | _ -> raise Type_error
 ```
