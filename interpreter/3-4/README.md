@@ -29,3 +29,16 @@ $./main test.txt
 ## functions.ml
 ### apply_ty_subst
 
+```OCaml
+let rec apply_ty_subst (s : ty_subst) (t : ty) : ty =
+  match t with
+  | TyInt -> TyInt
+  | TyBool -> TyBool
+  | TyFun(t1, t2) -> TyFun(apply_ty_subst s t1, apply_ty_subst s t2)
+  | TyVar n -> 
+    (match s with
+    | [] -> t
+    | (s', t') :: rest when s' = n -> t'
+    | (s', t') :: rest -> apply_ty_subst rest t
+    )
+```
