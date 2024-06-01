@@ -69,3 +69,20 @@ let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
   in let l1 = make_l1 s1
 in l2 @ l1
 ```
+
+### check_var_fault
+単一化を行うために用意した関数。引数 `s` と `ty` を与え、`ty` が `TyVar t_v` のとき、`ty = s` でないことを確認する関数。
+単一化を行う際、
+```
+unify ({α=t}∪C)= unify ({t=α}∪C)
+= unify (C[α↦t])∘[α↦t]
+```
+となるが、型制約`C`のうちの`α`を`t`で置き換える際、`t`は`α`を含んでいてはいけない。このことを保証するために使用する。
+```OCaml
+let rec check_var_fault (s : string) (t : ty) : bool =
+  match t with
+  | TyInt -> false
+  | TyBool -> false
+  | TyVar t_v -> if t_v = s then true else false
+  | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
+```
