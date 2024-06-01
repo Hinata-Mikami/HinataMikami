@@ -106,3 +106,14 @@ let rec ty_unify (c : ty_constraints) : ty_subst =
     (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
   | _ -> raise Type_error
 ```
+
+### new_ty_var
+未定義の型変数 `t1, t2, ...` を導入するための関数。  
+`let counter = ref 0` でカウンターの値を保持する領域を作成し、新たな型変数を作成する際は都度カウンタの値を取得し1加算した後、新しい型変数を`str`型で返す。
+```OCaml
+let counter = ref 0
+let new_ty_var () =
+  let current_count = !counter in
+  counter := current_count + 1;
+  "t" ^ string_of_int current_count
+```
