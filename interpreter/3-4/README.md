@@ -87,7 +87,10 @@ let rec check_var_fault (s : string) (t : ty) : bool =
 ```
 
 ### unify
-
+型制約 `C : ty_constraints = (ty * ty) list`を受け取り、型制約の単一化を行う関数。  
+単一化は以下のルールに基づいている。  
+-a
+-b
 ```OCaml
 let rec ty_unify (c : ty_constraints) : ty_subst =
   match c with
