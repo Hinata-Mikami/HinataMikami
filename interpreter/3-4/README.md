@@ -38,9 +38,10 @@ let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
   | TyBool -> TyBool
   | TyFun(t1, t2) -> TyFun(apply_ty_subst t_s t1, apply_ty_subst t_s t2)
   | TyVar t_v -> 
-    (match s with
-    | [] -> t_v
+    (match t_s with
+    | [] -> t
     | (t_v', t') :: rest when t_v' = t_v -> t'
-    | (t_v', t') :: rest -> apply_ty_subst rest t_v
+    | (t_v', t') :: rest -> apply_ty_subst rest t
+    )
     )
 ```
