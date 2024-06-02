@@ -1,3 +1,4 @@
+# ocamllex, ocamlyaccを使うとき
 ## コンパイル方法
 cd でsrcフォルダまで移動して以下を実行
 
