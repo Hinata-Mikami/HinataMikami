@@ -139,13 +139,12 @@ let new_ty_var () =
    新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[(t1, TyFun (t2, TyVar a))] @ c1 @ c2`
 7. ERLetAnd (l, e) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e)  
    `l`の各要素に新たな型変数`a`,`b`を導入し、組`(f, x, e1, a, b)`のリスト`l'`を作る。  
-   型環境`gamma`・・・`l'`の各`f, a, b`について、`t_e`に `f` と `a->b` の対応を追加する。つまり、l'の各要素について、`t_e`に`(f, TyFun (TyVar a, TyVar b))`を追加する。  
-   さらに`x`と`a`の対応`(x, TyVar a)`を追加した型環境`new_ty_env`で`e1`の型`t1`と制約`c1`を求める  
-   `gamma`の下で`e`の型`t`と制約`c`を求める  
-   式全体の型は`t`、制約は`{t1=β}∪C1∪C`つまり`[(t1, TyVar b)] @ c1 @ c`  
+   型環境`gamma`・・・`l'`の各`f, a, b`について、`t_e`に `f` と `a->b` の対応を追加する。つまり、l'の各要素について、`t_e`に`(f, TyFun (TyVar a, TyVar b))`を追加する。
+   次に、`gammma`の下で`e`の制約を収集し型`t`と制約`c`を得る。`t`は`e`の型。
+   次に、リスト`l'`の各要素`(f,x1,e1,a,b)`から`gamma`の下で`e1`の制約を収集し、`(t1,c1)`を得る。これを加工し`(t1, TyVar b, c1)`のリスト`ty_con_b_list`を得る。
+   最後にこのリストの各要素を分解しすべての`(t1, TyVar b)`と`c1`を`c`に結合してリスト`new_con`を得る。これが`e`の制約。
 
-今後の改善  
-let rec f x = e1 and ...　の形は一旦認めていない。  
+今後の改善   
 ETuple, ENil, EConsは未実装。
    
 ```OCaml
