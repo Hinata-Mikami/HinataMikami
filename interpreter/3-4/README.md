@@ -229,6 +229,14 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
 > `infer_cmd`の返り値の組の第1要素は表示用  
 > コマンドを型推論することにより，その型変数に対する制約が生じることがあり，型環境をその情報を用いて更新しなければならない
 
+`cmd`を読み、`(推論したcmdの型環境, 更新した新たな型環境)`を返すように実装する。  
+1. CExp e
+
+2. CLet (n, e) `let n = e;;`
+
+3. CRLetAnd (l, e) `let rec f x1 = e1 and f x2 = e2 ... in e`
+
+
 
 ```OCaml
 (*型推論の実装：command*)
