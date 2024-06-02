@@ -215,6 +215,7 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
 ### `infer_cmd` ty_env -> command -> ty_env * ty_env
 `command`式の型推論の実装  
 
+```OCaml
 (*型推論の実装：command*)
 let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
@@ -239,3 +240,4 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
         let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
         (f, tl))) l' in
       (newenv', newenv)
+```
