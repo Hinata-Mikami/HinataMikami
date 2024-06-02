@@ -231,15 +231,14 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
 
 `cmd`を読み、`(推論したcmdの型環境, 更新した新たな型環境)`を返すように実装する。  
 1. CExp e
-
+  `t_e`の下で`e`を型推論して得られた型環境`t_e'`が、cmdの型推論の結果であり、新たな型環境でもある。  
 2. CLet (n, e) `let n = e;;`
-
+  `t_e`の下で`e`を型推論して得られた型`t`が`n`の型である。 
 3. CRLetAnd (l, e) `let rec f x1 = e1 and f x2 = e2 ... in e`
 
 
 
 ```OCaml
-(*型推論の実装：command*)
 let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
@@ -250,17 +249,22 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
     let newenv = (n, t) :: t_e' in
     ([(n, t)], newenv)
   | CRLetAnd l ->
-      let l' = (List.map (fun (f, x, e) ->
-        let s1 = new_ty_var () in
-        let s2 = new_ty_var () in
-        (f, x, e, s1, s2)) l) in
-      let t_e' = (List.map (fun (f, x, e, s1, s2) ->
-        (f, TyFun (TyVar s1, TyVar s2))) l') @ t_e in
-      let newenv = List.fold_left (fun list (f, x, e, s1, s2) ->
-        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
-        (f, tl) :: tenvl @ list) [] l' in
-      let newenv' = (List.map (fun (f, x, e, s1, s2) ->
-        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
-        (f, tl))) l' in
-      (newenv', newenv)
+    let l' = (List.map (fun (f,x1,e1) ->
+    let a = new_ty_var () in
+    let b = new_ty_var () in
+    (f, x1, e1, a, b))
+    l) in
+    let gamma = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      (f, TyFun (TyVar a, TyVar b)))
+      l') @ t_e in
+    let new_t_e = 
+      List.fold_left (fun list (f,x1,e1,a,b) ->
+        let (t_i, t_e_i) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+        (f, t_i) :: t_e_i @ list) [] l' in
+    let t_e_of_command = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      let (tl, tenvl) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+      (f, tl))) l' in
+    (t_e_of_command, new_t_e)
 ```
