@@ -232,9 +232,9 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
 `cmd`を読み、`(推論したcmdの型環境, 更新した新たな型環境)`を返すように実装する。  
 1. CExp e
   `t_e`の下で`e`を型推論して得られた型環境`t_e'`が、cmdの型推論の結果であり、新たな型環境でもある。  
-2. CLet (n, e) `let n = e;;`
+2. CLet (n, e) `let n = e;;`  
   `t_e`の下で`e`を型推論して得られた型`t`が`n`の型である。 
-3. CRLetAnd (l, e) `let rec f x1 = e1 and f x2 = e2 ... in e`
+3. CRLetAnd (l, e)   `let rec f x1 = e1 and f x2 = e2 ... in e`
 
 
 
