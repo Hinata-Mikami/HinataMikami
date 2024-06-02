@@ -70,58 +70,69 @@ let new_ty_var () =
 
 let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   match e with
-  | ELiteral x  (*1*) 
-    ->(match (Eval.value_of_literal x) with
-      | VInt _ -> (TyInt, [])
-      | VBool _ -> (TyBool, [])
-      | _ -> raise Type_error
-      )
-  | EVar x  (*2*)
-    ->(match List.assoc_opt x t_e with
-      | Some x' -> (x', [])
-      | None -> raise (Error (" : Unbound variable "^x))
-      )
-  | ELet (x, e1, e2)  (*3*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
-      (t2, c1 @ c2)
-  | EIf (e1, e2, e3) (*4*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints t_e e2 in
-      let (t3, c3) = gather_ty_constraints t_e e3 in
-      (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
-  | EFun (x, e) (*5*)
-    ->let a = new_ty_var () in
-      let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
-      (TyFun (TyVar a, t), c)
-  | EApp (e1, e2) (*6*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints t_e e2 in 
+  | ELiteral x -> (*1*) 
+    (match (Eval.value_of_literal x) with
+    | VInt _ -> (TyInt, [])
+    | VBool _ -> (TyBool, [])
+    | _ -> raise Type_error
+    )
+  | EVar x ->  (*2*)
+    (match List.assoc_opt x t_e with
+    | Some x' -> (x', [])
+    | None -> raise (Error (" : Unbound variable "^x))
+    )
+  | ELet (x, e1, e2) -> (*3*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
+    (t2, c1 @ c2)
+  | EIf (e1, e2, e3) -> (*4*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in
+    let (t3, c3) = gather_ty_constraints t_e e3 in
+    (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
+  | EFun (x, e) -> (*5*)
+    let a = new_ty_var () in
+    let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
+    (TyFun (TyVar a, t), c)
+  | EApp (e1, e2) -> (*6*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in 
+    let a = new_ty_var () in
+    (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
+  | ERLetAnd (l, e) -> (*7*)
+    let l' = (List.map (fun (f,x1,e1) ->
       let a = new_ty_var () in
-      (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
-  | ERLetAnd (l, e2) (*7*)
-    ->( match l with
-      | (f, x, e1) :: []
-        ->let a = new_ty_var () in
-          let b = new_ty_var () in
-          let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
-          let new_ty_env = (x, TyVar a) :: gamma in
-          let (t1, c1) = gather_ty_constraints new_ty_env e1 in
-          let (t2, c2) = gather_ty_constraints gamma e2 in
-            (t2, [(t1, TyVar b)] @ c1 @ c2)
-      | _ -> raise Type_error
-      )
+      let b = new_ty_var () in
+      (f, x1, e1, a, b))
+      l) in
+    let gamma = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      (f, TyFun (TyVar a, TyVar b)))
+      l') @ t_e in
+    let rec ty_con_b_list list =
+      (match list with
+      | [] -> []
+      | (f,x1,e1,a,b) :: rest -> 
+        let (t1, c1) = gather_ty_constraints gamma e1 in 
+        (t1, TyVar b, c1) :: ty_con_b_list rest  
+      ) in
+    let (t, c) = gather_ty_constraints gamma e in      
+    let rec new_con list' =
+      (match list' with
+      | [] -> c
+      | (t1, t_vb, c1) :: rest -> ((t1, t_vb) :: c1) @ new_con rest  
+      ) in
+    (t, new_con (ty_con_b_list l'))
+
   | _ -> raise Type_error
 
 
-(*型推論の実装：expr*)
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
   let (t, c) = gather_ty_constraints t_e e in
   let t_s = ty_unify c in
   (apply_ty_subst t_s t, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) t_e)
 
 
-(*型推論の実装：command*)
 let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
@@ -132,22 +143,26 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
     let newenv = (n, t) :: t_e' in
     ([(n, t)], newenv)
   | CRLetAnd l ->
-      let l' = (List.map (fun (f, x, e) ->
-        let s1 = new_ty_var () in
-        let s2 = new_ty_var () in
-        (f, x, e, s1, s2)) l) in
-      let t_e' = (List.map (fun (f, x, e, s1, s2) ->
-        (f, TyFun (TyVar s1, TyVar s2))) l') @ t_e in
-      let newenv = List.fold_left (fun list (f, x, e, s1, s2) ->
-        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
-        (f, tl) :: tenvl @ list) [] l' in
-      let newenv' = (List.map (fun (f, x, e, s1, s2) ->
-        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
-        (f, tl))) l' in
-      (newenv', newenv)
+    let l' = (List.map (fun (f,x1,e1) ->
+    let a = new_ty_var () in
+    let b = new_ty_var () in
+    (f, x1, e1, a, b))
+    l) in
+    let gamma = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      (f, TyFun (TyVar a, TyVar b)))
+      l') @ t_e in
+    let new_t_e = 
+      List.fold_left (fun list (f,x1,e1,a,b) ->
+        let (t_i, t_e_i) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+        (f, t_i) :: t_e_i @ list) [] l' in
+    let t_e_of_command = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      let (tl, tenvl) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+      (f, tl))) l' in
+    (t_e_of_command, new_t_e)
 
-let rec print_type : ty -> unit =
-  fun t ->
+let rec print_type (t : ty) : unit =
   match t with
   | TyInt -> print_string "int"
   | TyBool -> print_string "bool"
@@ -155,9 +170,8 @@ let rec print_type : ty -> unit =
   | TyVar s -> print_string s
 
   
-let rec print_command_type : ty_env -> unit =
-  fun l ->
-  match l with
+let rec print_command_type (t_e : ty_env) : unit =
+  match t_e with
   | [] -> print_string ";"
   | (name, t) :: [] ->
     print_string (name ^ ": "); print_type t; print_string ";";
@@ -214,6 +228,8 @@ let print_types_of_tuple (l : value list) : unit =
         | VBool _ -> print_string("bool");(string_of_value_type rest)
         | _ -> print_string(" ");(string_of_value_type rest)
         )
+
+
 
 
 (*対話型シェル：実行＋新たな環境envを返す関数*)
