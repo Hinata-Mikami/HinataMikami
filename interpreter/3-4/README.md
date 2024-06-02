@@ -178,18 +178,30 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       let (t2, c2) = gather_ty_constraints t_e e2 in 
       let a = new_ty_var () in
       (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
-  | ERLetAnd (l, e2) (*7*)
-    ->( match l with
-        | (f, x, e1) :: []
-          ->let a = new_ty_var () in
-            let b = new_ty_var () in
-            let gamma = (f, TyFun (TyVar a, TyVar b)):: t_e in
-            let new_ty_env = (x, TyVar a) :: gamma in
-            let (t1, c1) = gather_ty_constraints new_ty_env e1 in
-            let (t2, c2) = gather_ty_constraints gamma e2 in
-            (t2, [(t1, TyVar b)] @ c1 @ c2)
-        | _ -> raise Type_error
-      )
+  | ERLetAnd (l, e) (*7*)
+    ->let l' = (List.map (fun (f,x1,e1) ->
+        let a = new_ty_var () in
+        let b = new_ty_var () in
+        (f, x1, e1, a, b))
+        l) in
+      let gamma = (List.map (fun (f,x1,e1,a,b) ->
+        (f, TyFun (TyVar a, TyVar b)))
+        l') @ t_e in
+      let rec ty_con_b_list list =
+        (match list with
+        | [] -> []
+        | (f,x1,e1,a,b) :: rest -> 
+          let (t1, c1) = gather_ty_constraints gamma e1 in 
+          (t1, TyVar b, c1) :: ty_con_b_list rest  
+        ) in
+      let (t, c) = gather_ty_constraints gamma e in      
+      let rec new_con list' =
+        (match list' with
+        | [] -> c
+        | (t1, t_vb, c1) :: rest -> ((t1, t_vb) :: c1) @ new_con rest  
+        ) in
+      (t, new_con (ty_con_b_list l'))
+
   | _ -> raise Type_error
 ```
 
