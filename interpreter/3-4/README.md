@@ -195,7 +195,11 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
 ```
 
 ## `infer_expr`  ty_env -> expr -> ty * ty_env
-`expr`式の型推論の実装
+`expr`式の型推論の実装  
+資料の各ステップを実行  
+1. 現在の型環境`t_e`において`e`を検査し`e`の型`t`と制約`c`を得る
+2. 制約`c`を単一化し、型代入`t_s`を得る
+3. `e`の型は`t`に`t_s`を適用したもの。新たな型環境は現環境の各要素`(n, ty)`の`ty`に`t_s`を適用したもの。
 
 ```OCaml
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
