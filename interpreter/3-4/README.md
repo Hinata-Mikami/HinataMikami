@@ -196,6 +196,8 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
 
 ## `infer_expr`  ty_env -> expr -> ty * ty_env
 `expr`式の型推論の実装  
+>第一引数は表示用
+>式やコマンドを型推論することにより，その型変数に対する制約が生じることがあり，型環境をその情報を用いて更新しなければならない
 資料の各ステップを実行  
 1. 現在の型環境`t_e`において`e`を検査し`e`の型`t`と制約`c`を得る
 2. 制約`c`を単一化し、型代入`t_s`を得る
@@ -207,3 +209,31 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
   let t_s = ty_unify c in
   (apply_ty_subst t_s t, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) t_e)
 ```
+
+### `infer_cmd` ty_env -> command -> ty_env * ty_env
+`command`式の型推論の実装  
+
+(*型推論の実装：command*)
+let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
+  match cmd with
+  | CExp e ->
+    let (t, t_e') = infer_expr t_e e in
+    (t_e', t_e')
+  | CLet (n, e) ->
+    let (t, t_e') = infer_expr t_e e in
+    let newenv = (n, t) :: t_e' in
+    ([(n, t)], newenv)
+  | CRLetAnd l ->
+      let l' = (List.map (fun (f, x, e) ->
+        let s1 = new_ty_var () in
+        let s2 = new_ty_var () in
+        (f, x, e, s1, s2)) l) in
+      let t_e' = (List.map (fun (f, x, e, s1, s2) ->
+        (f, TyFun (TyVar s1, TyVar s2))) l') @ t_e in
+      let newenv = List.fold_left (fun list (f, x, e, s1, s2) ->
+        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
+        (f, tl) :: tenvl @ list) [] l' in
+      let newenv' = (List.map (fun (f, x, e, s1, s2) ->
+        let (tl, tenvl) = infer_expr ((x, TyVar s1) :: t_e') (EFun (x, e)) in
+        (f, tl))) l' in
+      (newenv', newenv)
