@@ -150,57 +150,59 @@ ETuple, ENil, EConsは未実装。
 ```OCaml
 let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   match e with
-  | ELiteral x  (*1*) 
-    ->(match (Eval.value_of_literal x) with
-      | VInt _ -> (TyInt, [])
-      | VBool _ -> (TyBool, [])
-      )
-  | EVar x  (*2*)
-    ->(match List.assoc_opt x t_e with
-      | Some x' -> (x', [])
-      | None -> raise (Error (" : Unbound variable "^x))
-      )
-  | ELet (x, e1, e2)  (*3*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
-      (t2, c1 @ c2)
-  | EIf (e1, e2, e3) (*4*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints t_e e2 in
-      let (t3, c3) = gather_ty_constraints t_e e3 in
-      (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
-  | EFun (x, e) (*5*)
-    ->let a = new_ty_var () in
-      let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
-      (TyFun (TyVar a, t), c)
-  | EApp (e1, e2) (*6*)
-    ->let (t1, c1) = gather_ty_constraints t_e e1 in
-      let (t2, c2) = gather_ty_constraints t_e e2 in 
+  | ELiteral x -> (*1*) 
+    (match (Eval.value_of_literal x) with
+    | VInt _ -> (TyInt, [])
+    | VBool _ -> (TyBool, [])
+    | _ -> raise Type_error
+    )
+  | EVar x ->  (*2*)
+    (match List.assoc_opt x t_e with
+    | Some x' -> (x', [])
+    | None -> raise (Error (" : Unbound variable "^x))
+    )
+  | ELet (x, e1, e2) -> (*3*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints ((x, t1) :: t_e) e2 in
+    (t2, c1 @ c2)
+  | EIf (e1, e2, e3) -> (*4*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in
+    let (t3, c3) = gather_ty_constraints t_e e3 in
+    (t2, [(t1, TyBool); (t2, t3)] @ c1 @ c2 @ c3)
+  | EFun (x, e) -> (*5*)
+    let a = new_ty_var () in
+    let (t, c) = gather_ty_constraints ((x, TyVar a) :: t_e) e in
+    (TyFun (TyVar a, t), c)
+  | EApp (e1, e2) -> (*6*)
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in 
+    let a = new_ty_var () in
+    (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
+  | ERLetAnd (l, e) -> (*7*)
+    let l' = (List.map (fun (f,x1,e1) ->
       let a = new_ty_var () in
-      (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
-  | ERLetAnd (l, e) (*7*)
-    ->let l' = (List.map (fun (f,x1,e1) ->
-        let a = new_ty_var () in
-        let b = new_ty_var () in
-        (f, x1, e1, a, b))
-        l) in
-      let gamma = (List.map (fun (f,x1,e1,a,b) ->
-        (f, TyFun (TyVar a, TyVar b)))
-        l') @ t_e in
-      let rec ty_con_b_list list =
-        (match list with
-        | [] -> []
-        | (f,x1,e1,a,b) :: rest -> 
-          let (t1, c1) = gather_ty_constraints gamma e1 in 
-          (t1, TyVar b, c1) :: ty_con_b_list rest  
-        ) in
-      let (t, c) = gather_ty_constraints gamma e in      
-      let rec new_con list' =
-        (match list' with
-        | [] -> c
-        | (t1, t_vb, c1) :: rest -> ((t1, t_vb) :: c1) @ new_con rest  
-        ) in
-      (t, new_con (ty_con_b_list l'))
+      let b = new_ty_var () in
+      (f, x1, e1, a, b))
+      l) in
+    let gamma = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      (f, TyFun (TyVar a, TyVar b)))
+      l') @ t_e in
+    let rec ty_con_b_list list =
+      (match list with
+      | [] -> []
+      | (f,x1,e1,a,b) :: rest -> 
+        let (t1, c1) = gather_ty_constraints gamma e1 in 
+        (t1, TyVar b, c1) :: ty_con_b_list rest  
+      ) in
+    let (t, c) = gather_ty_constraints gamma e in      
+    let rec new_con list' =
+      (match list' with
+      | [] -> c
+      | (t1, t_vb, c1) :: rest -> ((t1, t_vb) :: c1) @ new_con rest  
+      ) in
+    (t, new_con (ty_con_b_list l'))
 
   | _ -> raise Type_error
 ```
