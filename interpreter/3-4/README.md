@@ -135,14 +135,14 @@ let new_ty_var () =
    新たな型変数`a = new_ty_var ()` を導入し、型環境`t_e`に`(x, TyVar a)`を追加。そのうえで`e`の型`t`と制約`c`を求める。  
    fun式全体の型は `a -> t` つまり `[TyFun (TyVar a, t)]`。fun式全体の制約は`c`。
 6. EApp (e1, e2) (e1 e2)  
-   `e1`・`e2`それぞれの型`t1`・`t2`と制約`c1`・`c2`を求める。
+   `e1`・`e2`それぞれの型`t1`・`t2`と制約`c1`・`c2`を求める。  
    新たな型変数 `a = new_ty_var ()`としたうえで、式全体の型は `a`、制約は `{t1=t2→α}∪C1∪C2` つまり `[(t1, TyFun (t2, TyVar a))] @ c1 @ c2`
-7. ERLetAnd (l, e2) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e2)  
-   新たな型変数`a`,`b`を導入  
-   `t_e`に`f`と`a → b`の対応を追加した型環境`gamma = (f, TyFun (TyVar a, TyVar b)) :: t_e`  
+7. ERLetAnd (l, e) ただし `l : (name * name * expr) list` (let rec f x = e1 ... in e)  
+   `l`の各要素に新たな型変数`a`,`b`を導入し、組`(f, x, e1, a, b)`のリスト`l'`を作る。  
+   型環境`gamma`・・・`l'`の各`f, a, b`について、`t_e`に `f` と `a->b` の対応を追加する。つまり、l'の各要素について、`t_e`に`(f, TyFun (TyVar a, TyVar b))`を追加する。  
    さらに`x`と`a`の対応`(x, TyVar a)`を追加した型環境`new_ty_env`で`e1`の型`t1`と制約`c1`を求める  
-   `gamma`の下で`e2`の型`t2`と制約`c2`を求める  
-   式全体の型は`t2`、制約は`{t1=β}∪C1∪C2`つまり`[(t1, TyVar b)] @ c1 @ c2`  
+   `gamma`の下で`e`の型`t`と制約`c`を求める  
+   式全体の型は`t`、制約は`{t1=β}∪C1∪C`つまり`[(t1, TyVar b)] @ c1 @ c`  
 
 今後の改善  
 let rec f x = e1 and ...　の形は一旦認めていない。  
