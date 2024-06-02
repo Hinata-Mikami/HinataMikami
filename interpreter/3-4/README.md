@@ -210,7 +210,6 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
 ## `infer_expr`  ty_env -> expr -> ty * ty_env
 `expr`式の型推論の実装  
 
->第一引数は表示用  
 >式やコマンドを型推論することにより，その型変数に対する制約が生じることがあり，型環境をその情報を用いて更新しなければならない
 
 資料の各ステップを実行  
@@ -227,7 +226,7 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
 
 ### `infer_cmd` ty_env -> command -> ty_env * ty_env
 `command`式の型推論の実装  
-> `infer_cmd`の返り値の組の第1要素は表示用
+> `infer_cmd`の返り値の組の第1要素は表示用  
 > コマンドを型推論することにより，その型変数に対する制約が生じることがあり，型環境をその情報を用いて更新しなければならない
 
 
