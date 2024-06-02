@@ -27,7 +27,7 @@ $./main test.txt
 
 
 ## functions.ml
-### apply_ty_subst    ty_subst -> ty -> ty
+### apply_ty_subst    `ty_subst -> ty -> ty`
 型代入を行う関数。
 `t_s : ty_subst = (ty_var * ty) list`と`t : ty`を受け取り、型代入リスト`t_s`のうち適当なものを`t`に代入する。  
 具体的には、`t = TyVar tv`において`tv`がリスト`t_s`に含まれる組`(t_v', t')`の第1要素に既に存在するとき、`t_v`を`t_v'`に置き換える。  `t = TyFun (t1 t2)`のときは、再帰的に`t1`、`t2`に対して型代入を行う。
