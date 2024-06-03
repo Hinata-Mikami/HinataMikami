@@ -268,3 +268,93 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
       (f, tl))) l' in
     (t_e_of_command, new_t_e)
 ```
+
+
+## テストケース
+### test1.txt
+
+```
+fun x -> fun y -> x + (fun x -> if x then 1 else 2) y;;
+```
+==> `- : Int -> Bool -> Int = <fun>`
+
+### test2.txt
+
+```
+fun x -> fun y -> y x;;
+```
+==> `- : (t1 -> t2 -> t3) -> (t1 -> t2) -> t1 -> t3`
+
+### test3.txt
+
+```
+fun x -> fun y -> fun z -> x z (y z);;
+```
+==> `fact : Int -> Int = <fun>`
+
+### test4.txt
+
+```
+let fact = 
+ let rec fix f = fun x -> f (fix f) x in
+ fix (fun f -> fun x -> if x < 1 then 1 else x * f (x - 1));;
+```
+==> `fact : Int -> Int = <fun>`
+
+### test5.txt
+
+```
+let rec loop x = loop x;;
+```
+==> `loop : t1 -> t2`
+
+### test6.txt
+
+```
+let rec f x = x + 1
+    and g x = if x then f 1 else f 2
+in g true;;
+```
+==> `- : Int = 2`
+
+### test7.txt
+
+```
+let f = fun x -> 1;;
+```
+==> `f : t1 -> Int = <fun>`
+```
+f 3;;
+```
+==> `- : Int = 1`
+```
+f;;
+```
+==> `- : Int -> Int = <fun>`
+
+### test8.txt
+```
+let f = fun x -> 1;;
+```
+==> `f : t1 -> Int = <fun>`
+```
+let rec h x = let _ = f 3 in 1 and g x = h x;;
+```
+==> `h : t2 -> Int = <fun>`  
+    `g : t2 -> Int = <fun>`
+```
+f;;
+```
+==> `f : Int -> Int`
+
+### test9.txt
+```
+fun x -> x x;;
+```
+==> `Error`
+
+### test10.txt
+```
+fun f -> (f 0 < 1) && f true;;
+```
+==> `Error`
