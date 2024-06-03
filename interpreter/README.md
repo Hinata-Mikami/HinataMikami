@@ -42,3 +42,11 @@ dune exec example
 または
 dune exrc example src/test.txt
 
+#gitに関するエラ
+## fatal: Not possible to fast-forward, aborting.
+以下を実行
+```
+git pull origin main --rebase
+
+```
+
