@@ -346,7 +346,8 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
    `l`は`(f, x1, e1)`のリスト。とりあえずERLetAndと同じようにやってみる...?
    新たな型変数`a, b`導入し、現在の環境`t_e`に`f`と`a -> b`の対応を追加。これを`l`のすべての要素において実行し型環境`gamma`を得る。
    この`cmd`の型のリスト`t_e_of_cmd`は、リスト`l'`の各要素において`gamma`に`x1`と`a`を追加したうえで`EFun(x, e1)`を型推論し、得られた型`t_i`を`f`の型とした。
-   更新する型`new_t_e`は、上記の`(f. t_i)`と型環境`t_e_i`をリストにして得られる。  
+   更新する型`new_t_e`は、上記の`(f. t_i)`と型環境`t_e_i`をリストにして得られる。
+
 
 ```OCaml
 let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
