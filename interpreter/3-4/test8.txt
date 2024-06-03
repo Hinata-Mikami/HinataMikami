@@ -1,0 +1,5 @@
+let f = fun x -> 1;;
+
+let rec h x = let _ = f 3 in 1 and g x = h x;;
+
+f;;
