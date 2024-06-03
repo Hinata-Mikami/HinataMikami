@@ -342,7 +342,10 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
   `t_e`の下で`e`を型推論して得られた型環境`t_e'`が、cmdの型推論の結果であり、新たな型環境でもある。  
 2. CLet (n, e) `let n = e;;`  
   `t_e`の下で`e`を型推論して得られた型`t`が`n`の型である。 
-3. CRLetAnd (l, e)   `let rec f x1 = e1 and f x2 = e2 ... in e`
+3. CRLetAnd l   `let rec f x1 = e1 and f x2 = e2 ...`
+   `l`は`(f, x1, e1)`のリスト。とりあえずERLetAndと同じようにやってみる...?
+   新たな型変数`a, b`導入し、現在の環境`t_e`に`f`と`a -> b`の対応を追加。これを`l`のすべての要素において実行し型環境`gamma`を得る。
+   この`cmd`の型のリスト`t_e_of_cmd`は、リスト`l'`から
 
 ```OCaml
 let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
