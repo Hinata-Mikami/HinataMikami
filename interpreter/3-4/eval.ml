@@ -1,10 +1,6 @@
 open Syntax
 
-exception Eval_error;;
-exception Zero_Division;;
-exception Unexpected_Expression_at_binOp
-exception Unexpected_Expression_at_eval_if
-exception Variable_Not_Found
+exception Error of string
 
 let value_of_literal (l:  literal) : value = 
   match l with
@@ -23,24 +19,24 @@ let rec eval (env : env) (expr : expr) : value =
       | OpAdd -> VInt (x + y)
       | OpSub -> VInt (x - y)
       | OpMul -> VInt (x * y)
-      | OpDiv -> if y = 0 then raise Zero_Division else VInt (x / y)
+      | OpDiv -> if y = 0 then raise (Error "Eval_Error : Zero_Division") else VInt (x / y)
       | OpEq -> VBool (x = y)
       | OpLt -> VBool (x < y))
-    | _ -> raise Unexpected_Expression_at_binOp
+    | _ -> raise (Error "Eval_Error : Unexpected expression on eval_bin_op")
 
   (*if e0 then e1 else e2 -> value*)
   in let eval_if (env : env) (e0 : expr) (e1 : expr) (e2 : expr) : value =
     match eval env e0 with
     | VBool true -> eval env e1
     | VBool false -> eval env e2
-    | _ -> raise Unexpected_Expression_at_eval_if
+    | _ -> raise (Error "Eval_Error : Unexpected expression on eval_if")
 
   (* (x, v)∊env ⇒ v *)
   in let lookup_variable (env : env) (x : name) : value =
     try
       List.assoc x env
     with
-    | Not_found -> raise Variable_Not_Found
+    | Not_found -> raise (Error "Eval_Error : Variable not found on lookup_variable")
 
   (*let n = e1 in e2-> value*)
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) : value = 
@@ -84,19 +80,12 @@ let rec eval (env : env) (expr : expr) : value =
       | EIf (e0, e1, e2) -> eval_if env e0 e1 e2
       | EVar n -> lookup_variable env n
       | ELet (x, e1, e2) -> eval_let env x e1 e2
-      (* | ERLet (f, x, e1, e2) -> 
-          let env' = (f, VRFun(f, x, e1, env)) :: env in
-          eval env' e2 *)
       | EFun (x, e) -> VFun (x, e, env)
       | EApp (e1, e2) -> 
         let v1 = eval env e1 in
         let v2 = eval env e2 in
         (match v1 with
         | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e
-        (* | VRFun (f, x, e, oenv) ->
-            let env' = (x, v2) :: (f, VRFun (f, x, e, oenv)) :: oenv in
-            eval env' e *)
-        (*l = (f, x, e) と oenv から (f1, l, oenv), ..., (fn, l, oenv)　を作成*)
         | VRFunAnd (i, l, oenv) -> 
           (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
             match l1 with
@@ -107,14 +96,14 @@ let rec eval (env : env) (expr : expr) : value =
           (*i番目の要素を取り出す*)
           in let (f, x, e) = List.nth l i
           in eval ((x, v2) :: nenv) e) (*i番目の変数名と値v2を環境に追加したうえでeを評価*)
-        | _ -> raise Eval_error)
+        | _ -> raise (Error "EvalError : Non-function cannot be applied"))
       (*match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
       | EMatch (e, pl) -> 
         let v = eval env e in
         (*マッチ時は情報を環境に追加してそのうえで->の右側を評価)*)
         let rec match_to_value (v: value) (l: (pattern * expr) list) : value =
           match l with
-          | [] -> raise Eval_error
+          | [] -> raise (Error "Evalerror : No pattern matched")
           | (p, e') :: rest ->
             (match find_match p v with
             | Some nenv -> eval (nenv @ env) e'

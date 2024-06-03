@@ -1,10 +1,5 @@
 open Syntax
 
-exception Eval_error
-exception Zero_Division
-exception Unexpected_Expression_at_binOp
-exception Unexpected_Expression_at_eval_if
-exception Variable_Not_Found
 exception Error of string
 
 
@@ -54,10 +49,10 @@ let rec check_var_fault (s : string) (t : ty) : bool =
     | (t1, t2) :: rest when t1 = t2 -> ty_unify rest  (*2*)
     | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)  (*3*)
     | (TyVar s, t) :: rest | (t, TyVar s) :: rest -> (*4*)
-      if check_var_fault s t then raise (Error ("Error : Unable to decide type of"^s))
+      if check_var_fault s t then raise (Error ("FunctionsError : Unable to decide type of "^s))
       else compose_ty_subst
       (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
-    | _ -> raise (Error "Error : Unable to unify")
+    | _ -> raise (Error "FunctionsError : Unable to unify")
 
 
 let counter = ref 0
@@ -69,16 +64,15 @@ let new_ty_var () =
 
 let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
   match e with
-  | ELiteral x -> (*1*) 
-    (match (Eval.value_of_literal x) with
-    | VInt _ -> (TyInt, [])
-    | VBool _ -> (TyBool, [])
-    | _ -> raise (Error "Error : Different value type")
+  | ELiteral x -> (*1*)
+    (match x with
+    | LInt _ -> (TyInt, [])
+    | LBool _ -> (TyBool, [])
     )
   | EVar x ->  (*2*)
     (match List.assoc_opt x t_e with
     | Some x' -> (x', [])
-    | None -> raise (Error ("Error : Unbound variable "^x))
+    | None -> raise (Error ("FunctionsError : Unbound variable "^x))
     )
   | ELet (x, e1, e2) -> (*3*)
     let (t1, c1) = gather_ty_constraints t_e e1 in
@@ -129,7 +123,7 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     | OpLt -> (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
     )
 
-  | _ -> raise (Error "Error : Unable to gather constraints")
+  | _ -> raise (Error "FunctionsError : Unable to gather constraints")
 
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
@@ -176,9 +170,7 @@ let rec print_type (t : ty) : unit =
   | TyBool -> print_string "Bool"
   | TyFun (t1, t2) -> 
     (match (t1, t2) with
-    | (TyFun (t11, t12) as t1'), (TyFun (t21, t22) as t2') -> print_string "("; print_type t1'; print_string ")"; print_string " -> "; print_string "("; print_type t2'; print_string ")"
     | (TyFun (t11, t12) as t1'), t2'-> print_string "("; print_type t1'; print_string ")"; print_string " -> "; print_type t2'
-    | t1', (TyFun (t21, t22) as t2') -> print_type t1'; print_string " -> "; print_string "("; print_type t2'; print_string ")"
     | _ -> print_type t1; print_string " -> "; print_type t2
     )
   | TyVar s -> print_string s
@@ -201,7 +193,7 @@ let rec print_value (v: value) : unit =
   | VBool b -> print_string "Bool = "; print_string (string_of_bool b)
   | VFun (x, e, env) -> print_string " = <fun>"
   | VRFunAnd (_, l, _) -> print_string " = <fun>"
-  | _ -> raise (Error "Error : Still developing")
+  | _ -> raise (Error "FunctionsError : Still developing")
 
 
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
@@ -233,13 +225,6 @@ let repl () =
     | r ->
       (match print_command_value env r t_e with
       | (env', t_e') -> loop_stdin env' t_e'
-      | exception Eval_error -> Printf.printf "exception: Eval_error\n"; loop_stdin env t_e
-      | exception Zero_Division -> Printf.printf "exception: Zero_Division\n"; loop_stdin env t_e
-      | exception Unexpected_Expression_at_binOp 
-        -> Printf.printf "exception: Unexpected_Expression_at_binOp\n"; loop_stdin env t_e
-      | exception Unexpected_Expression_at_eval_if
-        -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; loop_stdin env t_e
-      | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; loop_stdin env t_e
       | exception Error s -> print_endline s; print_newline(); loop_stdin env t_e
       )
     | exception Lexer.Error msg ->
@@ -263,13 +248,6 @@ let read_file op_file =
     | r -> 
       (match print_command_value env r t_e with
       | (env', t_e') -> loop_file env' t_e'
-      | exception Eval_error -> Printf.printf "exception: Eval_error\n";
-      | exception Zero_Division -> Printf.printf "exception: Zero_Division\n";
-      | exception Unexpected_Expression_at_binOp 
-        -> Printf.printf "exception: Unexpected_Expression_at_binOp\n";
-      | exception Unexpected_Expression_at_eval_if
-        -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; 
-      | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; 
       | exception Error s -> print_endline s; print_newline()
       )
     | exception Lexer.Error msg -> Printf.printf "Lexing Error\n"; print_endline msg;
