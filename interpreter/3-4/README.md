@@ -143,6 +143,9 @@ let new_ty_var () =
    次に、`gammma`の下で`e`の制約を収集し型`t`と制約`c`を得る。`t`は`e`の型。  
    次に、リスト`l'`の各要素`(f,x1,e1,a,b)`から`gamma`の下で`e1`の制約を収集し、`(t1,c1)`を得る。これを加工し`(t1, TyVar b, c1)`のリスト`ty_con_b`を得る。  
    最後にこのリストの各要素を分解しすべての`(t1, TyVar b)`と`c1`を`c`に結合してリスト`new_con`を得る。これが`e`の制約。
+8. EBin(BinOp, e1, e2)
+   EBinについても制約を収集できるようにしないとエラーを吐くことに気づいた。
+   とりあえず、`e1`と`e2`の制約を収集し、得られた型`11, t2`について、OpEqの時は両者が`bool`であること、それ以外は両者が`int`であることを条件とし、それ以外はエラーを返すようにした。  
 
 今後の改善   
 ETuple, ENil, EConsは未実装。
@@ -204,6 +207,23 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       ) in
     (t, new_con (ty_con_b_list l'))
 
+  | EBin (op, e1, e2) ->
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in
+    (match op with
+    | OpAdd | OpSub | OpMul | OpDiv | OpLt
+      -> (
+        match t1, t2 with
+        | TyInt, TyInt -> (TyInt, (c1@c2))
+        | _ -> raise (Error "Error : Variable types unmatched")
+      )
+    | OpEq -> 
+      (match t1, t2 with
+      | TyBool, TyBool -> (TyBool, (c1@c2))
+      | _ -> raise (Error "Error : Variable types unmatched")
+      )
+    )
+
   | _ -> raise Type_error
 ```
 
@@ -236,10 +256,8 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
   `t_e`の下で`e`を型推論して得られた型`t`が`n`の型である。 
 3. CRLetAnd (l, e)   `let rec f x1 = e1 and f x2 = e2 ... in e`
 
-
-
 ```OCaml
-let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
+let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
     let (t, t_e') = infer_expr t_e e in
@@ -264,8 +282,8 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
         (f, t_i) :: t_e_i @ list) [] l' in
     let t_e_of_command = 
       (List.map (fun (f,x1,e1,a,b) ->
-      let (tl, tenvl) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
-      (f, tl))) l' in
+      let (t_i, _) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+      (f, t_i))) l' in
     (t_e_of_command, new_t_e)
 ```
 
