@@ -110,7 +110,7 @@ fun x -> x x;;
 
 ## test10.txt
 ```
-fun f -> (f 0 < 1) && f true;;
+fun f -> if true then (f 0 < 1) else f true;;
 ```
 ==> `Error`
 
