@@ -25,6 +25,94 @@ $./main
 $./main test.txt
 ```  
 
+## テストケース
+### test1.txt
+
+```
+fun x -> fun y -> x + (fun x -> if x then 1 else 2) y;;
+```
+==> `- : Int -> Bool -> Int = <fun>`
+
+### test2.txt
+
+```
+fun x -> fun y -> y x;;
+```
+==> `- : (t1 -> t2 -> t3) -> (t1 -> t2) -> t1 -> t3`
+
+### test3.txt
+
+```
+fun x -> fun y -> fun z -> x z (y z);;
+```
+==> `fact : Int -> Int = <fun>`
+
+### test4.txt
+
+```
+let fact = 
+ let rec fix f = fun x -> f (fix f) x in
+ fix (fun f -> fun x -> if x < 1 then 1 else x * f (x - 1));;
+```
+==> `fact : Int -> Int = <fun>`
+
+### test5.txt
+
+```
+let rec loop x = loop x;;
+```
+==> `loop : t1 -> t2`
+
+### test6.txt
+
+```
+let rec f x = x + 1
+    and g x = if x then f 1 else f 2
+in g true;;
+```
+==> `- : Int = 2`
+
+### test7.txt
+
+```
+let f = fun x -> 1;;
+```
+==> `f : t1 -> Int = <fun>`
+```
+f 3;;
+```
+==> `- : Int = 1`
+```
+f;;
+```
+==> `- : Int -> Int = <fun>`
+
+### test8.txt
+```
+let f = fun x -> 1;;
+```
+==> `f : t1 -> Int = <fun>`
+```
+let rec h x = let _ = f 3 in 1 and g x = h x;;
+```
+==> `h : t2 -> Int = <fun>`  
+    `g : t2 -> Int = <fun>`
+```
+f;;
+```
+==> `f : Int -> Int`
+
+### test9.txt
+```
+fun x -> x x;;
+```
+==> `Error`
+
+### test10.txt
+```
+fun f -> (f 0 < 1) && f true;;
+```
+==> `Error`
 
 ## functions.ml
 ### `apply_ty_subst` ty_subst -> ty -> ty
@@ -119,7 +207,7 @@ let new_ty_var () =
 ```
 
 ### `gather_ty_constraints`  ty_env -> expr -> ty * ty_constraints
-型環境`t_e : ty_env = (name * ty) list`を受け取り、 `型`expr`に含まれる型制約を収集し、`expr`の型と収集した型制約の組`ty * ty_constraints` を返す関数。
+型環境`t_e : ty_env = (name * ty) list`を受け取り、 型`expr`に含まれる型制約を収集し、`expr`の型と収集した型制約の組`ty * ty_constraints` を返す関数。
 `expr`によって場合分けを行う。
 1. ELiteral x  
    定数のときは,それ自身の型と空の制約を返す。`x`を`value`に直したうえで返り値を求める。
@@ -287,92 +375,129 @@ let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
     (t_e_of_command, new_t_e)
 ```
 
-
-## テストケース
-### test1.txt
-
+### `print_type` ty -> unit
+`ty`の型を表示する関数
+```OCaml
+let rec print_type (t : ty) : unit =
+  match t with
+  | TyInt -> print_string "Int"
+  | TyBool -> print_string "Bool"
+  | TyFun (t1, t2) -> print_type t1; print_string " -> "; print_type t2
+  | TyVar s -> print_string s
 ```
-fun x -> fun y -> x + (fun x -> if x then 1 else 2) y;;
-```
-==> `- : Int -> Bool -> Int = <fun>`
 
-### test2.txt
+### `print_command_type` ty_env -> command -> ty_env
+`command`の型推論を行い、得られた`ty_env`リストの各要素`(name, ty)`を用いてすべての`name`の型`ty`を表示する関数。
+```OCaml
+let print_command_type (t_e : ty_env) (cmd : command) : ty_env =
 
-```
-fun x -> fun y -> y x;;
-```
-==> `- : (t1 -> t2 -> t3) -> (t1 -> t2) -> t1 -> t3`
+  let (t_e', t_e'') = infer_cmd t_e cmd in
 
-### test3.txt
-
-```
-fun x -> fun y -> fun z -> x z (y z);;
-```
-==> `fact : Int -> Int = <fun>`
-
-### test4.txt
-
-```
-let fact = 
- let rec fix f = fun x -> f (fix f) x in
- fix (fun f -> fun x -> if x < 1 then 1 else x * f (x - 1));;
-```
-==> `fact : Int -> Int = <fun>`
-
-### test5.txt
+  let rec print_command_loop (t_e : ty_env) : unit =
+  match t_e with
+  | [] -> ()
+  | (name, ty) :: [] -> ();
+    print_string (name ^ ": "); print_type ty
+  | (name, ty) :: rest ->
+    print_string (name ^ ": "); print_type ty; print_string "; "; print_command_loop rest
+  in print_command_loop t_e';
+  t_e''
 
 ```
-let rec loop x = loop x;;
-```
-==> `loop : t1 -> t2`
 
-### test6.txt
+### `print_value` value -> unit
+`value`の型と値を表示する関数
+```OCaml
+let rec print_value (v: value) : unit =
+  match v with
+  | VInt i -> print_string "Int = "; print_int i 
+  | VBool b -> print_string "Bool = "; print_string (string_of_bool b)
+  | VFun (x, e, env) -> print_string " = <fun>"
+  | VRFunAnd (_, l, _) -> print_string " = <fun>"
+  | _ -> raise (Error "Error : Still developing")
+```
 
+### `print_command_value` env -> command -> ty_env -> env * ty_env
+`command`の型を表示した後、`command`の値を評価し表示する関数。
+```OCaml
+let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
+  let t_e' = print_command_type t_e cmd in
+  match cmd with
+  | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e')
+  | CLet (n, e) ->  print_string (" = "); 
+    let command_let (env : env) (n : name) (e : expr) : (value * env) =
+      (match Eval.eval env e with | v1 -> (v1, ((n,v1) :: env))) in
+    let (v,e') = command_let env n e in print_value v; print_newline();
+    (e', t_e')
+  | CRLetAnd l ->
+      let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+      match l1 with
+        | [] -> env
+        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest);
+      in 
+      let nenv = and_env 0 l in
+      (nenv, t_e')
 ```
-let rec f x = x + 1
-    and g x = if x then f 1 else f 2
-in g true;;
-```
-==> `- : Int = 2`
 
-### test7.txt
+### `repl`
+### `read_file`
+メイン関数における一連の処理を行う部分。loop部分に`env`だけでなく`ty_env`も常に更新し続けるように変更している。
+```OCaml
+let repl () =
 
-```
-let f = fun x -> 1;;
-```
-==> `f : t1 -> Int = <fun>`
-```
-f 3;;
-```
-==> `- : Int = 1`
-```
-f;;
-```
-==> `- : Int -> Int = <fun>`
+  let lexbuf = Lexing.from_channel stdin in
 
-### test8.txt
-```
-let f = fun x -> 1;;
-```
-==> `f : t1 -> Int = <fun>`
-```
-let rec h x = let _ = f 3 in 1 and g x = h x;;
-```
-==> `h : t2 -> Int = <fun>`  
-    `g : t2 -> Int = <fun>`
-```
-f;;
-```
-==> `f : Int -> Int`
+  let rec loop_stdin (env:env) (t_e : ty_env) =  
+    let () = print_string "# " in
+    let () = flush stdout in
+  
+    match Parser.command Lexer.token lexbuf with
+    | r ->
+      (match print_command_value env r t_e with
+      | (env', t_e') -> loop_stdin env' t_e'
+      | exception Eval_error -> Printf.printf "exception: Eval_error\n"; loop_stdin env t_e
+      | exception Zero_Division -> Printf.printf "exception: Zero_Division\n"; loop_stdin env t_e
+      | exception Unexpected_Expression_at_binOp 
+        -> Printf.printf "exception: Unexpected_Expression_at_binOp\n"; loop_stdin env t_e
+      | exception Unexpected_Expression_at_eval_if
+        -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; loop_stdin env t_e
+      | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; loop_stdin env t_e
+      | exception Error s -> print_endline s; print_newline(); loop_stdin env t_e
+      )
+    | exception Lexer.Error msg ->
+      Printf.printf "Lexing Error\n" ;
+      print_endline msg;
+      loop_stdin env t_e
+    | exception Parsing.Parse_error ->
+      Printf.printf "Parse Error "; 
+      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
+      loop_stdin env t_e
+  
+  in loop_stdin [] []
 
-### test9.txt
-```
-fun x -> x x;;
-```
-==> `Error`
 
-### test10.txt
+let read_file op_file =
+  
+  let lexbuf = Lexing.from_channel op_file in
+    
+  let rec loop_file (env : env) (t_e : ty_env) = 
+    match Parser.command Lexer.token lexbuf with 
+    | r -> 
+      (match print_command_value env r t_e with
+      | (env', t_e') -> loop_file env' t_e'
+      | exception Eval_error -> Printf.printf "exception: Eval_error\n";
+      | exception Zero_Division -> Printf.printf "exception: Zero_Division\n";
+      | exception Unexpected_Expression_at_binOp 
+        -> Printf.printf "exception: Unexpected_Expression_at_binOp\n";
+      | exception Unexpected_Expression_at_eval_if
+        -> Printf.printf "exception: Unexpected_Expression_at_eval_if\n"; 
+      | exception Variable_Not_Found -> Printf.printf "exception: Variable_Not_Found\n"; 
+      | exception Error s -> print_endline s; print_newline()
+      )
+    | exception Lexer.Error msg -> Printf.printf "Lexing Error\n"; print_endline msg;
+    | exception Parsing.Parse_error 
+      ->  Printf.printf "Parse Error "; 
+          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
+  
+  in loop_file [] []
 ```
-fun f -> (f 0 < 1) && f true;;
-```
-==> `Error`
