@@ -167,15 +167,15 @@ let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
       (List.map (fun (f,x1,e1,a,b) ->
       (f, TyFun (TyVar a, TyVar b)))
       l') @ t_e in
+    let t_e_of_cmd = 
+      (List.map (fun (f,x1,e1,a,b) ->
+      let (t_i, _) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+      (f, t_i))) l' in
     let new_t_e = 
       List.fold_left (fun list (f,x1,e1,a,b) ->
         let (t_i, t_e_i) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
         (f, t_i) :: t_e_i @ list) [] l' in
-    let t_e_of_command = 
-      (List.map (fun (f,x1,e1,a,b) ->
-      let (t_i, _) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
-      (f, t_i))) l' in
-    (t_e_of_command, new_t_e)
+    (t_e_of_cmd, new_t_e) 
 
 
 let rec print_type (t : ty) : unit =
