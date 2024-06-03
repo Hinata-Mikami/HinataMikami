@@ -47,14 +47,14 @@ let rec check_var_fault (s : string) (t : ty) : bool =
   | TyVar t_v -> if t_v = s then true else false
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
 
-  
+
   let rec ty_unify (c : ty_constraints) : ty_subst =
     match c with
     | [] -> []  (*1*)
     | (t1, t2) :: rest when t1 = t2 -> ty_unify rest  (*2*)
     | (TyFun (s1, t1), TyFun (s2, t2)) :: rest -> ty_unify ((s1, s2) :: (t1, t2) :: rest)  (*3*)
     | (TyVar s, t) :: rest | (t, TyVar s) :: rest -> (*4*)
-      if check_var_fault s t then raise (Error "Error : Variable already used")
+      if check_var_fault s t then raise (Error ("Error : Unable to decide type of"^s))
       else compose_ty_subst
       (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
     | _ -> raise (Error "Error : Unable to unify")
@@ -105,14 +105,12 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       (f, x1, e1, a, b))
       l) in
     let gamma = 
-      (List.map (fun (f,x1,e1,a,b) ->
-      (f, TyFun (TyVar a, TyVar b)))
-      l') @ t_e in
+      (List.map (fun (f,x1,e1,a,b) -> (f, TyFun (TyVar a, TyVar b))) l') @ t_e in
     let rec ty_con_b_list list =
       (match list with
       | [] -> []
       | (f,x1,e1,a,b) :: rest -> 
-        let (t1, c1) = gather_ty_constraints gamma e1 in 
+        let (t1, c1) = gather_ty_constraints ((x1, TyVar a) :: gamma) e1 in 
         (t1, TyVar b, c1) :: ty_con_b_list rest  
       ) in
     let (t, c) = gather_ty_constraints gamma e in      
@@ -126,17 +124,9 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     let (t1, c1) = gather_ty_constraints t_e e1 in
     let (t2, c2) = gather_ty_constraints t_e e2 in
     (match op with
-    | OpAdd | OpSub | OpMul | OpDiv | OpLt
-      -> (
-        match t1, t2 with
-        | TyInt, TyInt -> (TyInt, (c1@c2))
-        | _ -> raise (Error "Error : Variable types unmatched")
-      )
-    | OpEq -> 
-      (match t1, t2 with
-      | TyBool, TyBool -> (TyBool, (c1@c2))
-      | _ -> raise (Error "Error : Variable types unmatched")
-      )
+    | OpAdd | OpSub | OpMul | OpDiv | OpEq
+      -> (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2) 
+    | OpLt -> (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
     )
 
   | _ -> raise (Error "Error : Unable to gather constraints")
@@ -152,53 +142,57 @@ let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
     let (t, t_e') = infer_expr t_e e in
-    (t_e', t_e')
+    ([("-", t)], t_e')
   | CLet (n, e) ->
     let (t, t_e') = infer_expr t_e e in
     let newenv = (n, t) :: t_e' in
     ([(n, t)], newenv)
-  | CRLetAnd l ->
-    let l' = (List.map (fun (f,x1,e1) ->
-    let a = new_ty_var () in
-    let b = new_ty_var () in
-    (f, x1, e1, a, b))
-    l) in
-    let gamma = 
-      (List.map (fun (f,x1,e1,a,b) ->
-      (f, TyFun (TyVar a, TyVar b)))
-      l') @ t_e in
-    let t_e_of_cmd = 
-      (List.map (fun (f,x1,e1,a,b) ->
-      let (t_i, _) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
-      (f, t_i))) l' in
-    let new_t_e = 
-      List.fold_left (fun list (f,x1,e1,a,b) ->
-        let (t_i, t_e_i) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
-        (f, t_i) :: t_e_i @ list) [] l' in
-    (t_e_of_cmd, new_t_e) 
-
+   | CRLetAnd l ->
+      let l' = (List.map (fun (f,x1,e1) ->
+        let a = new_ty_var () in
+        let b = new_ty_var () in
+        (f, x1, e1, a, b))
+        l) in
+      let a = (List.map (fun (f,x1,e1,a,b) -> (f, TyFun (TyVar a, TyVar b))) l') in
+      let gamma = a @ t_e in
+      let rec ty_con_b_list list =
+        (match list with
+        | [] -> []
+        | (f,x1,e1,a,b) :: rest -> 
+          let (t1, c1) = gather_ty_constraints ((x1, TyVar a) :: gamma) e1 in 
+          (t1, TyVar b, c1) :: ty_con_b_list rest  
+        ) in
+      let rec new_con list' =
+        (match list' with
+        | [] -> []
+        | (t1, t_vb, c1) :: rest -> ((t1, t_vb) :: c1) @ new_con rest  
+        ) in
+      let t_s = ty_unify (new_con (ty_con_b_list l')) in
+      (List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) a, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) gamma)
 
 let rec print_type (t : ty) : unit =
   match t with
   | TyInt -> print_string "Int"
   | TyBool -> print_string "Bool"
-  | TyFun (t1, t2) -> print_type t1; print_string " -> "; print_type t2
+  | TyFun (t1, t2) -> 
+    (match (t1, t2) with
+    | (TyFun (t11, t12) as t1'), (TyFun (t21, t22) as t2') -> print_string "("; print_type t1'; print_string ")"; print_string " -> "; print_string "("; print_type t2'; print_string ")"
+    | (TyFun (t11, t12) as t1'), t2'-> print_string "("; print_type t1'; print_string ")"; print_string " -> "; print_type t2'
+    | t1', (TyFun (t21, t22) as t2') -> print_type t1'; print_string " -> "; print_string "("; print_type t2'; print_string ")"
+    | _ -> print_type t1; print_string " -> "; print_type t2
+    )
   | TyVar s -> print_string s
-
   
 let print_command_type (t_e : ty_env) (cmd : command) : ty_env =
-
   let (t_e', t_e'') = infer_cmd t_e cmd in
-
   let rec print_command_loop (t_e : ty_env) : unit =
   match t_e with
   | [] -> ()
   | (name, ty) :: [] -> ();
     print_string (name ^ ": "); print_type ty
   | (name, ty) :: rest ->
-    print_string (name ^ ": "); print_type ty; print_string "; "; print_command_loop rest
-  in print_command_loop t_e';
-  t_e''
+    print_string (name ^ ": "); print_type ty; print_string "; "; print_command_loop rest in
+  print_command_loop t_e'; t_e''
 
 
 let rec print_value (v: value) : unit =
@@ -220,12 +214,11 @@ let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * t
     let (v,e') = command_let env n e in print_value v; print_newline();
     (e', t_e')
   | CRLetAnd l ->
-      let rec and_env (i: int) (l1: (name * name * expr) list) : env =
-      match l1 with
-        | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest);
-      in 
-      let nenv = and_env 0 l in
+    let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+    match l1 with
+    | [] -> env
+    | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
+    let nenv = and_env 0 l in
       (nenv, t_e')
 
 let repl () =
