@@ -148,7 +148,7 @@ let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env =
   (apply_ty_subst t_s t, List.map (fun (n, ty) -> (n, apply_ty_subst t_s ty)) t_e)
 
 
-let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
+let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
   match cmd with
   | CExp e ->
     let (t, t_e') = infer_expr t_e e in
@@ -173,9 +173,10 @@ let rec infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
         (f, t_i) :: t_e_i @ list) [] l' in
     let t_e_of_command = 
       (List.map (fun (f,x1,e1,a,b) ->
-      let (tl, tenvl) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
-      (f, tl))) l' in
+      let (t_i, _) = infer_expr ((x1, TyVar a) :: gamma) (EFun (x1, e1)) in
+      (f, t_i))) l' in
     (t_e_of_command, new_t_e)
+
 
 let rec print_type (t : ty) : unit =
   match t with
@@ -186,52 +187,45 @@ let rec print_type (t : ty) : unit =
 
   
 let print_command_type (t_e : ty_env) (cmd : command) : ty_env =
+
   let (t_e', t_e'') = infer_cmd t_e cmd in
+
   let rec print_command_loop (t_e : ty_env) : unit =
   match t_e with
-  | [] -> print_string ";"
-  | (name, t) :: [] -> ();
-    print_string (name ^ ": "); print_type t; print_string ";";
-  | (name, t) :: rest ->
-    print_string (name ^ ": "); print_type t; print_string "; "; print_command_loop rest
+  | [] -> ()
+  | (name, ty) :: [] -> ();
+    print_string (name ^ ": "); print_type ty
+  | (name, ty) :: rest ->
+    print_string (name ^ ": "); print_type ty; print_string "; "; print_command_loop rest
   in print_command_loop t_e';
   t_e''
 
 
 let rec print_value (v: value) : unit =
   match v with
-  | VInt i -> print_int i 
-  | VBool b -> print_string (string_of_bool b)
-  | VFun (x, e, env) -> print_string "<fun>"
-  | VRFunAnd (_, l, _) -> print_string "<fun>"
+  | VInt i -> print_string "Int = "; print_int i 
+  | VBool b -> print_string "Bool = "; print_string (string_of_bool b)
+  | VFun (x, e, env) -> print_string " = <fun>"
+  | VRFunAnd (_, l, _) -> print_string " = <fun>"
   | _ -> raise (Error "Error : Still developing")
 
-  
-let command_let (env : env) (n : name) (e : expr) : (value * env) =
-  match Eval.eval env e with
-  | v1 -> (v1, ((n,v1) :: env))
 
-
-let print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
+let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
   let t_e' = print_command_type t_e cmd in
   match cmd with
-  | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e)
-  | CLet (n, e) -> 
-    print_string ("val "); print_string n; print_string (" = "); 
+  | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e')
+  | CLet (n, e) ->  print_string (" = "); 
+    let command_let (env : env) (n : name) (e : expr) : (value * env) =
+      (match Eval.eval env e with | v1 -> (v1, ((n,v1) :: env))) in
     let (v,e') = command_let env n e in print_value v; print_newline();
     (e', t_e')
   | CRLetAnd l ->
       let rec and_env (i: int) (l1: (name * name * expr) list) : env =
       match l1 with
         | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest) in
+        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (and_env (i + 1) rest);
+      in 
       let nenv = and_env 0 l in
-      let rec printfun (l2 : (name * name * expr) list) : unit =
-        match l2 with
-        | [] -> ()
-        | (f, x, e) :: rest ->
-            print_endline (f ^ " = <fun>"); printfun rest;
-        in printfun l;
       (nenv, t_e')
 
 let repl () =
