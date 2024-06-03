@@ -38,14 +38,14 @@ fun x -> fun y -> x + (fun x -> if x then 1 else 2) y;;
 ```
 fun x -> fun y -> y x;;
 ```
-==> `- : (t1 -> t2 -> t3) -> (t1 -> t2) -> t1 -> t3`
+==> `- : t1 -> (t1 -> t2) -> t2 = <fun>`
 
 ## test3.txt
 
 ```
 fun x -> fun y -> fun z -> x z (y z);;
 ```
-==> `fact : Int -> Int = <fun>`
+==> `- : (t1 -> t2 -> t3) -> (t1 -> t2) -> t1 -> t3`
 
 ## test4.txt
 
@@ -93,7 +93,7 @@ let f = fun x -> 1;;
 ```
 ==> `f : t1 -> Int = <fun>`
 ```
-let rec h x = let _ = f 3 in 1 and g x = h x;;
+let rec h x = let z = f 3 in 1 and g x = h x;;
 ```
 ==> `h : t2 -> Int = <fun>`  
     `g : t2 -> Int = <fun>`
