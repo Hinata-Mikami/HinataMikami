@@ -59,7 +59,10 @@ type ty =
   | TyInt
   | TyBool
   | TyFun of ty * ty
-  | TyVar of ty_var                       
+  | TyVar of ty_var
+  | TyNil
+  | TyCons of ty * ty
+  | TyTuple of ty list                       
 
 
 and ty_subst = (ty_var * ty) list
