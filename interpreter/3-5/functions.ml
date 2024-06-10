@@ -14,14 +14,8 @@ let rec apply_ty_subst (t_s : ty_subst) (t : ty) : ty =
     | (t_v', t') :: rest when t_v' = t_v -> t'
     | (t_v', t') :: rest -> apply_ty_subst rest t
     )
-  | TyCons (t1, t2) -> TyCons(apply_ty_subst t_s t1, apply_ty_subst t_s t2)
-  | TyNil -> TyNil
-  | TyTuple t_l ->
-    TyTuple
-    (match t_l with
-    | [] -> []
-    | t'::rest -> (apply_ty_subst t_s t') :: (apply_ty_subst t_s rest)
-    )
+  | TyTuple (t1, t2) -> TyTuple (apply_ty_subst t_s t1, apply_ty_subst t_s t2)
+  | TyCons t' -> TyCons (apply_ty_subst t_s t')
  
 
 let compose_ty_subst (s1 : ty_subst) (s2 : ty_subst) : ty_subst =
@@ -49,15 +43,8 @@ let rec check_var_fault (s : string) (t : ty) : bool =
   | TyBool -> false
   | TyVar t_v -> if t_v = s then true else false
   | TyFun (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
-  | TyNil -> false
-  | TyCons (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
-  | TyTuple t_l ->
-    (match t_l with
-    | [] -> false
-    | TyVar t_v :: rest 
-      -> if t_v = s then true else check_var_fault s (TyTuple rest)
-    | _ :: rest -> check_var_fault s (TyTuple rest)
-    )
+  | TyTuple (t1, t2) -> check_var_fault s t1 || check_var_fault s t2
+  | TyCons t' -> check_var_fault s t'
 
 
   let rec ty_unify (c : ty_constraints) : ty_subst =
@@ -69,9 +56,9 @@ let rec check_var_fault (s : string) (t : ty) : bool =
       if check_var_fault s t then raise (Error ("FunctionsError : Unable to decide type of "^s))
       else compose_ty_subst
       (ty_unify (List.map (fun (t1, t2) -> (apply_ty_subst [(s, t)] t1, apply_ty_subst [(s, t)] t2)) rest)) [(s, t)]
-    | TyNil
-    | TyCons
-    | TyTuple 
+    | (TyCons t1, TyCons t2) :: rest -> ty_unify ((t1, t2) :: rest)
+    | (TyTuple (t1, t2), TyTuple (t1', t2')) :: rest ->
+      ty_unify ((t1, t1') :: (t2, t2') :: rest)
 
     | _ -> raise (Error "FunctionsError : Unable to unify")
 
@@ -143,7 +130,32 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       -> (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2) 
     | OpLt -> (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
     )
-
+  | ECons (e1, e2) ->
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in
+    (TyCons t1, [(t2, TyCons t1)] @ c1 @ c2)
+  | ETuple e_l -> 
+    let rec gather_ETuple_constraints e_l =
+      (match e_l with
+      | [] -> []
+      | e :: rest -> (gather_ty_constraints t_e e) :: gather_ETuple_constraints rest
+      ) in
+    let l = gather_ETuple_constraints e_l in
+    let rec tlist l =
+      (match l with
+      | (ti, _) :: [] ->  ti
+      | (ti, _) :: rest -> TyTuple (ti, (tlist rest))
+      | _ -> raise (Error "FunctionsError : unable to gather ETuple constraints")
+      ) in
+    let rec clist l =
+      (match l with
+      | [] -> []
+      | (_, ci) :: rest -> [ci] @ clist rest
+      )
+    in (tlist l, clist l)
+    (* let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints t_e e2 in
+    (TyTuple (t1, t2), c1 @ c2) *)
   | _ -> raise (Error "FunctionsError : Unable to gather constraints")
 
 
