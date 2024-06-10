@@ -106,6 +106,7 @@ app_expr:
 
 //match e with ...
 match_pattern:
+  | END                                   { [] }
   | pattern ARROW expr patterns           { ($1,$3) :: $4 }
   | pattern ARROW expr END                { [($1,$3)] }
 ;
