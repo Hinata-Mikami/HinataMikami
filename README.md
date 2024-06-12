@@ -21,6 +21,3 @@ OCaml冬の課題の答案
 
 ## interpreter
 インタプリタ演習本編
-
-## horse_AI
-python、機械学習の勉強もかねて競馬予想AIを作っています。
