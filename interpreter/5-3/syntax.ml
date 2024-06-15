@@ -35,7 +35,7 @@ and value =
   | VTuple of value list                          
   | VNil                                              
   | VCons of value * value                            
-  | VRFunAnd of int * (name * name * expr) list * env
+  | VRLetAnd of int * (name * name * expr) list * env
 
 and pattern = 
   | PInt of int

@@ -36,7 +36,7 @@ and value =
   | VTuple of value * value                         
   | VNil                                              
   | VCons of value * value                            
-  | VRFunAnd of int * (name * name * expr) list * env
+  | VRLetAnd of int * (name * name * expr) list * env
 
 and pattern = 
   | PInt of int
@@ -45,10 +45,11 @@ and pattern =
   | PWild
   | PCons of pattern * pattern
   | PNil
-  | PTuple of pattern * pattern
+  | PTuple of pattern list
 
-and thunk = Thunk of expr * env
-  | ThunkInf of name * expr * env
+and thunk = 
+  | Thunk of expr * env
+  | ThunkExt of name * expr * env
 
 
 type command =
@@ -56,3 +57,21 @@ type command =
   | CLet of name * expr
   | CRLetAnd of (name * name * expr) list
   | CRLetInf of name * expr
+
+
+type ty_var = name
+
+type ty =
+  | TyInt
+  | TyBool
+  | TyFun of ty * ty
+  | TyVar of ty_var
+  | TyCons of ty 
+  | TyTuple of ty * ty                 
+  
+  
+and ty_subst = (ty_var * ty) list
+  
+and ty_constraints = (ty * ty) list
+  
+and ty_env = (name* ty) list

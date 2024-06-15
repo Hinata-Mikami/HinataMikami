@@ -86,11 +86,11 @@ let rec eval (env : env) (expr : expr) : value =
         let v2 = eval env e2 in
         (match v1 with
         | VFun (x, e, oenv) -> eval ((x, v2) :: oenv) e
-        | VRFunAnd (i, l, oenv) -> 
+        | VRLetAnd (i, l, oenv) -> 
           (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
             match l1 with
               | [] -> []
-              | (fj, _, _) :: rest -> (fj, VRFunAnd(j, l, oenv)) :: make_env (j + 1) rest
+              | (fj, _, _) :: rest -> (fj, VRLetAnd(j, l, oenv)) :: make_env (j + 1) rest
           (*作成した環境を既存の環境oenvに追加*)
           in let nenv = (make_env 0 l) @ oenv
           (*i番目の要素を取り出す*)
@@ -122,7 +122,7 @@ let rec eval (env : env) (expr : expr) : value =
         let rec make_env (i: int) (l' : (name * name * expr) list) : env =
         match l' with
         | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (make_env (i + 1) rest) in
+        | (f, x, e) :: rest -> (f, VRLetAnd(i, l, env)) :: (make_env (i + 1) rest) in
           let nenv = make_env 0 l 
         (*環境の下でeを評価*)
         in eval nenv e
