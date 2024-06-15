@@ -60,8 +60,8 @@ type ty =
   | TyBool
   | TyFun of ty * ty
   | TyVar of ty_var
-  | TyCons of ty
-  | TyTuple of ty * ty                      
+  | TyCons of ty (*TyList*)
+  | TyTuple of ty * ty  (*ty list*)                    
 
 
 and ty_subst = (ty_var * ty) list

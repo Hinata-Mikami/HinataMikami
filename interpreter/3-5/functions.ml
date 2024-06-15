@@ -71,15 +71,15 @@ let new_ty_var () =
 
   let rec gather_ty_constraints_pattern (p : pattern) : ty * ty_env * ty_constraints =
     match p with
-    | PInt i -> (TyInt, [], [])
-    | PBool b -> (TyBool, [], [])
+    | PInt _ -> (TyInt, [], [])
+    | PBool _ -> (TyBool, [], [])
     | PVar s ->
       let s1 = new_ty_var () in
       (TyVar s1, [(s, TyVar s1)], [])
-    (* | PTuple p_l ->
+     | PTuple p_l ->
       let rec gather_PTuple_constraints p_l =
         (match p_l with
-        | [] -> ([], [], [])
+        | [] -> []
         | pi :: rest -> (gather_ty_constraints_pattern pi) :: gather_PTuple_constraints rest
         ) in
       let l = gather_PTuple_constraints p_l in
@@ -99,8 +99,8 @@ let new_ty_var () =
         | [] -> []
         | (_, _, cons) :: rest -> cons @ t_cons rest
         ) in
-        (ty_l l, t_bind l, t_cons l) *)
-    | PTuple p_l ->
+        (ty_l l, t_bind l, t_cons l) 
+    (* | PTuple p_l -> (*組の最後の要素だけ特別扱いにする*)
       let rec gather_PTuple_constraints p_l =
         (match p_l with
         | [] -> ([], [], [])
@@ -111,7 +111,7 @@ let new_ty_var () =
           ) in
       let (types, env, cons) = gather_PTuple_constraints p_l in
       let ty = List.fold_right (fun t acc -> TyTuple (t, acc)) types (List.hd (List.rev types)) in
-      (ty, env, cons)
+      (ty, env, cons) *)
     | PNil ->
       let s = new_ty_var () in
       (TyCons (TyVar s), [], [])
@@ -119,7 +119,7 @@ let new_ty_var () =
       let (t1, t_bind1, c1) = gather_ty_constraints_pattern p1 in
       let (t2, t_bind2, c2) = gather_ty_constraints_pattern p2 in
       (TyCons t1, t_bind1 @ t_bind2, [(TyCons t1, t2)] @ c1 @ c2) 
-    | PWild -> 
+    | PWild ->  (*?*)
       let s = new_ty_var () in
       (TyVar s, [], [])
 
@@ -223,11 +223,11 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       | [] -> []
       | (p, e) :: rest ->
         let (t_p, t_bind, c_p) = gather_ty_constraints_pattern p in
-        let (t_e, c_e) = gather_ty_constraints (t_bind @ t_e) e in
-        (t, t_p) :: (TyVar s, t_e) :: c_p @ c_e @ process_patterns rest
+        let (t_e', c_e) = gather_ty_constraints (t_bind @ t_e) e in
+        (t, t_p) :: (TyVar s, t_e') :: c_p @ c_e @ process_patterns rest
     in
     let c' = process_patterns plist in
-    (TyVar s, c @ c')
+    (TyVar s, c')
   | _ -> raise (Error "FunctionsError : Unable to gather constraints")
 
 
@@ -284,10 +284,10 @@ let rec print_type (t : ty) : unit =
   | TyTuple (t1, t2) as tyt -> 
     let rec print_type_tuple (t : ty) : unit =
     (match t with
-      | TyTuple (t1, t2) -> 
+      | TyTuple (t1, t2) ->
         (match t2 with
-        | TyTuple (t1', t2) as t' -> print_type t1'; print_string " * "; print_type_tuple t'
-        | t'' -> print_type t''
+        | TyTuple (t1', t2) as t' -> print_type t1; print_string " * "; print_type_tuple t'
+        | t'' -> print_type t1; print_string " * "; print_type t''
         )
       | _ -> raise (Error "FunctionsError : Couldn't print type of tuple")
     ) in
@@ -310,17 +310,20 @@ let print_command_type (t_e : ty_env) (cmd : command) : ty_env =
 
 let rec print_value (v: value) : unit =
   match v with
-  | VInt i -> print_string "Int = "; print_int i 
-  | VBool b -> print_string "Bool = "; print_string (string_of_bool b)
+  | VInt i -> print_int i 
+  | VBool b -> print_string (string_of_bool b)
   | VFun (x, e, env) -> print_string " = <fun>"
   | VRFunAnd (_, l, _) -> print_string " = <fun>"
   | VNil | VCons _ -> print_string "List = "
-  | _ -> raise (Error "FunctionsError : Still developing")
+  | VTuple vl -> print_string " = (";
+    match vl with
+    | v :: rest -> print_value v;
+      List.map (fun v -> print_string ", "; print_value v) rest;
+      print_string (")")
 
 
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
   let t_e' = print_command_type t_e cmd in
-  print_newline();
   match cmd with
   | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e')
   | CLet (n, e) ->  print_string (" = "); 
@@ -347,7 +350,7 @@ let repl () =
     match Parser.command Lexer.token lexbuf with
     | r ->
       (match print_command_value env r t_e with
-      | (env', t_e') -> loop_stdin env' t_e'
+      | (env', t_e') -> print_newline(); loop_stdin env' t_e'
       | exception Error s -> print_endline s; print_newline(); loop_stdin env t_e
       )
     | exception Lexer.Error msg ->
