@@ -1,4 +1,4 @@
-open Syntax_cbn
+open Syntax
 
 exception Error of string
 
@@ -320,15 +320,16 @@ let rec print_value (v: value) : unit =
     | v :: rest -> print_value v;
       List.map (fun v -> print_string ", "; print_value v) rest;
       print_string (")")
+    | _ -> raise (Error "Unexpected match happened at functions/print_value")
 
 
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
   let t_e' = print_command_type t_e cmd in
   match cmd with
-  | CExp expr -> print_value (Eval_cbn.eval_cbn env expr); print_newline(); (env, t_e')
+  | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e')
   | CLet (n, e) ->  print_string (" = "); 
     let command_let (env : env) (n : name) (e : expr) : (value * env) =
-      (match Eval_cbn.eval_cbn env e with | v1 -> (v1, ((n,v1) :: env))) in
+      (match Eval.eval env e with | v1 -> (v1, ((n,v1) :: env))) in
     let (v,e') = command_let env n e in print_value v; print_newline();
     (e', t_e')
   | CRLetAnd l ->

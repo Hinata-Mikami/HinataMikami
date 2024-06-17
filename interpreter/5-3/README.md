@@ -17,16 +17,16 @@ ocamlc -o main syntax.cmo parser.cmo lexer.cmo eval.cmo functions.cmo main.cmo
 
 ## 名前呼び
 ```
-ocamllex lexer.mll  
-ocamlyacc parser.mly  
+ocamllex lexer_cbn.mll  
+ocamlyacc parser_cbn.mly  
 ocamlc -c syntax_cbn.ml  
-ocamlc -c parser.mli  
-ocamlc -c parser.ml  
-ocamlc -c lexer.ml  
+ocamlc -c parser_cbn.mli  
+ocamlc -c parser_cbn.ml  
+ocamlc -c lexer_cbn.ml  
 ocamlc -c eval_cbn.ml
-ocamlc -c functions_cbn.ml  
-ocamlc -c main.ml  
-ocamlc -o main syntax_cbn.cmo parser.cmo lexer.cmo eval.cmo eval_cbn.cmo functions_cbn.cmo main.cmo
+ocamlc -c functions_cbn.ml
+ocamlc -c main_cbn.ml  
+ocamlc -o main syntax_cbn.cmo parser_cbn.cmo lexer_cbn.cmo eval_cbn.cmo functions_cbn.cmo main_cbn.cmo
 ```
 
 ## 実行方法

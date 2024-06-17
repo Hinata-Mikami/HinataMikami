@@ -1,4 +1,4 @@
-open Syntax
+open Syntax_cbn
 
 exception Error of string
 
@@ -306,79 +306,3 @@ let print_command_type (t_e : ty_env) (cmd : command) : ty_env =
     in 
     print_command_loop t_e'; 
     t_e''
-
-
-let rec print_value (v: value) : unit =
-  match v with
-  | VInt i -> print_int i 
-  | VBool b -> print_string (string_of_bool b)
-  | VFun (x, e, env) -> print_string " = <fun>"
-  | VRLetAnd (_, l, _) -> print_string " = <fun>"
-  | VNil | VCons _ -> print_string "List = "
-  | VTuple vl -> print_string " = (";
-    match vl with
-    | v :: rest -> print_value v;
-      List.map (fun v -> print_string ", "; print_value v) rest;
-      print_string (")")
-
-
-let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
-  let t_e' = print_command_type t_e cmd in
-  match cmd with
-  | CExp expr -> print_value (Eval.eval env expr); print_newline(); (env, t_e')
-  | CLet (n, e) ->  print_string (" = "); 
-    let command_let (env : env) (n : name) (e : expr) : (value * env) =
-      (match Eval.eval env e with | v1 -> (v1, ((n,v1) :: env))) in
-    let (v,e') = command_let env n e in print_value v; print_newline();
-    (e', t_e')
-  | CRLetAnd l ->
-    let rec and_env (i: int) (l1: (name * name * expr) list) : env =
-    match l1 with
-    | [] -> env
-    | (f, x, e) :: rest -> (f, VRLetAnd(i, l, env)) :: (and_env (i + 1) rest) in
-    let nenv = and_env 0 l in
-      (nenv, t_e')
-
-let repl () =
-
-  let lexbuf = Lexing.from_channel stdin in
-
-  let rec loop_stdin (env:env) (t_e : ty_env) =  
-    let () = print_string "# " in
-    let () = flush stdout in
-  
-    match Parser.command Lexer.token lexbuf with
-    | r ->
-      (match print_command_value env r t_e with
-      | (env', t_e') -> print_newline(); loop_stdin env' t_e'
-      | exception Error s -> print_endline s; print_newline(); loop_stdin env t_e
-      )
-    | exception Lexer.Error msg ->
-      Printf.printf "Lexing Error\n" ;
-      print_endline msg;
-      loop_stdin env t_e
-    | exception Parsing.Parse_error ->
-      Printf.printf "Parse Error "; 
-      Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
-      loop_stdin env t_e
-  
-  in loop_stdin [] []
-
-
-let read_file op_file =
-  
-  let lexbuf = Lexing.from_channel op_file in
-    
-  let rec loop_file (env : env) (t_e : ty_env) = 
-    match Parser.command Lexer.token lexbuf with 
-    | r -> 
-      (match print_command_value env r t_e with
-      | (env', t_e') -> loop_file env' t_e'
-      | exception Error s -> print_endline s; print_newline()
-      )
-    | exception Lexer.Error msg -> Printf.printf "Lexing Error\n"; print_endline msg;
-    | exception Parsing.Parse_error 
-      ->  Printf.printf "Parse Error "; 
-          Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
-  
-  in loop_file [] []

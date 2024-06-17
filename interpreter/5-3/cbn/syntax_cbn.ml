@@ -21,11 +21,11 @@ type expr =
   | EFun of name * expr
   | EApp of expr * expr
   | EMatch of expr * (pattern * expr) list        
-  | ETuple of expr * expr                           
+  | ETuple of expr list                          
   | ENil                                     
   | ECons of expr * expr                       
   | ERLetAnd of (name * name * expr) list * expr
-  | ERLetInf of name * expr * expr
+
 
 and env = (name * thunk) list
 
@@ -33,9 +33,9 @@ and value =
   | VInt  of int
   | VBool of bool 
   | VFun of name * expr * env
-  | VTuple of value * value                         
+  | VTuple of thunk list                       
   | VNil                                              
-  | VCons of value * value                            
+  | VCons of thunk * value                          
   | VRLetAnd of int * (name * name * expr) list * env
 
 and pattern = 
@@ -49,14 +49,14 @@ and pattern =
 
 and thunk = 
   | Thunk of expr * env
-  | ThunkExt of name * expr * env
+
 
 
 type command =
   | CExp of expr
   | CLet of name * expr
   | CRLetAnd of (name * name * expr) list
-  | CRLetInf of name * expr
+
 
 
 type ty_var = name
