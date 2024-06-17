@@ -41,40 +41,59 @@ $./main test.txt
 ```  
 
 # テストケース
-## test1.txt
+## 1-1
 
 ```
-fun x ->
+let z = 1 / 0;;
+```
+==> zを評価してしまうとエラーが起きるのでzの型のみを表示するとよいでしょう
+
+## 1-2
+
+```
+1 / 0;;
+```
+==> `実行時エラー`
+
+## 1-3
+
+```
+(fun x -> 42) (1 / 0)
+```
+==> ` - : Int = 42`
+
+## 1-4
+
+```
+(fun x -> fun y -> x) 5 (1 / 0);;
+```
+==> `- : Int = 5`
+
+## 1-5
+```
+(fun x -> fun y -> x) (loop ()) (1 / 0);;
+```
+==> `実行時エラー` loop定義不可？
+
+## 2-1
+```
+let head = fun x ->
   match x with
-    (a, b) -> a
-  end;;
+    h :: t -> h
+  | [] -> 0
+  end
+in
+head (5 :: (1 / 0));;
 ```
-==> `- : t1 * t2 -> t1 = <fun>`
+==> `- : Int = 5` 
 
-## test2.txt
-
+## 2-2
 ```
-fun x ->
+let fst = fun x ->
   match x with
-    (a, h :: t) -> h
-  end;;
+    (x, y) -> x
+  end
+in
+fst (5, (1 / 0));;
 ```
-==> `- : t1 * [t2] -> t2 = <fun>`
-
-## test3.txt
-
-```
-fun x ->
-  match x with
-    (a, h :: t) -> h
-  | (a, []) -> a * 2
-  end;;
-```
-==> `- : Int * [Int] -> Int = <fun>`
-
-## test4.txt
-
-```
-fun x -> match x with end;;
-```
-==> `- : t1 -> t2`
+==> `- : Int = 5` 

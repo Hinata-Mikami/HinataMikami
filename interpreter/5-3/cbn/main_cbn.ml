@@ -13,13 +13,6 @@ let rec print_command_value (env : env) (cmd : Syntax_cbn.command) (t_e : ty_env
     let (v,e') = command_let env n e in Eval_cbn.print_value v; print_newline();
     (e', t_e')
   | _ -> raise (Error "Main_cbn Error : Unexpected command at print_command_value")
-  (* | CRLetAnd l ->
-    let rec and_env (i: int) (l1: (name * name * expr) list) : env =
-    match l1 with
-    | [] -> env
-    (* | (f, x, e) :: rest -> (f, VRLetAnd(i, l, env)) :: (and_env (i + 1) rest) in *)
-    let nenv = and_env 0 l in
-      (nenv, t_e') *)
 
 
 let repl () =
@@ -34,14 +27,17 @@ let repl () =
     | r ->
       (match print_command_value env r t_e with
       | (env', t_e') -> print_newline(); loop_stdin env' t_e'
-      | exception Error s -> print_endline s; print_newline(); loop_stdin env t_e
+      | exception Eval_cbn.Error msg -> print_newline(); print_endline msg; loop_stdin env t_e
+      | exception Functions_cbn.Error msg -> print_newline(); print_endline msg; loop_stdin env t_e
+      | exception Error s -> print_newline(); print_endline s; print_newline(); loop_stdin env t_e
       )
+ 
     | exception Lexer_cbn.Error msg ->
-      Printf.printf "Lexing Error\n" ;
+      Printf.printf "\nLexing Error\n" ;
       print_endline msg;
       loop_stdin env t_e
     | exception Parsing.Parse_error ->
-      Printf.printf "Parse Error "; 
+      Printf.printf "\nParse Error "; 
       Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf); 
       loop_stdin env t_e
   
@@ -59,9 +55,9 @@ let read_file op_file =
       | (env', t_e') -> loop_file env' t_e'
       | exception Error s -> print_endline s; print_newline()
       )
-    | exception Lexer_cbn.Error msg -> Printf.printf "Lexing Error\n"; print_endline msg;
+    | exception Lexer_cbn.Error msg -> Printf.printf "\nLexing Error\n"; print_endline msg;
     | exception Parsing.Parse_error 
-      ->  Printf.printf "Parse Error "; 
+      ->  Printf.printf "\nParse Error "; 
           Printf.printf "around `%s'\n" (Lexing.lexeme lexbuf);
   
   in loop_file [] []
