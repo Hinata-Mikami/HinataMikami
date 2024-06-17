@@ -183,6 +183,8 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       -> (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2) 
     | OpLt -> (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
     )
+  | ENil -> let s = new_ty_var () in
+           (TyCons (TyVar s), [])
   | ECons (e1, e2) ->
     let (t1, c1) = gather_ty_constraints t_e e1 in
     let (t2, c2) = gather_ty_constraints t_e e2 in
@@ -228,7 +230,7 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     in
     let c' = process_patterns plist in
     (TyVar s, c')
-  | _ -> raise (Error "FunctionsError : Unable to gather constraints")
+  (* | _ -> raise (Error "FunctionsError : Unable to gather constraints") *)
 
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
