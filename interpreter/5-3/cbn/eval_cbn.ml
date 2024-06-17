@@ -111,7 +111,7 @@ let rec value_of_exp (exp : expr) (env : env) : value =
     | EIf (e1, e2, e3) -> value_of_exp exp' env'
     | ELet (x, e1, e2) -> value_of_exp exp' env'
     | EApp (e1, e2) -> value_of_exp exp' env'
-    | EFun (n, e1) -> value_of_exp exp' env'
+    | EFun (n, e1) -> VFun (n, e1, env')
     | ETuple elist -> VTuple (value_of_etuple elist env)
     | ENil -> VNil
     | ECons (e1, e2) -> VCons (Thunk (e1, env'), value_of_exp e2 env')
@@ -135,8 +135,8 @@ let print_value (v : value) : unit =
       in print_value_tuple thlist
     | VNil -> print_string "[]"
     | VCons (Thunk (exp, env), v) -> print_loop (value_of_exp exp env); print_string " :: "; print_loop v
-    | VFun (x, e, env) -> print_string " = <fun>"
-    | VRLetAnd (_, l, _) -> print_string " = <fun>" in
+    | VFun (x, e, env) -> print_string "<fun>"
+    | VRLetAnd (_, l, _) -> print_string "<fun>" in
   print_loop v
  
 
