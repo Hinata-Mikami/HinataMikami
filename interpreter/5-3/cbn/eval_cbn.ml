@@ -19,6 +19,7 @@ let rec make_thunk (exp : expr) (env : env) : thunk =
   | ELet (n, e1, e2) -> Thunk (e2, (n, Thunk (e1, env)) :: env)
   | EVar n ->(try List.assoc n env 
               with Not_found -> raise (Error "Eval-CBN Error : Variable not found"))
+  | EFun (n, e) -> Thunk (EFun (n, e), env)
   | EApp (e1, e2) -> 
     (match make_thunk e1 env with
     | Thunk (EFun (n, e), env') -> Thunk (e, (n, Thunk (e2, env)) :: env')
@@ -35,7 +36,7 @@ let rec make_thunk (exp : expr) (env : env) : thunk =
   | ECons (e1, e2) -> Thunk (ECons (e1, e2), env)
   | ENil -> Thunk (ENil, env)
   | EMatch (e, plist) ->
-    let th = make_thunk e env in
+    (let th = make_thunk e env in
     let rec eval_match env l th =
       match l with
       | [] -> raise (Error "Eval_cbn Error : Failed to match")
@@ -44,6 +45,7 @@ let rec make_thunk (exp : expr) (env : env) : thunk =
         | None -> eval_match env rest th
         | Some s -> Thunk (e, (s @ env)))
       in eval_match env plist th
+    )
   | _ -> raise (Error "Eval_cbn Error : Still developing")
 
 and find_match (p : pattern) (th : thunk) : env option =

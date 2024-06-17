@@ -76,7 +76,7 @@ let new_ty_var () =
     | PVar s ->
       let s1 = new_ty_var () in
       (TyVar s1, [(s, TyVar s1)], [])
-     | PTuple p_l ->
+    | PTuple p_l ->
       let rec gather_PTuple_constraints p_l =
         (match p_l with
         | [] -> []
