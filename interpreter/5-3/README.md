@@ -23,10 +23,10 @@ ocamlc -c syntax_cbn.ml
 ocamlc -c parser_cbn.mli  
 ocamlc -c parser_cbn.ml  
 ocamlc -c lexer_cbn.ml  
-ocamlc -c eval_cbn.ml
 ocamlc -c functions_cbn.ml
+ocamlc -c eval_cbn.ml
 ocamlc -c main_cbn.ml  
-ocamlc -o main syntax_cbn.cmo parser_cbn.cmo lexer_cbn.cmo eval_cbn.cmo functions_cbn.cmo main_cbn.cmo
+ocamlc -o main syntax_cbn.cmo parser_cbn.cmo lexer_cbn.cmo functions_cbn.cmo eval_cbn.cmo main_cbn.cmo
 ```
 
 ## 実行方法
@@ -73,7 +73,7 @@ let z = 1 / 0;;
 ```
 (fun x -> fun y -> x) (1 / 0) (1 / 0);;
 ```
-==> 実行時エラー loop定義不可？
+==> 実行時エラー
 
 ## 2-1
 ```

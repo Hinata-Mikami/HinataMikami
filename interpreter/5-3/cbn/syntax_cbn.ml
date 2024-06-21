@@ -35,7 +35,7 @@ and value =
   | VFun of name * expr * env
   | VTuple of thunk list                       
   | VNil                                              
-  | VCons of thunk * value                          
+  | VCons of thunk * thunk                          
   | VRLetAnd of int * (name * name * expr) list * env
 
 and pattern = 

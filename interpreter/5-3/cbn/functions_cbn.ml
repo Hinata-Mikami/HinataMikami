@@ -100,18 +100,6 @@ let new_ty_var () =
         | (_, _, cons) :: rest -> cons @ t_cons rest
         ) in
         (ty_l l, t_bind l, t_cons l) 
-    (* | PTuple p_l -> (*組の最後の要素だけ特別扱いにする*)
-      let rec gather_PTuple_constraints p_l =
-        (match p_l with
-        | [] -> ([], [], [])
-        | pi :: rest -> 
-          let (t, env, cons) = gather_ty_constraints_pattern pi in
-          let (t_rest, env_rest, cons_rest) = gather_PTuple_constraints rest in
-          (t :: t_rest, env @ env_rest, cons @ cons_rest)
-          ) in
-      let (types, env, cons) = gather_PTuple_constraints p_l in
-      let ty = List.fold_right (fun t acc -> TyTuple (t, acc)) types (List.hd (List.rev types)) in
-      (ty, env, cons) *)
     | PNil ->
       let s = new_ty_var () in
       (TyCons (TyVar s), [], [])
@@ -208,15 +196,6 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
       | (_, ci) :: rest -> ci @ clist rest
       )
     in (tlist l, clist l)
-    (* | EMatch (e, plist) ->
-      let (t, c) = gather_ty_constraints t_e e in
-      let s = new_ty_var () in
-      let plist =
-        List.fold_left (fun list (p, e) ->
-          let (t, t_bind, c) = gather_ty_constraints_pattern p in
-          let (t_e', c') = gather_ty_constraints (t_bind @ t_e) e in
-          (t, t) :: (TyVar s, t_e') :: c @ c' @ list) [] plist in
-      (TyVar s, c @ plist) *)
   | EMatch (e, plist) ->
     let (t, c) = gather_ty_constraints t_e e in
     let s = new_ty_var () in
@@ -230,7 +209,6 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     in
     let c' = process_patterns plist in
     (TyVar s, c')
-  (* | _ -> raise (Error "FunctionsError : Unable to gather constraints") *)
 
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 

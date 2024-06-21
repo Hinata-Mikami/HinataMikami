@@ -3,18 +3,6 @@ open Syntax_cbn
 exception Error of string
 (*メイン関数*)
 
-let rec print_command_value (env : env) (cmd : Syntax_cbn.command) (t_e : ty_env) : env * ty_env =
-  let t_e' = Functions_cbn.print_command_type t_e cmd in
-  match cmd with
-  | CExp expr -> Eval_cbn.print_value (Eval_cbn.value_of_exp expr env); print_newline(); (env, t_e')
-  | CLet (n, e) ->  print_string (" = "); 
-    let command_let (env : env) (n : name) (e : expr) : (value * env) =
-      (match Eval_cbn.value_of_exp e env with | v1 -> (v1, ((n, Thunk (e, env)) :: env))) in
-    let (v,e') = command_let env n e in Eval_cbn.print_value v; print_newline();
-    (e', t_e')
-  | _ -> raise (Error "Main_cbn Error : Unexpected command at print_command_value")
-
-
 let repl () =
 
   let lexbuf = Lexing.from_channel stdin in
@@ -25,7 +13,7 @@ let repl () =
   
     match Parser_cbn.command Lexer_cbn.token lexbuf with
     | r ->
-      (match print_command_value env r t_e with
+      (match Eval_cbn.print_command_value env r t_e with
       | (env', t_e') -> print_newline(); loop_stdin env' t_e'
       | exception Eval_cbn.Error msg -> print_newline(); print_endline msg; loop_stdin env t_e
       | exception Functions_cbn.Error msg -> print_newline(); print_endline msg; loop_stdin env t_e
@@ -51,7 +39,7 @@ let read_file op_file =
   let rec loop_file (env : env) (t_e : ty_env) = 
     match Parser_cbn.command Lexer_cbn.token lexbuf with 
     | r -> 
-      (match print_command_value env r t_e with
+      (match Eval_cbn.print_command_value env r t_e with
       | (env', t_e') -> loop_file env' t_e'
       | exception Error s -> print_endline s; print_newline()
       )
