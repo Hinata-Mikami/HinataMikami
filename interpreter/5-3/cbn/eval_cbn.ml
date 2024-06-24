@@ -8,8 +8,6 @@ let value_of_literal (l:  literal) : value =
   | LBool b -> VBool b
 
 let rec eval (env : env) (expr : expr) : value =
-
-  (*binOp -> value*)
   let eval_bin_op (env : env) (op : binOp) (e1 : expr) (e2 : expr) : value =
     let v1 = eval env e1 in
     let v2 = eval env e2 in
@@ -24,14 +22,12 @@ let rec eval (env : env) (expr : expr) : value =
       | OpLt -> VBool (x < y))
     | _ -> raise (Error "Eval_Error : Unexpected expression on eval_bin_op")
 
-  (*if e0 then e1 else e2 -> value*)
   in let eval_if (env : env) (e0 : expr) (e1 : expr) (e2 : expr) : value =
     match eval env e0 with
     | VBool true -> eval env e1
     | VBool false -> eval env e2
     | _ -> raise (Error "Eval_Error : Unexpected expression on eval_if")
 
-  (* (x, v)∊env ⇒ v *)
   in let lookup_variable (env : env) (x : name) : value =
     try
       let Thunk(exp, env) = List.assoc x env in
@@ -39,41 +35,9 @@ let rec eval (env : env) (expr : expr) : value =
     with
     | Not_found -> raise (Error "Eval_Error : Variable not found on lookup_variable")
 
-  (*let n = e1 in e2-> value*)
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) : value = 
     eval ((n, Thunk (e1, env)) :: env) e2
        
-  (*match v with p -> ... *)     
-  (* p v の型一致を確認し、一致ならSome 追加する環境を返す *)
-  (* in let rec find_match (p : pattern ) (v : value) : env option =
-    match p, v with
-    | PInt i1, VInt i2 -> if i1 = i2 then Some [] else None
-    | PBool b1, VBool b2 -> if b1 = b2 then Some [] else None
-    | PVar x, _ -> Some [(x, v)] (*左側が変数xなら(x, v)を環境に追加*)
-    | PWild, _ -> Some [] (*ワイルドカードは必ず右側を評価*)
-    (*リストの評価*)
-    | PCons(ph, prest), VCons(vh, vrest) ->
-      let h = find_match ph vh in (*先頭のパターンマッチの確認*)
-      let rest = find_match prest vrest in (*再帰的に2番目以降の要素のパターンマッチを確認*)
-      (match h, rest with
-        | Some env1, Some env2 -> Some (env1 @ env2) (*先頭もそれ以降もマッチ->新環境を連結*)
-        | _ -> None)
-    | PNil, VNil -> Some [] (* [] -> [] なら返す環境なし*)
-    (*組の評価 リストの時と同様*)
-    | PTuple pl, VTuple vl ->
-      let rec match_tuple (pl:pattern list) (vl: value list) : env option =
-      match pl, vl with
-          | [], [] -> Some []
-          | p :: prest , v :: vrest ->
-              let h = find_match p v in
-              let rest = match_tuple prest vrest in
-              (match h, rest with
-                | Some env1, Some env2 -> Some (env1 @ env2)
-                | _ -> None)
-          | _ -> None
-          in match_tuple pl vl
-    | _ -> None *)
-
   in match expr with
       | ELiteral x -> value_of_literal x
       | EBin (op, e1, e2) -> eval_bin_op env op e1 e2
@@ -96,23 +60,8 @@ let rec eval (env : env) (expr : expr) : value =
           in let (f, x, e) = List.nth l i
           in eval ((x, v2) :: nenv) e) i番目の変数名と値v2を環境に追加したうえでeを評価 *)
         | _ -> raise (Error "EvalError : Non-function cannot be applied"))
-      (*match e with ... の e とパターンの組のリスト (p, e) list を受け取る *)
-      (* | EMatch (e, pl) -> 
-        let v = eval env e in
-        (*マッチ時は情報を環境に追加してそのうえで->の右側を評価)*)
-        let rec match_to_value (v: value) (l: (pattern * expr) list) : value =
-          match l with
-          | [] -> raise (Error "Evalerror : No pattern matched")
-          | (p, e') :: rest ->
-            (match find_match p v with
-            | Some nenv -> eval (nenv @ env) e'
-            | None -> match_to_value v rest) 
-          in match_to_value v pl *)
-      | ENil -> VNil
-      (*リストの評価：要素をvalueに変える*)          
-      | ECons (e1, e2) ->
-        VCons (Thunk (e1, env), Thunk (e2, env))
-      (*組の評価：すべての要素をvalueに変える*)
+      | ENil -> VNil        
+      | ECons (e1, e2) -> VCons (Thunk (e1, env), Thunk (e2, env))
       | ETuple el -> VTuple (List.map (fun e -> Thunk (e, env)) el)
       (* (* | ERLetAnd (l, e) ->
         (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
@@ -125,12 +74,73 @@ let rec eval (env : env) (expr : expr) : value =
         in eval nenv e *)
       | _ -> raise (Error "still developing : eval") 
 
-
-let make_thunk (exp : expr) (env : env) : thunk = Thunk (exp, env)
-
 let eval_thunk (th : thunk) : value = 
   let Thunk (exp, env) = th in
   eval env exp
+
+let rec find_match (p : pattern ) (v : value) (env : env): env option =
+  match p, v with
+  | PInt i1, VInt i2 -> if i1 = i2 then Some [] else None
+  | PBool b1, VBool b2 -> if b1 = b2 then Some [] else None
+  | PVar x, _ -> Some [(x, Thunk (EVar x, env))] 
+  | PWild, _ -> Some [] 
+  | PCons(ph, prest), VCons(vh, vrest)  ->
+    let h = find_match ph (eval_thunk vh) env in 
+    let rest = find_match prest (eval_thunk vrest) env in 
+    (match h, rest with
+      | Some env1, Some env2 -> Some (env1 @ env2) 
+      | _ -> None)
+  | PNil, VNil -> Some [] 
+  | PTuple pl, VTuple thl ->
+    (let rec match_tuple (pl:pattern list) (vl: value list) : env option =
+    match pl, vl with
+      | [], [] -> Some []
+      | p :: prest , v :: vrest ->
+        let h = find_match p v env in
+        let rest = match_tuple prest vrest in
+        (match h, rest with
+          | Some env1, Some env2 -> Some (env1 @ env2)
+          | _ -> None)
+    in match_tuple pl (List.map(fun th -> eval_thunk th) thl))
+  | _ -> None
+
+let rec make_thunk (exp : expr) (env : env) : thunk =
+  match exp with
+  | ELiteral x -> Thunk (exp, env)
+  | EBin (op, e1, e2) -> 
+    (match op with
+    | OpDiv -> 
+      (match eval env e2 with
+      | VInt 0 -> raise (Error "Zero-Division detected")
+      | _ -> Thunk (exp, env)
+      )
+    | _ -> Thunk (exp, env)
+    )
+  | EIf (e0, e1, e2) -> 
+    (match eval env e0 with
+    | VBool true -> Thunk (e1, env)
+    | VBool false -> Thunk (e2, env)
+    | _ -> raise (Error "Eval_cbn Error (make_thunk) : Unexpected bool detected") 
+    ) 
+  | EVar n -> List.assoc n env
+  | ELet (x, e1, e2) -> Thunk (e2, (x, Thunk (e1, env)) :: env)
+  | EFun (x, e) -> Thunk (exp, env)
+  | EApp (e1, e2) -> Thunk (exp, env)
+  | ENil -> Thunk (exp, env)
+  | ECons (e1, e2) -> Thunk (exp, env)
+  | ETuple el -> Thunk (exp, env)
+  | EMatch (e, pl) -> 
+      let v = eval env e in
+      let rec match_to_thunk (v: value) (l: (pattern * expr) list) : thunk =
+        match l with
+        | [] -> raise (Error "Evalerror : No pattern matched")
+        | (p, e') :: rest ->
+          (match find_match p v env with
+          | Some nenv -> Thunk (e', (nenv @ env))
+          | None -> match_to_thunk v rest) 
+        in match_to_thunk v pl 
+  | _ -> raise (Error "still developing : make_thunk") 
+
 
 let print_value (v: value) : unit =
   print_string " = ";
@@ -158,7 +168,7 @@ let print_value (v: value) : unit =
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
   let t_e' = Functions_cbn.print_command_type t_e cmd in
   match cmd with
-  | CExp expr -> print_value (eval_thunk (Thunk (expr, env))); print_newline(); (env, t_e')
+  | CExp expr -> print_value (eval_thunk (make_thunk expr env)); print_newline(); (env, t_e')
   | CLet (n, e) ->  
     let command_let (env : env) (n : name) (e : expr) : (value * env) =
       (match eval env e with | v1 -> (v1, ((n, Thunk (e, env)) :: env))) in
