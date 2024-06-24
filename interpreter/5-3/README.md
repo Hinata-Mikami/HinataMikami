@@ -83,7 +83,7 @@ let head = fun x ->
   | [] -> 0
   end
 in
-head (5 :: (1 / 0));;
+head (5 :: (if (1/0) = 0 then [] else []));;
 ```
 ==> `- : Int = 5` 
 
