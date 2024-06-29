@@ -19,7 +19,7 @@ let rec find_match (p : pattern ) (th : thunk) (env : env) : env option =
     | VBool b2 when b1 = b2 -> Some []
     | _ -> None
     ) 
-  | PVar x -> Some [(x, Thunk (EVar x, env))] 
+  | PVar x -> Some [(x, th)] 
   | PWild -> Some [] 
   | PCons(ph, pr)->
     let h = find_match ph th env in 
