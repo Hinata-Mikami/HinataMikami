@@ -118,6 +118,7 @@ and eval (env : env) (expr : expr) : value =
             ) 
           in match_to_value th0 pl
 
+
       (* (* | ERLetAnd (l, e) ->
         (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
         let rec make_env (i: int) (l' : (name * name * expr) list) : env =

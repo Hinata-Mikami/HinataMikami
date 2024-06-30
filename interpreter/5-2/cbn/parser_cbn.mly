@@ -50,7 +50,6 @@
 
 command:
   | LET var EQ expr DSC                   { CLet ($2, $4) }
-  | LET REC var EQ expr DSC               { CLet ($3, $5) }
   | LET REC var var EQ expr and_command   { CRLetAnd (($3, $4, $6) :: $7) }
   | expr DSC                              { CExp $1 }
 ;
@@ -73,7 +72,6 @@ expr:
   | IF expr THEN expr ELSE expr           { EIf($2, $4, $6) }
   //let x = e1 in e2
   | LET var EQ expr IN expr               { ELet($2, $4, $6) }
-  | LET REC var EQ expr IN expr           { ELet($3, $5, $7)} 
   //let rec f1 x ... and f2 x ... in e (let rec f x = e1 in e を含む)
   | LET REC var var EQ expr and_expr expr { ERLetAnd ((($3, $4, $6) :: $7), $8) }
   //match e with ...

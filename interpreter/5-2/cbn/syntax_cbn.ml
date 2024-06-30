@@ -23,8 +23,7 @@ type expr =
   | EMatch of expr * (pattern * expr) list        
   | ETuple of expr list                          
   | ENil                                     
-  | ECons of expr * expr
-  | ERLet of name * expr * expr                       
+  | ECons of expr * expr                  
   | ERLetAnd of (name * name * expr) list * expr
 
 
