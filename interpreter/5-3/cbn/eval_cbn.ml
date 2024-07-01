@@ -73,11 +73,7 @@ and eval (env : env) (expr : expr) : value =
 
   in let lookup_variable (env : env) (x : name) : value =
     match List.assoc x env with
-    | Thunk(exp, env') -> eval env exp
-    | ThRLet (n, exp, env') -> eval env exp
-    | ThRLetAnd (i, l, env') ->
-      let (f, exp) = List.nth l i in
-      eval env exp
+    | th -> eval_thunk th
     | exception Not_found 
       -> raise (Error ("Eval_Error : Variable not found on lookup_variable. 
       You were looking for " ^ x ^ " but couldn't find out.\n"))
@@ -139,6 +135,16 @@ and eval (env : env) (expr : expr) : value =
 and eval_thunk (th : thunk) : value = 
   match th with
   | Thunk (exp, env) -> eval env exp
+  | ThRLet (x, exp, env) -> eval ((x, ThRLet (x, exp, env)) :: env) exp
+  | ThRLetAnd (i, f_e_list, env) -> 
+    let rec and_env (i: int) (l1: (name * expr) list) : env =
+      match l1 with
+      | [] -> env
+      | (f, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
+    let nenv = and_env 0 f_e_list in 
+    let (_, e') = List.nth f_e_list i in
+    eval nenv e' 
+
   | _ -> raise (Error "Eval_cbn error : unexpected thunk at eval_thunk")
 
 

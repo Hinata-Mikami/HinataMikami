@@ -25,7 +25,7 @@ type expr =
   | ENil                                     
   | ECons of expr * expr                    
   | ERLet of name * expr * expr        
-  | ERLetAnd of (name * name * expr) list * expr
+  | ERLetAnd of (name * expr) list * expr
 
 
 and env = (name * thunk) list
@@ -58,7 +58,7 @@ and thunk =
 type command =
   | CExp of expr
   | CLet of name * expr
-  | CRLetAnd of (name * name * expr) list
+  | CRLetAnd of (name * expr) list
 
 
 

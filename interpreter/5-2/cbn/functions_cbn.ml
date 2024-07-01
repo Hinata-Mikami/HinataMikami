@@ -208,7 +208,7 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
         (t, t_p) :: (TyVar s, t_e') :: c_p @ c_e @ process_patterns rest
     in
     let c' = process_patterns plist in
-    (TyVar s, c')
+    (TyVar s, c @ c')
 
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
