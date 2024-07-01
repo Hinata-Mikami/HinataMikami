@@ -51,7 +51,7 @@ and pattern =
 and thunk = 
   | Thunk of expr * env
   | ThRLet of name * expr * env
-  | ThRLetAnd of int * (name * expr list) * env
+  | ThRLetAnd of int * (name * expr) list * env
 
 
 

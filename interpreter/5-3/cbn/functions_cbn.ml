@@ -209,7 +209,10 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     in
     let c' = process_patterns plist in
     (TyVar s, c')
-
+  | ERLet (n, e1, e2) -> 
+    let (t1, c1) = gather_ty_constraints t_e e1 in
+    let (t2, c2) = gather_ty_constraints ((n, t1) :: t_e) e2 in
+    (t2, c1 @ c2)
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
   let (t, c) = gather_ty_constraints t_e e in

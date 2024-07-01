@@ -72,11 +72,15 @@ and eval (env : env) (expr : expr) : value =
     | _ -> raise (Error "Eval_Error : Unexpected expression on eval_if")
 
   in let lookup_variable (env : env) (x : name) : value =
-    try
-      let Thunk(exp, env) = List.assoc x env in
+    match List.assoc x env with
+    | Thunk(exp, env') -> eval env exp
+    | ThRLet (n, exp, env') -> eval env exp
+    | ThRLetAnd (i, l, env') ->
+      let (f, exp) = List.nth l i in
       eval env exp
-    with
-    | Not_found -> raise (Error "Eval_Error : Variable not found on lookup_variable")
+    | exception Not_found 
+      -> raise (Error ("Eval_Error : Variable not found on lookup_variable. 
+      You were looking for " ^ x ^ " but couldn't find out.\n"))
 
   in let eval_let (env : env) (n : name) (e1 : expr) (e2 : expr) : value = 
     eval ((n, Thunk (e1, env)) :: env) e2
@@ -92,17 +96,18 @@ and eval (env : env) (expr : expr) : value =
         let v1 = eval env e1 in
         (match v1 with
         | VFun (x, e, oenv) -> eval ((x, Thunk(e2, env)) :: oenv) e
-        (* | VRFunAnd (i, l, oenv) -> 
+        (* | VRLetAnd (i, l, oenv) -> 
           (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
             match l1 with
               | [] -> []
-              | (fj, _, _) :: rest -> (fj, VRFunAnd(j, l, oenv)) :: make_env (j + 1) rest
+              | (fj, _, _) :: rest -> (fj, VRLetAnd(j, l, oenv)) :: make_env (j + 1) rest
           (*作成した環境を既存の環境oenvに追加*)
           in let nenv = (make_env 0 l) @ oenv
           (*i番目の要素を取り出す*)
           in let (f, x, e) = List.nth l i
           in eval ((x, v2) :: nenv) e) i番目の変数名と値v2を環境に追加したうえでeを評価 *)
         | _ -> raise (Error "EvalError : Non-function cannot be applied"))
+
       | ENil -> VNil        
       | ECons (e1, e2) -> VCons (Thunk (e1, env), Thunk (e2, env))
       | ETuple el -> VTuple (List.map (fun e -> Thunk (e, env)) el)
@@ -118,20 +123,23 @@ and eval (env : env) (expr : expr) : value =
             ) 
           in match_to_value th0 pl
 
-      (* (* | ERLetAnd (l, e) ->
-        (*リストから環境を生成: (f0, VRFunAnd(0, l, env)), ... を生成*)
-        let rec make_env (i: int) (l' : (name * name * expr) list) : env =
-        match l' with
-        | [] -> env
-        | (f, x, e) :: rest -> (f, VRFunAnd(i, l, env)) :: (make_env (i + 1) rest) in
-          let nenv = make_env 0 l  *)
-        (*環境の下でeを評価*)
-        in eval nenv e *)
-  | _ -> raise (Error "still developing : eval") 
+      | ERLet (n, e1, e2) 
+        ->let nenv = (n, ThRLet(n, e1, env)) :: env in
+          eval nenv e1
+      | ERLetAnd (l, e) ->
+        let f_e_list = List.map(fun (f, x, e) -> (f, e)) l in
+        let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+          match l1 with
+          | [] -> env
+          | (f, x, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
+        let nenv = and_env 0 l 
+        in eval nenv e
+  
 
 and eval_thunk (th : thunk) : value = 
-  let Thunk (exp, env) = th in
-  eval env exp
+  match th with
+  | Thunk (exp, env) -> eval env exp
+  | _ -> raise (Error "Eval_cbn error : unexpected thunk at eval_thunk")
 
 
 let print_value (v: value) : unit =
@@ -147,6 +155,7 @@ let print_value (v: value) : unit =
       (match threst with
       | Thunk (ENil, _) -> print_loop (eval_thunk th); print_string " :: []"
       | Thunk _ -> print_loop (eval_thunk th); print_string " :: "; print_loop (eval_thunk threst)
+      | _ -> raise (Error "Eval_cbn error : unexpected thunk at print_value")
       )
     | VTuple thl -> print_string " = (";
       match thl with
@@ -158,7 +167,8 @@ let print_value (v: value) : unit =
 
 
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
-  let t_e' = Functions_cbn.print_command_type t_e cmd in
+  (* let t_e' = Functions_cbn.print_command_type t_e cmd in *)
+  let t_e' = [] in
   match cmd with
   | CExp expr -> print_value (eval_thunk (Thunk (expr, env))); print_newline(); (env, t_e')
   | CLet (n, e) ->  
@@ -166,11 +176,11 @@ let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * t
       (match eval env e with | v1 -> (v1, ((n, Thunk (e, env)) :: env))) in
     let (v,e') = command_let env n e in print_value v; print_newline();
     (e', t_e')
-  (* | CRLetAnd l ->
+  | CRLetAnd l ->
+    let f_e_list = List.map(fun (f, x, e) -> (f, e)) l in
     let rec and_env (i: int) (l1: (name * name * expr) list) : env =
     match l1 with
     | [] -> env
-    | (f, x, e) :: rest -> (f, VRLetAnd(i, l, env)) :: (and_env (i + 1) rest) in
+    | (f, x, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
     let nenv = and_env 0 l in
-      (nenv, t_e') *)
-  | _ -> raise (Error "still developing : print_command_value")
+      (nenv, t_e')
