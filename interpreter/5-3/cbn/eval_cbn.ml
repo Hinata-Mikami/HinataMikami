@@ -92,16 +92,6 @@ and eval (env : env) (expr : expr) : value =
         let v1 = eval env e1 in
         (match v1 with
         | VFun (x, e, oenv) -> eval ((x, Thunk(e2, env)) :: oenv) e
-        (* | VRLetAnd (i, l, oenv) -> 
-          (let rec make_env (j : int)  (l1 : (name * name * expr) list) : env =
-            match l1 with
-              | [] -> []
-              | (fj, _, _) :: rest -> (fj, VRLetAnd(j, l, oenv)) :: make_env (j + 1) rest
-          (*作成した環境を既存の環境oenvに追加*)
-          in let nenv = (make_env 0 l) @ oenv
-          (*i番目の要素を取り出す*)
-          in let (f, x, e) = List.nth l i
-          in eval ((x, v2) :: nenv) e) i番目の変数名と値v2を環境に追加したうえでeを評価 *)
         | _ -> raise (Error "EvalError : Non-function cannot be applied"))
 
       | ENil -> VNil        
@@ -118,24 +108,20 @@ and eval (env : env) (expr : expr) : value =
             | None -> match_to_value th rest
             ) 
           in match_to_value th0 pl
-
-      | ERLet (n, e1, e2) 
-        ->let nenv = (n, ThRLet(n, e1, env)) :: env in
-          eval nenv e1
-      | ERLetAnd (l, e) ->
-        let f_e_list = List.map(fun (f, x, e) -> (f, e)) l in
-        let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+      | ERLetAnd (f_e_list, e) ->
+        (* let f_e_list = List.map(fun (f, x, e) -> (f, e)) l i *)
+        let rec and_env (i: int) (l1: (name * expr) list) : env =
           match l1 with
           | [] -> env
-          | (f, x, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
-        let nenv = and_env 0 l 
+          | (f, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
+        let nenv = and_env 0 f_e_list
         in eval nenv e
   
 
 and eval_thunk (th : thunk) : value = 
   match th with
   | Thunk (exp, env) -> eval env exp
-  | ThRLet (x, exp, env) -> eval ((x, ThRLet (x, exp, env)) :: env) exp
+  (* | ThRLet (x, exp, env) -> eval ((x, ThRLet (x, exp, env)) :: env) exp *)
   | ThRLetAnd (i, f_e_list, env) -> 
     let rec and_env (i: int) (l1: (name * expr) list) : env =
       match l1 with
@@ -154,8 +140,8 @@ let print_value (v: value) : unit =
     match v with
     | VInt i -> print_int i 
     | VBool b -> print_string (string_of_bool b)
-    | VFun (x, e, env) -> print_string " = <fun>"
-    | VRLetAnd (_, l, _) -> print_string " = <fun>"
+    | VFun (x, e, env) -> print_string "<fun>"
+    | VRLetAnd (_, l, _) -> print_string "<fun>"
     | VNil -> print_string "[]" 
     | VCons (th, threst) -> 
       (match threst with
@@ -173,20 +159,15 @@ let print_value (v: value) : unit =
 
 
 let rec print_command_value (env : env) (cmd : command) (t_e : ty_env) : env * ty_env =
-  (* let t_e' = Functions_cbn.print_command_type t_e cmd in *)
-  let t_e' = [] in
+  let t_e' = Functions_cbn.print_command_type t_e cmd in
   match cmd with
   | CExp expr -> print_value (eval_thunk (Thunk (expr, env))); print_newline(); (env, t_e')
   | CLet (n, e) ->  
-    let command_let (env : env) (n : name) (e : expr) : (value * env) =
-      (match eval env e with | v1 -> (v1, ((n, Thunk (e, env)) :: env))) in
-    let (v,e') = command_let env n e in print_value v; print_newline();
-    (e', t_e')
-  | CRLetAnd l ->
-    let f_e_list = List.map(fun (f, x, e) -> (f, e)) l in
-    let rec and_env (i: int) (l1: (name * name * expr) list) : env =
+    ((n, Thunk (e, env)) :: env, t_e') 
+  | CRLetAnd f_e_list ->
+    let rec and_env (i: int) (l1: (name * expr) list) : env =
     match l1 with
     | [] -> env
-    | (f, x, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
-    let nenv = and_env 0 l in
+    | (f, e) :: rest -> (f, ThRLetAnd (i, f_e_list, env)) :: (and_env (i + 1) rest) in
+    let nenv = and_env 0 f_e_list in
       (nenv, t_e')

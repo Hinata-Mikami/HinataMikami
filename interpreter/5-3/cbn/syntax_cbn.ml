@@ -23,8 +23,7 @@ type expr =
   | EMatch of expr * (pattern * expr) list        
   | ETuple of expr list                          
   | ENil                                     
-  | ECons of expr * expr                    
-  | ERLet of name * expr * expr        
+  | ECons of expr * expr                           
   | ERLetAnd of (name * expr) list * expr
 
 
@@ -50,7 +49,6 @@ and pattern =
 
 and thunk = 
   | Thunk of expr * env
-  | ThRLet of name * expr * env
   | ThRLetAnd of int * (name * expr) list * env
 
 

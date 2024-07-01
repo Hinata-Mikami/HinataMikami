@@ -142,18 +142,18 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
     let a = new_ty_var () in
     (TyVar a, [(t1, TyFun (t2, TyVar a))] @ c1 @ c2)
   | ERLetAnd (l, e) -> 
-    let l' = (List.map (fun (f,x1,e1) ->
-      let a = new_ty_var () in
+    let l' = (List.map (fun (f,e1) ->
+      (* let a = new_ty_var () in *)
       let b = new_ty_var () in
-      (f, x1, e1, a, b))
+      (f, e1, b))
       l) in
     let gamma = 
-      (List.map (fun (f,x1,e1,a,b) -> (f, TyFun (TyVar a, TyVar b))) l') @ t_e in
+      (List.map (fun (f,e1,b) -> (f, TyVar b)) l') @ t_e in
     let rec ty_con_b_list list =
       (match list with
       | [] -> []
-      | (f,x1,e1,a,b) :: rest -> 
-        let (t1, c1) = gather_ty_constraints ((x1, TyVar a) :: gamma) e1 in 
+      | (f,e1,b) :: rest -> 
+        let (t1, c1) = gather_ty_constraints gamma e1 in 
         (t1, TyVar b, c1) :: ty_con_b_list rest  
       ) in
     let (t, c) = gather_ty_constraints gamma e in      
@@ -208,11 +208,8 @@ let rec gather_ty_constraints (t_e : ty_env) (e : expr) : ty * ty_constraints =
         (t, t_p) :: (TyVar s, t_e') :: c_p @ c_e @ process_patterns rest
     in
     let c' = process_patterns plist in
-    (TyVar s, c')
-  | ERLet (n, e1, e2) -> 
-    let (t1, c1) = gather_ty_constraints t_e e1 in
-    let (t2, c2) = gather_ty_constraints ((n, t1) :: t_e) e2 in
-    (t2, c1 @ c2)
+    (TyVar s, c @ c')
+
 
 let rec infer_expr (t_e : ty_env) (e : expr) : ty * ty_env = 
   let (t, c) = gather_ty_constraints t_e e in
@@ -230,18 +227,17 @@ let infer_cmd (t_e : ty_env) (cmd : command) : ty_env * ty_env =
     let newenv = (n, t) :: t_e' in
     ([(n, t)], newenv)
    | CRLetAnd l ->
-      let l' = (List.map (fun (f,x1,e1) ->
-        let a = new_ty_var () in
+      let l' = (List.map (fun (f,e1) ->
         let b = new_ty_var () in
-        (f, x1, e1, a, b))
+        (f, e1, b))
         l) in
-      let a = (List.map (fun (f,x1,e1,a,b) -> (f, TyFun (TyVar a, TyVar b))) l') in
+      let a = (List.map (fun (f,e1,b) -> (f, TyVar b)) l') in
       let gamma = a @ t_e in
       let rec ty_con_b_list list =
         (match list with
         | [] -> []
-        | (f,x1,e1,a,b) :: rest -> 
-          let (t1, c1) = gather_ty_constraints ((x1, TyVar a) :: gamma) e1 in 
+        | (f,e1,b) :: rest -> 
+          let (t1, c1) = gather_ty_constraints gamma e1 in 
           (t1, TyVar b, c1) :: ty_con_b_list rest  
         ) in
       let rec new_con list' =

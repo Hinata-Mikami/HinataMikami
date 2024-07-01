@@ -97,3 +97,44 @@ in
 fst (5, (1 / 0));;
 ```
 ==> `- : Int = 5` 
+
+## 3-3
+```
+let rec take = fun n -> fun l ->
+  if n < 1 then
+    []
+  else
+    match l with
+      h :: t -> h :: take (n - 1) t
+    | _ -> []
+    end
+in 
+let rec mylist = 0 :: 1 :: mylist in
+take 5 mylist;;
+```
+
+==>  - : Int -> Int = <fun>`
+
+## 3-4
+```
+let rec fix = fun f -> f (fix f) in
+fix (fun f -> fun x -> if x < 1 then 1 else x * f (x - 1));;
+```
+
+==> `- : [Int] = [0,1,0,1,0]`
+
+## 3-others
+```
+let rec f = fun x -> g x
+and     g = fun x -> h x
+and     h = fun x -> x * 2
+in
+f 3;;
+```
+
+```
+let rec even = fun x -> if x = 0 then true else odd (x - 1)
+and     odd  = fun x -> if x = 0 then false else even (x - 1)
+in
+even 3;;
+```
