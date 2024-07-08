@@ -568,7 +568,7 @@ Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
       
         n' =? n' = true.
         
-      which is immediate from the induction hypothesis.  _Qed._
+      which is the same with the induction hypothesis.  _Qed._
 *)
 
 (* Do not modify the following line: *)
@@ -990,15 +990,45 @@ Proof. simpl. reflexivity. Qed.
     progress. We have one lemma for the [B0] case (which also makes
     use of [double_incr_bin]) and another for the [B1] case. *)
 
-Lemma 
+Lemma bin_to_nat_b0 : forall b, bin_to_nat (B0 b) = bin_to_nat b + bin_to_nat b.
+Proof.
+  intros b.
+  induction b as [|b' IHb' |b'' IHb''].
+  - simpl. reflexivity.
+  - simpl. rewrite <- plus_n_O. rewrite <- plus_n_O. reflexivity.
+  - simpl. rewrite <- plus_n_O. rewrite <- plus_n_O. reflexivity.
+Qed.
 
+Lemma normalize_division : forall b,
+  (normalize (B0 b))-> (normalize b) + (normalize b).
+Proof.
+
+Lemma case_b0 : forall b, 
+  nat_to_bin (bin_to_nat (B0 b)) = normalize (B0 b).
+
+Proof. 
+  intros b.
+  induction b as [|b' IHb' |b'' IHb''].
+  - simpl. reflexivity. 
+  - rewrite bin_to_nat_b0.
+    rewrite bin_to_nat_b0.
+    
+
+     
+
+Lemma case_b1 : forall b, 
+  nat_to_bin (bin_to_nat (B1 b)) = normalize (B1 b).
+
+Proof. Admitted.
 
 Theorem bin_nat_bin : forall b, nat_to_bin (bin_to_nat b) = normalize b.
 Proof.
   intros b.
   induction b as [|b' IHb' |b'' IHb''].
   - simpl. reflexivity.
-  -
+  - rewrite case_b0. reflexivity.
+  - rewrite case_b1. reflexivity.
+Qed.
 
 
 (** [] *)
