@@ -1328,17 +1328,13 @@ Theorem andb_true_elim2 : forall b c : bool,
 Proof.
   intros b c.
   destruct b eqn:Eb.
-  - (* b = true の場合 *)
-    simpl.
+  - simpl.
     intros H.
-    assumption. (*H : c = true がそのまま結論*)
-  - (* b = false の場合 *)
-    simpl.
+    assumption. 
+  - simpl.
     destruct c eqn:Ec.
-    + (* c = true の場合 *)
-      reflexivity.
-    + (* c = false の場合 *)
-      simpl.
+    + reflexivity.
+    + simpl.
       intros H.
       rewrite <- H. 
       reflexivity.
@@ -1471,7 +1467,14 @@ Fixpoint plus' (n : nat) (m : nat) : nat :=
     homework assignment, make sure you comment out your solution so
     that it doesn't cause Coq to reject the whole file!) *)
 
+(* Finally terminate *)
 (* Fixpoint unacceptable (m : nat) : nat := mult m (unacceptable m). *)
+
+(* Fixpoint plus' (n : nat) (m : nat) : nat =
+  match n with
+  | O => m
+  | S n' => S (plus' (minus n' O) m)
+  end. *)
 
 (* ################################################################# *)
 (** * More Exercises *)
@@ -1805,10 +1808,14 @@ Qed.
     Our solution is under 10 lines of code total. *)
 Definition lower_grade (g : grade) : grade :=
   match g with
-  | Grade F Minus => g
+  (* | Grade F Minus => g *)
   | Grade l Plus => Grade l Natural
   | Grade l Natural => Grade l Minus
-  | Grade l Minus => Grade (lower_letter l) Plus
+  | Grade l Minus => 
+    match l with
+    | F => g
+    | _ => Grade (lower_letter l) Plus
+    end
   end.
 
 Example lower_grade_A_Plus :
@@ -1886,18 +1893,20 @@ Proof.
   intros H.
   destruct g.
   destruct m eqn : M.
-  -destruct l eqn : L.
+  -simpl. rewrite letter_comparison_Eq. reflexivity.
+  (* -destruct l eqn : L.
     +simpl. reflexivity.
     +simpl. reflexivity.
     +simpl. reflexivity.
     +simpl. reflexivity.
-    +simpl. reflexivity.
-  -destruct l eqn : L.
-    +simpl. reflexivity.
-    +simpl. reflexivity.
-    +simpl. reflexivity.
+    +simpl. reflexivity. *)
+  -simpl. rewrite letter_comparison_Eq. reflexivity.
+  (* -destruct l eqn : L.
     +simpl. reflexivity.
     +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity. *)
   -destruct l eqn : L.
     +simpl. reflexivity.
     +simpl. reflexivity.
@@ -2038,9 +2047,9 @@ Fixpoint incr (m:bin) : bin :=
 
 Fixpoint bin_to_nat (m:bin) : nat :=
   match m with
-  | Z => 0
-  | B0 m' => 2 * (bin_to_nat m')
-  | B1 m' => 1 + 2 * (bin_to_nat m')
+  | Z => O
+  | B0 m' => mult (S (S O))(bin_to_nat m')
+  | B1 m' => plus (S O) (mult (S (S O)) (bin_to_nat m'))
   end.
 
 (** The following "unit tests" of your increment and binary-to-unary
