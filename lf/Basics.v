@@ -1882,8 +1882,30 @@ Theorem lower_grade_lowers :
     grade_comparison (Grade F Minus) g = Lt ->
     grade_comparison (lower_grade g) g = Lt.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros g.
+  intros H.
+  destruct g.
+  destruct m eqn : M.
+  -destruct l eqn : L.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+  -destruct l eqn : L.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+  -destruct l eqn : L.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. reflexivity.
+    +simpl. assumption.
 
+Qed.
 (** [] *)
 
 (** Now that we have implemented and tested a function that lowers a
@@ -1938,7 +1960,11 @@ Theorem no_penalty_for_mostly_on_time :
     (late_days <? 9 = true) ->
     apply_late_policy late_days g = g.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros late_days g H.
+  rewrite apply_late_policy_unfold.
+  rewrite H.
+  reflexivity.
+Qed.
 
 (** [] *)
 
@@ -1953,7 +1979,12 @@ Theorem grade_lowered_once :
     (grade_comparison (Grade F Minus) g = Lt) ->
     (apply_late_policy late_days g) = (lower_grade g).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros late_days g H1 H2 H3.
+  rewrite apply_late_policy_unfold.
+  rewrite H1.
+  rewrite H2.
+  reflexivity.
+Qed.
 
 (** [] *)
 End LateDays.
@@ -1998,11 +2029,19 @@ Inductive bin : Type :=
     for binary numbers, and a function [bin_to_nat] to convert
     binary numbers to unary numbers. *)
 
-Fixpoint incr (m:bin) : bin
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint incr (m:bin) : bin :=
+  match m with
+  | Z => B1 Z
+  | B0 m' => B1 m'
+  | B1 m' => B0 (incr m')
+  end.
 
-Fixpoint bin_to_nat (m:bin) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint bin_to_nat (m:bin) : nat :=
+  match m with
+  | Z => 0
+  | B0 m' => 2 * (bin_to_nat m')
+  | B1 m' => 1 + 2 * (bin_to_nat m')
+  end.
 
 (** The following "unit tests" of your increment and binary-to-unary
     functions should pass after you have defined those functions correctly.
@@ -2011,24 +2050,24 @@ Fixpoint bin_to_nat (m:bin) : nat
     next chapter. *)
 
 Example test_bin_incr1 : (incr (B1 Z)) = B0 (B1 Z).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_bin_incr2 : (incr (B0 (B1 Z))) = B1 (B1 Z).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_bin_incr3 : (incr (B1 (B1 Z))) = B0 (B0 (B1 Z)).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_bin_incr4 : bin_to_nat (B0 (B1 Z)) = 2.
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_bin_incr5 :
         bin_to_nat (incr (B1 Z)) = 1 + bin_to_nat (B1 Z).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 Example test_bin_incr6 :
         bin_to_nat (incr (incr (B1 Z))) = 2 + bin_to_nat (B1 Z).
-(* FILL IN HERE *) Admitted.
+Proof. simpl. reflexivity. Qed.
 
 (** [] *)
 
