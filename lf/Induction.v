@@ -265,6 +265,8 @@ Proof.
     rewrite -> IHn'. 
     rewrite -> plus_n_Sm. 
     reflexivity.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 2 stars, standard (eqb_refl)
@@ -638,10 +640,12 @@ Theorem plus_leb_compat_l : forall n m p : nat,
   n <=? m = true -> (p + n) <=? (p + m) = true.
 Proof.
   intros n m p.
-  intros H.
+  (* intros H. *)
   induction p as [|p' IHp'].
-  - simpl. assumption.
-  - simpl. assumption.
+  - simpl. intros H. assumption.
+  - simpl. intros H. rewrite IHp'. 
+    + simpl. reflexivity.
+    + simpl. assumption. 
 Qed.
 
 (** [] *)
@@ -687,9 +691,11 @@ Theorem S_neqb_0 : forall n:nat,
   (S n) =? 0 = false.
 Proof.
   intros n.
-  destruct n as [|n'].
+  simpl.
+  reflexivity.
+  (* destruct n as [|n'].
   - simpl. reflexivity.
-  - simpl. reflexivity.
+  - simpl. reflexivity. *)
 Qed.
 
 Theorem mult_1_l : forall n:nat, 1 * n = n.
@@ -714,9 +720,10 @@ Proof.
   - destruct c.
     + simpl. reflexivity.
     + simpl. reflexivity.
-  - destruct c.
+  - simpl. reflexivity.
+  (* - destruct c.
     + simpl. reflexivity.
-    + simpl. reflexivity.
+    + simpl. reflexivity. *)
 Qed.
 
 Theorem mult_plus_distr_r : forall n m p : nat,
@@ -735,9 +742,9 @@ Proof.
   induction n as [|n' IHn'].
   - simpl. reflexivity.
   - simpl. 
-  rewrite -> IHn'. 
-  rewrite -> mult_plus_distr_r. 
-  reflexivity.
+    rewrite -> IHn'. 
+    rewrite -> mult_plus_distr_r. 
+    reflexivity.
 Qed.
 (** [] *)
 
@@ -825,13 +832,13 @@ Proof.
   - simpl.  
     rewrite IHb''. 
     simpl. 
+    rewrite <- plus_n_Sm. 
+    (* rewrite plus_n_Sm. 
     rewrite plus_n_Sm. 
     rewrite plus_n_Sm. 
     rewrite plus_n_Sm. 
     rewrite plus_n_Sm. 
-    rewrite plus_n_Sm. 
-    rewrite plus_n_Sm. 
-    rewrite plus_n_Sm.
+    rewrite plus_n_Sm. *)
     reflexivity.
 Qed.
 
@@ -892,9 +899,11 @@ Abort.
 Lemma double_incr : forall n : nat, double (S n) = S (S (double n)).
 Proof.
   intros n.
-  induction n as [|n' IHn'].
+  simpl.
+  reflexivity.
+  (* induction n as [|n' IHn'].
   - simpl. reflexivity.
-  - simpl. reflexivity.
+  - simpl. reflexivity. *)
 Qed.
 
 (** Now define a similar doubling function for [bin]. *)
@@ -916,10 +925,14 @@ Lemma double_incr_bin : forall b,
     double_bin (incr b) = incr (incr (double_bin b)).
 Proof. 
   intros b.
-  induction b as [|b' IHb' |b'' IHb''].
+  destruct b.
   - simpl. reflexivity.
   - simpl. reflexivity.
+  - simpl. reflexivity.  
+  (* induction b as [|b' IHb' |b'' IHb''].
   - simpl. reflexivity.
+  - simpl. reflexivity.
+  - simpl. reflexivity. *)
 Qed.
 
 (** [] *)
@@ -963,17 +976,16 @@ Abort.
 Fixpoint normalize (b:bin) : bin :=
   match b with
   | Z => Z
-  | B0 b' =>
-    match (normalize b') with
-    | Z => Z
-    | _ => B0 (normalize b')
-    end  
-  | B1 b' => B1 (normalize b')
+  | B1 b' => incr (double_bin (normalize b'))
+  | B0 b' => double_bin (normalize b')
 end.
 
 (** It would be wise to do some [Example] proofs to check that your definition of
     [normalize] works the way you intend before you proceed. They won't be graded,
     but fill them in below. *)
+
+Example normalize_ex0 : normalize (B1(B1 Z)) = B1 (B1 Z).
+Proof. simpl. reflexivity. Qed.
 
 Example normalize_ex1 : normalize (B0(B0 Z)) = Z.
 Proof. simpl. reflexivity. Qed.
@@ -990,44 +1002,67 @@ Proof. simpl. reflexivity. Qed.
     progress. We have one lemma for the [B0] case (which also makes
     use of [double_incr_bin]) and another for the [B1] case. *)
 
-Lemma bin_to_nat_b0 : forall b, bin_to_nat (B0 b) = bin_to_nat b + bin_to_nat b.
-Proof.
-  intros b.
-  induction b as [|b' IHb' |b'' IHb''].
-  - simpl. reflexivity.
-  - simpl. rewrite <- plus_n_O. rewrite <- plus_n_O. reflexivity.
-  - simpl. rewrite <- plus_n_O. rewrite <- plus_n_O. reflexivity.
-Qed.
-
-Lemma normalize_division : forall b,
-  (normalize (B0 b))-> (normalize b) + (normalize b).
-Proof.
-
-Lemma case_b0 : forall b, 
-  nat_to_bin (bin_to_nat (B0 b)) = normalize (B0 b).
+Lemma L1 : forall n,
+  nat_to_bin (double n) = double_bin (nat_to_bin n).
 
 Proof. 
-  intros b.
-  induction b as [|b' IHb' |b'' IHb''].
-  - simpl. reflexivity. 
-  - rewrite bin_to_nat_b0.
-    rewrite bin_to_nat_b0.
-    
+  intros n.
+  induction n as [|n' IHn'].
+  - simpl. reflexivity.
+  - simpl.
+    rewrite double_incr_bin.
+    rewrite <- IHn'.
+    reflexivity.
+Qed.
+      
+Lemma case_b0 : forall b, 
+  nat_to_bin (bin_to_nat b) = normalize b 
+  -> nat_to_bin (bin_to_nat (B0 b)) = normalize (B0 b).
 
+Proof.
+  intros b H.
+  simpl.
+  rewrite <- plus_n_O.
+  rewrite <- H.
+  rewrite <- double_plus.
+  rewrite L1.
+  reflexivity.
+Qed.
+(* 
+Lemma L2: forall b, 
+  double_bin (normalize b) = normalize b.
+
+Proof.
+  intros b.
+  induction b as [|b1 IHb1 |b2 IHb2].
+  - simpl. reflexivity.
+  - simpl. rewrite IHb1. rewrite IHb1. reflexivity.
+  - simpl. ??? *)
      
 
 Lemma case_b1 : forall b, 
-  nat_to_bin (bin_to_nat (B1 b)) = normalize (B1 b).
+  nat_to_bin (bin_to_nat b) = normalize b 
+  -> nat_to_bin (bin_to_nat (B1 b)) = normalize (B1 b).
 
-Proof. Admitted.
+Proof. 
+  intros b H.
+  simpl.
+  rewrite <- plus_n_O.
+  rewrite <- H.
+  rewrite <- double_plus.
+  rewrite L1.
+  reflexivity.
+Qed.
+  
 
-Theorem bin_nat_bin : forall b, nat_to_bin (bin_to_nat b) = normalize b.
+Theorem bin_nat_bin : forall b, 
+  nat_to_bin (bin_to_nat b) = normalize b.
 Proof.
   intros b.
   induction b as [|b' IHb' |b'' IHb''].
   - simpl. reflexivity.
-  - rewrite case_b0. reflexivity.
-  - rewrite case_b1. reflexivity.
+  - rewrite case_b0. reflexivity. assumption.
+  - rewrite case_b1. reflexivity. assumption.
 Qed.
 
 
