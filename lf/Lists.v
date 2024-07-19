@@ -537,7 +537,7 @@ Proof.
 Qed.
 
 Theorem add_inc_count : forall s : bag, forall v : nat,
-     count v (add v s) = S (count v s).
+  count v (add v s) = S (count v s).
 Proof.
   intros s v.
   simpl.
@@ -1062,9 +1062,14 @@ Qed.
 Theorem involution_injective : forall (f : nat -> nat),
     (forall n : nat, n = f (f n)) -> (forall n1 n2 : nat, f n1 = f n2 -> n1 = n2).
 Proof.
-  intros f n n1 n2.
-  intros H.
-Admitted.
+  intros f H n1 n2.
+  intros H0.
+  assert (H1 : f (f n1) = f (f n2)).
+  {rewrite H0. reflexivity. }
+  rewrite <- H in H1.
+  rewrite <- H in H1.
+  assumption.
+Qed.
 
 (** [] *)
 
@@ -1077,7 +1082,7 @@ Admitted.
 
 Theorem rev_injective : forall (l1 l2 : natlist),
   rev l1 = rev l2 -> l1 = l2.
-Proof.
+Proof. 
   intros l1 l2 H.
   rewrite <- rev_involutive.
   rewrite <- H.
@@ -1282,10 +1287,10 @@ Theorem update_eq :
 Proof.
   intros d x v. 
   simpl. 
-  rewrite <- eqb_id_refl. 
+  rewrite eqb_id_refl. 
   reflexivity. 
+Qed.
 
-Admitted.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (update_neq) *)
