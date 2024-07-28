@@ -1021,11 +1021,17 @@ Proof.
 Theorem remove_does_not_increase_count: forall (s : bag),
   (count 0 (remove_one 0 s)) <=? (count 0 s) = true.
 Proof.
-  intros s. induction s as [| n s' IHs'].
+  intros s. 
+  induction s as [|n s' IHs'].
   - simpl. reflexivity.
-  - simpl. destruct n as [| n'].
-    + simpl. rewrite -> leb_n_Sn. reflexivity.
-    + simpl. rewrite -> IHs'. reflexivity.
+  - simpl. 
+    destruct n as [| n'].
+    + simpl. 
+      rewrite leb_n_Sn. 
+      reflexivity.
+    + simpl. 
+      rewrite IHs'. 
+      reflexivity.
 Qed.
 (** [] *)
 
@@ -1084,6 +1090,7 @@ Theorem rev_injective : forall (l1 l2 : natlist),
   rev l1 = rev l2 -> l1 = l2.
 Proof. 
   intros l1 l2 H.
+  Search rev. 
   rewrite <- rev_involutive.
   rewrite <- H.
   rewrite -> rev_involutive.
@@ -1223,21 +1230,13 @@ Definition eqb_id (x1 x2 : id) :=
   end.
 
 (** **** Exercise: 1 star, standard (eqb_id_refl) *)
-
-Lemma same_eqb' : forall v : nat, (v =? v) = true.
-Proof.
-  intros v.
-  induction v as [|v' IHv'].
-  - simpl. reflexivity.
-  - simpl. rewrite IHv'. reflexivity.
-Qed.
-
 Theorem eqb_id_refl : forall x, eqb_id x x = true.
 Proof.
   intros x. 
   destruct x. 
   simpl. 
-  rewrite same_eqb'.
+  Search eqb.
+  rewrite eqb_refl.
   reflexivity. 
 Qed.
 (** [] *)
@@ -1287,6 +1286,7 @@ Theorem update_eq :
 Proof.
   intros d x v. 
   simpl. 
+  Search eqb_id.
   rewrite eqb_id_refl. 
   reflexivity. 
 Qed.
