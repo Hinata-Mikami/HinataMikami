@@ -40,6 +40,33 @@ $./main
 $./main test.txt
 ```  
 
+## 5-4 解答
+
+ones = [1; 1; 1; 1; 1; ...]
+```
+let rec ones = 1 :: ones;;
+ones;;
+```
+
+nats = [0; 1; 2; 3; 4; ...]
+```
+let rec nats = fun x -> x :: nats (x+1);;
+nats 0;;
+```
+
+fibs = [1; 1; 2; 3; 5; ...]
+```
+let rec fibs = fun x -> fun y -> (x + y) :: fibs y (x+y);;
+fibs 0 1;;
+```
+
+## 5-5 解答
+natpairs = [(0, 0), ... , (n, m), ...]
+```
+let rec natpairs = fun x -> fun y -> (x, y) :: ((natpairs (x+1) y) :: (natpairs x (y+1)));;
+natpairs 0 0;;
+```
+
 # テストケース
 ## 1-1
 

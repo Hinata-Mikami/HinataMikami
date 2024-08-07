@@ -147,7 +147,7 @@ let print_value (v: value) : unit =
       | Thunk _ -> print_loop (eval_thunk th); print_string " :: "; print_loop (eval_thunk threst)
       | _ -> raise (Error "Eval_cbn error : unexpected thunk at print_value")
       )
-    | VTuple thl -> print_string " = (";
+    | VTuple thl -> print_string " (";
       match thl with
       | th :: rest -> print_loop (eval_thunk th);
         List.map (fun th -> print_string ", "; print_loop (eval_thunk th)) rest;
