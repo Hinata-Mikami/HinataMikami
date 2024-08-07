@@ -135,6 +135,7 @@ and eval_thunk (th : thunk) : value =
 let print_value (v: value) : unit =
   print_string " = ";
   let rec print_loop v =
+    flush stdout;
     match v with
     | VInt i -> print_int i 
     | VBool b -> print_string (string_of_bool b)

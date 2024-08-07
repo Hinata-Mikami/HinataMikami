@@ -49,18 +49,11 @@ fibs 1 0;;
 ## 5-5 解答
 natPairs = [(0, 0), ... , (n, m), ...]
 ```
-let rec sub_natPairs = fun x -> fun y -> (x, y) :: sub_natPairs x (y+1);;
-
-
-let rec natPairs = fun x -> fun l ->
-    match l with
-    [] -> ( 
-            match (sub_natPairs x 0) with
-                hd :: tl -> hd :: natPairs (x+1) tl 
-            end
-            )
-    | hd :: tl -> hd :: natPairs x tl
-    end;; 
-
-natPairs 0 [];;
+let rec natPairs = fun x -> fun y -> if y = 0 then (x, y) :: natPairs 0 (x+1) else (x, y) :: natPairs (x+1) (y-1);;
+natPairs 0 0;;
 ```
+(0,0) 
+-> (0, 1) -> (1, 0) 
+-> (0, 2) -> (1, 1) -> (2, 0) 
+-> (0, 3) -> (1, 2) -> (2, 1) -> (3, 0)
+-> (0, 4) ...
