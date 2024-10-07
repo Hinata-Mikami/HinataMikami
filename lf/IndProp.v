@@ -197,6 +197,7 @@ Proof.
     and_ transitive closure?  How about reflexive, symmetric, and
     transitive closure? *)
 
+
 (* FILL IN HERE
 
     [] *)
@@ -819,8 +820,9 @@ Inductive empty_relation : nat -> nat -> Prop :=
 
 
 Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
-  Proof.
-  (* FILL IN HERE *) Admitted.
+Proof.
+  intros. unfold not. intros H. inversion H.
+Qed.
 (** [] *)
 
 (** From the definition of [le], we can sketch the behaviors of
@@ -844,10 +846,11 @@ Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
   intros m n o.
   intros H1 H2.
-  destruct m.
-  - rewrite H2 in H1. assumption.
-  - rewrite H2 in H1. assumption.
+  rewrite H2 in H1.
+  Show Proof. 
+  assumption.
 Qed.
+
 
 Theorem O_le_n : forall n,
   0 <= n.
@@ -863,6 +866,8 @@ Qed.
 Theorem n_le_m__Sn_le_Sm : forall n m,
   n <= m -> S n <= S m.
 Proof.
+  Search (?n <= ?m -> _ <= _).
+  Check le_n_S.
   apply le_n_S.
 Qed.
 
@@ -880,20 +885,40 @@ Proof.
   intros n.
   destruct m.
   - right.
-    destruct n.
+    unfold ">=".
+    apply O_le_n.
+    (* destruct n.
     + unfold ">=". reflexivity.
     + unfold ">=".
       Search (0 <= _). 
-      apply O_le_n.
+      apply O_le_n. *)
   - induction n.
     + left.
-      Search (0 < _). 
-      apply PeanoNat.Nat.lt_0_succ.
+      unfold "<".
+      apply n_le_m__Sn_le_Sm.
+      apply O_le_n.
+      (* Search (0 < _).
+      apply PeanoNat.Nat.lt_0_succ. *)
     + destruct IHn.
       * unfold "<" in H.
         Search (S _ <= S _).
         apply Sn_le_Sm__n_le_m in H.
-        Search "le_lt_eq_dec". (*gptから得たidea*)
+        inversion H.
+        -- right.
+           unfold ">=".
+           apply le_n.
+        -- unfold "<".
+           left. 
+           apply n_le_m__Sn_le_Sm.
+           apply n_le_m__Sn_le_Sm.
+           assumption.
+      
+           
+
+
+
+
+        (* Search "le_lt_eq_dec". (*gptから得たidea*)
         destruct (Compare_dec.le_lt_eq_dec _ _ H) as [H1 | H2].
         --Search (_ < _ -> S _ < S _).
           apply Arith_base.lt_n_S_stt in H1.
@@ -911,7 +936,7 @@ Proof.
             ++rewrite H2. Search (?x <= ?x). apply le_n. }
           Search (_ <= _ -> S _ <= S _).
           apply le_n_S in H3.
-          exact H3.
+          exact H3. *)
       * unfold ">=" in H. unfold ">=".
         right. 
         Search (?x <= ?y -> ?x <= S ?y).
@@ -935,7 +960,20 @@ Theorem plus_le : forall n1 n2 m,
 Proof.
   intros n1 n2 m.
   intros H.
-  induction n1.
+
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + Search (?x + ?y = ?y + ?x).  
+      rewrite add_comm. apply le_plus_l.
+  - destruct IHle.
+    split.
+    + apply le_S in H0. exact H0.
+    + apply le_S in H1. exact H1.
+Qed.
+
+
+  (* induction n1.
   Search (0 <= _).
   - split.
     + apply O_le_n.
@@ -950,13 +988,16 @@ Proof.
         {apply le_S. reflexivity. }
         rewrite H in H'. assumption.
       * split.
-        --Search (_ + _ <= _ -> _ <= _).
-          rewrite plus_n_O in H.
+        --Search (?x + ?y <= ?z -> ?x <= ?z).
+          inversion H.
+          (* rewrite plus_n_O in H.
+
           apply PeanoNat.Nat.le_le_add_le in H.
+          Check PeanoNat.Nat.le_le_add_le.
           ++ assumption.
-          ++ apply O_le_n.
+          ++ apply O_le_n. *)
         -- assumption.
-Qed.
+Qed. *)
 
 
 Lemma sub_alc : forall x y, S x <= y -> x <= y.
@@ -993,8 +1034,12 @@ Proof.
     + simpl in IHn.
       destruct IHn.
       * apply sub_alc. simpl in H. exact H.
-      * right. apply sub_alc2 in H0.
-        rewrite H0 in H. simpl in H.
+      * right. 
+        inversion H0.
+        rewrite H1 in H.
+        simpl in H.
+        (* apply sub_alc2 in H0.
+        rewrite H0 in H. simpl in H. *)
         apply sub_alc in H. exact H.
       * right. exact H0.
     + destruct IHn.
@@ -1002,13 +1047,20 @@ Proof.
       * simpl in H.
         Search (S _ <= S _).
         apply Sn_le_Sm__n_le_m in H.
-        destruct (Compare_dec.le_lt_eq_dec _ _ H0) as [H1 | H2].
-        --unfold "<" in H1. left. exact H1.
-        --rewrite H2 in H. simpl in H.
+        Check Compare_dec.le_lt_eq_dec.
+        (* destruct (Compare_dec.le_lt_eq_dec _ _ H0) as [H1 | H2]. *)
+        inversion H0.
+        
+        --rewrite H1 in H. simpl in H.
           apply sub_alc in H. 
           Search (?x + _ <= ?x + _).
           apply PeanoNat.Nat.add_le_mono_l in H.
           right. exact H.
+        --(*unfold "<" in H1.*) 
+          left. 
+          apply n_le_m__Sn_le_Sm.
+          exact H2.
+        
       * right. exact H0.
 Qed.
         
@@ -1020,9 +1072,16 @@ Theorem plus_le_compat_l : forall n m p,
 Proof.
   intros n m p H.
   Search (_ + _ <= _ + _).
-  apply PeanoNat.Nat.add_le_mono_l.
-  assumption.
+  induction p.
+  - simpl. exact H.
+  - simpl. apply n_le_m__Sn_le_Sm. exact IHp.
 Qed.
+
+
+
+  (* apply PeanoNat.Nat.add_le_mono_l.
+  assumption.
+Qed. *)
 
 
 Theorem plus_le_compat_r : forall n m p,
@@ -1030,10 +1089,18 @@ Theorem plus_le_compat_r : forall n m p,
   n + p <= m + p.
 Proof.
   intros n m p H.
+  rewrite add_comm.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  exact H.
+Qed.
+  
+
+(* 
   Search (_ + _ <= _ + _).
   apply PeanoNat.Nat.add_le_mono_r.
   assumption.
-Qed.
+Qed. *)
 
 Theorem le_plus_trans : forall n m p,
   n <= m ->
@@ -1054,7 +1121,13 @@ Theorem n_lt_m__n_le_m : forall n m,
   n <= m.
 Proof.
   intros n m H.
-  destruct n.
+  unfold "<" in H.
+  apply Sn_le_Sm__n_le_m.
+  Search (_ <= _ -> _ <= S _).
+  apply le_S in H.
+  exact H.
+
+  (* destruct n.
   - unfold "<" in H. 
     assert (H' : 0 <= 1).
     {apply PeanoNat.Nat.le_0_1. }
@@ -1064,7 +1137,7 @@ Proof.
     assert (H' : S n <= S (S n)).
     {apply le_n_S. apply le_S. reflexivity. }
     rewrite H in H'.
-    assumption.
+    assumption. *)
 Qed.
 
     
@@ -1074,15 +1147,18 @@ Theorem plus_lt : forall n1 n2 m,
   n1 + n2 < m ->
   n1 < m /\ n2 < m.
 Proof.
+  unfold "<".
   intros n1 n2 m.
   intros H.
   split.
-  - unfold "<" in H. unfold "<".
+  - 
+    (* unfold "<" in H. unfold "<". *)
     rewrite <- plus_Sn_m in H.
     apply plus_le in H.
     destruct H.
     assumption.
-  - unfold "<" in H. unfold "<".
+  - 
+    (* unfold "<" in H. unfold "<". *)
     rewrite plus_n_Sm in H.
     apply plus_le in H.
     destruct H.
@@ -1102,7 +1178,8 @@ Proof.
     destruct m.
     + discriminate.
     + apply n_le_m__Sn_le_Sm. 
-      apply IHn. 
+      apply IHn.
+      simpl in H. 
       apply H.
 Qed.
 
@@ -1118,9 +1195,9 @@ Proof.
     inversion H. 
     simpl. reflexivity.
   - intros n H.
-    inversion H.
-    + simpl. rewrite leb_refl. reflexivity.
-    + destruct n.
+    (* inversion H.
+    + simpl. rewrite leb_refl. reflexivity. *)
+    destruct n.
       * simpl. reflexivity.
       * simpl. 
         apply IHm.
@@ -1135,12 +1212,11 @@ Theorem leb_iff : forall n m,
 Proof.
   intros n m.
   split.
-  - intros H. 
-    apply leb_complete in H.
-    assumption.
-  - intros H.
-    apply leb_correct in H.
-    assumption.
+  - 
+    (* intros H.  *)
+    apply leb_complete.
+  - 
+    apply leb_correct.
 Qed.
 
 Theorem leb_true_trans : forall n m o,
@@ -1150,6 +1226,7 @@ Proof.
   apply leb_complete in H1.
   apply leb_complete in H2. 
   apply leb_correct. 
+  Print le_trans.
   apply (le_trans n m o H1 H2).
 Qed.
 (** [] *)
