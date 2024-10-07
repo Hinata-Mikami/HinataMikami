@@ -807,13 +807,6 @@ Inductive total_relation : nat -> nat -> Prop :=
   | tr n m : total_relation n m.
 
 
-Theorem total_relation_is_total : forall n m, total_relation n m.
-  Proof.
-    intros n m.
-    induction n.
-    - simpl.
-  Admitted.
-
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (empty_relation)
@@ -822,8 +815,8 @@ Theorem total_relation_is_total : forall n m, total_relation n m.
     that never holds. *)
 
 Inductive empty_relation : nat -> nat -> Prop :=
-  (* FILL IN HERE *)
 .
+
 
 Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
   Proof.
@@ -879,23 +872,52 @@ Proof.
   apply le_S_n.
 Qed.
 
-Lemma sub_ge_cases : forall n m, n < m -> S n = m \/ S n < m. 
+
 
 Theorem lt_ge_cases : forall n m,
   n < m \/ n >= m.
-  
 Proof.
-  intros n m.
-  induction n.
-  - destruct m.
-    + right. unfold ">=". reflexivity.
-    + left. apply PeanoNat.Nat.lt_0_succ.
-  - destruct m.
-    + right. apply le_0_n.
-    + destruct IHn as [H | H].
-      * unfold "<" in H. unfold ">=". (* ??? *)
-      (* *  ???*)
-Abort.
+  intros n.
+  destruct m.
+  - right.
+    destruct n.
+    + unfold ">=". reflexivity.
+    + unfold ">=".
+      Search (0 <= _). 
+      apply O_le_n.
+  - induction n.
+    + left.
+      Search (0 < _). 
+      apply PeanoNat.Nat.lt_0_succ.
+    + destruct IHn.
+      * unfold "<" in H.
+        Search (S _ <= S _).
+        apply Sn_le_Sm__n_le_m in H.
+        Search "le_lt_eq_dec". (*gptから得たidea*)
+        destruct (Compare_dec.le_lt_eq_dec _ _ H) as [H1 | H2].
+        --Search (_ < _ -> S _ < S _).
+          apply Arith_base.lt_n_S_stt in H1.
+          left. exact H1.
+        --Search (_ = _  -> S _ = S _).
+          (* apply eq_S in H2. *)
+          Search (?x = ?y -> ?y = ?x).
+          apply eq_sym in H2.
+          right.
+          unfold ">=".
+          assert (H3 : m <= n).
+          { intros.
+            destruct m.
+            ++Search (0 <= _). apply O_le_n.
+            ++rewrite H2. Search (?x <= ?x). apply le_n. }
+          Search (_ <= _ -> S _ <= S _).
+          apply le_n_S in H3.
+          exact H3.
+      * unfold ">=" in H. unfold ">=".
+        right. 
+        Search (?x <= ?y -> ?x <= S ?y).
+        apply le_S in H.
+        exact H.
+Qed.
 
 
 Theorem le_plus_l : forall a b,
@@ -936,6 +958,30 @@ Proof.
         -- assumption.
 Qed.
 
+
+Lemma sub_alc : forall x y, S x <= y -> x <= y.
+Proof.
+  intros x y H. 
+  Search (S ?x <= ?y).
+  rewrite PeanoNat.Nat.le_succ_l in H.
+  Search (?x < ?y -> ?z <= ?w).
+  apply PeanoNat.Nat.lt_le_incl in H.
+  exact H.
+Qed.
+
+Lemma sub_alc2 : forall x, x <= 0 -> S x = 1.
+Proof.
+  intros.
+  Search (?x <= 0).
+  apply Arith_base.le_n_0_eq_stt in H.
+  Search (?x = ?y -> S _ = S _).
+  apply eq_S in H.
+  Search (?x = ?y -> ?y = ?x).
+  apply eq_sym.
+  exact H.
+Qed.
+  
+
 Theorem add_le_cases : forall n m p q,
   n + m <= p + q -> n <= p \/ m <= q.
   (** Hint: May be easiest to prove by induction on [n]. *)
@@ -944,28 +990,28 @@ Proof.
   induction n.
   - left. apply O_le_n.
   - destruct p.
-    + simpl in H. simpl in IHn.
+    + simpl in IHn.
       destruct IHn.
-      * apply le_S in H.
-        apply le_S_n in H.
-        assumption.
-      * apply Arith_base.le_n_0_eq_stt in H0.
-        rewrite <- H0 in H.
-        simpl in H.
-        apply le_S in H.
-        apply le_S_n in H.
-        right. assumption.
-      * right. assumption.
-    + simpl in H. simpl in IHn.
-      apply Sn_le_Sm__n_le_m in H.
-      apply le_S in H.
-      destruct IHn.
-      * assumption.
-      * destruct m.
-        -- right. apply O_le_n.
-        -- (* ??? *)
-      (* * right. assumption.  *)
-Admitted.
+      * apply sub_alc. simpl in H. exact H.
+      * right. apply sub_alc2 in H0.
+        rewrite H0 in H. simpl in H.
+        apply sub_alc in H. exact H.
+      * right. exact H0.
+    + destruct IHn.
+      * simpl in H. apply sub_alc in H. exact H.
+      * simpl in H.
+        Search (S _ <= S _).
+        apply Sn_le_Sm__n_le_m in H.
+        destruct (Compare_dec.le_lt_eq_dec _ _ H0) as [H1 | H2].
+        --unfold "<" in H1. left. exact H1.
+        --rewrite H2 in H. simpl in H.
+          apply sub_alc in H. 
+          Search (?x + _ <= ?x + _).
+          apply PeanoNat.Nat.add_le_mono_l in H.
+          right. exact H.
+      * right. exact H0.
+Qed.
+        
 
 
 Theorem plus_le_compat_l : forall n m p,
@@ -1066,7 +1112,7 @@ Theorem leb_correct : forall n m,
   (** Hint: May be easiest to prove by induction on [m]. *)
 Proof.
     intros n m. 
-    generalize dependent n.  
+    generalize dependent n.
     induction m.
   - intros n H. 
     inversion H. 
@@ -1148,12 +1194,32 @@ Definition manual_grade_for_R_provability : option (nat*string) := None.
     Figure out which function; then state and prove this equivalence
     in Coq. *)
 
-Definition fR : nat -> nat -> nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition fR : nat -> nat -> nat := plus.
 
 Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
 Proof.
-(* FILL IN HERE *) Admitted.
+Proof.
+  intros m n o. split.
+  - intros H. unfold fR. induction H.
+    + reflexivity.
+    + simpl. rewrite -> IHR. reflexivity.
+    + rewrite <- plus_n_Sm. rewrite -> IHR. reflexivity.
+    + simpl in IHR. rewrite <- plus_n_Sm in IHR. injection IHR as H'.
+      apply H'.
+    + Search(?m + ?n = ?n + ?m).
+      rewrite ->add_comm. apply IHR.
+  - generalize dependent o. unfold fR. induction m as [|m' IHm].
+    + intros o H. simpl in H. rewrite -> H.
+      assert (H': forall x, R 0 x x).
+      { intros x. induction x as [|x' IHx].
+        - apply c1.
+        - apply c3. apply IHx. }
+      apply H'.
+    + intros o H. destruct o as [|o'].
+      * apply and_exercise in H. destruct H as [H1 H2]. rewrite -> H1.
+        rewrite -> H2. apply c1.
+      * apply c2. apply IHm. simpl in H. injection H as H'. apply H'.
+Qed.
 (** [] *)
 
 End R.
@@ -1195,18 +1261,28 @@ End R.
       is a subsequence of [l3], then [l1] is a subsequence of [l3]. *)
 
 Inductive subseq : list nat -> list nat -> Prop :=
-(* FILL IN HERE *)
+| subseqnil l : subseq nil l
+| subseqcons1 l h t (H: subseq l t): subseq l (h :: t)
+| subseqcons2 h t1 t2 (H: subseq t1 t2): subseq (h :: t1) (h :: t2)
 .
 
 Theorem subseq_refl : forall (l : list nat), subseq l l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intro l. induction l as [| h t IHl].
+  - apply subseqnil.
+  - apply subseqcons2. apply IHl.
+Qed.
+
 
 Theorem subseq_app : forall (l1 l2 l3 : list nat),
   subseq l1 l2 ->
   subseq l1 (l2 ++ l3).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2 l3 H. induction H.
+  - apply subseqnil.
+  - simpl. apply subseqcons1. apply IHsubseq.
+  - simpl. apply subseqcons2. apply IHsubseq.
+Qed.
 
 Theorem subseq_trans : forall (l1 l2 l3 : list nat),
   subseq l1 l2 ->
@@ -1215,7 +1291,16 @@ Theorem subseq_trans : forall (l1 l2 l3 : list nat),
 Proof.
   (* Hint: be careful about what you are doing induction on and which
      other things need to be generalized... *)
-  (* FILL IN HERE *) Admitted.
+Proof.
+  intros l1 l2 l3 H1 H2. generalize dependent H1. generalize dependent l1.
+  induction H2.
+  - intros l1 H. inversion H. apply subseqnil.
+  - intros l1 H. apply subseqcons1. apply IHsubseq. apply H.
+  - intros l1 H. inversion H.
+    + apply subseqnil.
+    + apply subseqcons1. apply IHsubseq. apply H3.
+    + apply subseqcons2. apply IHsubseq. apply H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (R_provability2)
@@ -1465,13 +1550,17 @@ Qed.
 Lemma empty_is_empty : forall T (s : list T),
   ~ (s =~ EmptySet).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T s. unfold not. intro H. inversion H.
+Qed.
 
 Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
   s =~ re1 \/ s =~ re2 ->
   s =~ Union re1 re2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T s re1 re2 [H1 | H2].
+  - apply MUnionL. apply H1.
+  - apply MUnionR. apply H2.
+Qed.
 
 (** The next lemma is stated in terms of the [fold] function from the
     [Poly] chapter: If [ss : list (list T)] represents a sequence of
@@ -1482,7 +1571,12 @@ Lemma MStar' : forall T (ss : list (list T)) (re : reg_exp T),
   (forall s, In s ss -> s =~ re) ->
   fold app ss [] =~ Star re.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T ss re H. induction ss as [| h t IHss].
+  - simpl. apply MStar0.
+  - simpl. simpl in H. apply MStarApp.
+    + apply H. left. reflexivity.
+    + apply IHss. intros s H'. apply H. right. apply H'.
+Qed.
 (** [] *)
 
 (** Since the definition of [exp_match] has a recursive
@@ -1771,7 +1865,24 @@ Lemma MStar'' : forall T (s : list T) (re : reg_exp T),
     s = fold app ss []
     /\ forall s', In s' ss -> s' =~ re.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T s re H. remember (Star re) as re'.
+  induction H.
+  - discriminate.
+  - discriminate.
+  - discriminate.
+  - discriminate.
+  - discriminate.
+  - exists []. simpl. split.
+    + reflexivity.
+    + intros s' H. destruct H.
+  - destruct (IHexp_match2 Heqre').
+    destruct H1.
+    exists (s1 :: x). simpl. split.
+    + rewrite <- H1. reflexivity.
+    + intros s' [H1'| H2'].
+      * inversion Heqre'. rewrite <- H4. rewrite <- H1'. apply H.
+      * apply H2. apply H2'.
+Qed.
 (** [] *)
 
 (** **** Exercise: 5 stars, advanced (weak_pumping)
@@ -1904,7 +2015,66 @@ Proof.
        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2 ].
   - (* MEmpty *)
     simpl. intros contra. inversion contra.
-  (* FILL IN HERE *) Admitted.
+  - simpl. intros contra. inversion contra. inversion H0.
+  - simpl. intros H. rewrite -> app_length in H. apply add_le_cases in H.
+    destruct H.
+    + apply IH1 in H. destruct H. destruct H. destruct H.
+      destruct H as [H1 [H2 H3]]. exists x. exists x0. exists (x1 ++ s2).
+      split.
+      * rewrite -> H1. rewrite <- app_assoc. rewrite <- app_assoc.
+        reflexivity.
+      * split.
+        { apply H2. }
+        { intro m. rewrite -> app_assoc. rewrite -> app_assoc.
+          apply MApp.
+          + rewrite <- app_assoc. apply H3.
+          + apply Hmatch2. }
+    + apply IH2 in H. destruct H. destruct H. destruct H.
+      destruct H as [H1 [H2 H3]]. exists (s1 ++ x). exists x0. exists x1.
+      split.
+      * rewrite -> H1. rewrite <- app_assoc. reflexivity.
+      * split.
+        { apply H2. }
+        { intro m. rewrite <- app_assoc. apply MApp.
+          + apply Hmatch1.
+          + apply H3. }
+  - simpl. intro H. apply plus_le in H. destruct H as [H1 H2].
+    apply IH in H1. destruct H1. destruct H. destruct H.
+    destruct H as [H1' [H2' H3']]. exists x. exists x0. exists x1.
+    split.
+    + apply H1'.
+    + split.
+      * apply H2'.
+      * intro m. apply MUnionL. apply H3'.
+  - simpl. intro H. apply plus_le in H. destruct H as [H1 H2].
+    apply IH in H2. destruct H2. destruct H. destruct H.
+    destruct H as [H1' [H2' H3']]. exists x.
+    exists x0. exists x1. split.
+    + apply H1'.
+    + split.
+      * apply H2'.
+      * intro m. apply MUnionR. apply H3'.
+  - simpl. intro contra. inversion contra.
+    apply pumping_constant_0_false in H0. destruct H0.
+  - simpl. intro H. rewrite -> app_length in H. simpl in IH2.
+    destruct s1.
+    + simpl. simpl in H. apply IH2 in H. destruct H. destruct H.
+      destruct H. destruct H as [H1 [H2 H3]].
+      exists x. exists x0. exists x1. split.
+      * apply H1.
+      * split.
+        { apply H2. }
+        { apply H3. }
+    + exists [], (x :: s1), s2. simpl. split.
+      * reflexivity.
+      * split.
+        { unfold not. intro contra. discriminate contra. }
+        { intro m. induction m.
+          - simpl. apply Hmatch2.
+          - simpl. rewrite <- app_assoc.
+            apply (MStarApp (x :: s1) (napp m (x :: s1) ++ s2)).
+            apply Hmatch1. apply IHm. }
+Qed.
 (** [] *)
 
 (** **** Exercise: 5 stars, advanced, optional (pumping)
@@ -1931,8 +2101,9 @@ Proof.
        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2 ].
   - (* MEmpty *)
     simpl. intros contra. inversion contra.
-  (* FILL IN HERE *) Admitted.
-
+  - simpl. intros contra. inversion contra. inversion H0.
+  - 
+Abort.  
 End Pumping.
 (** [] *)
 
@@ -2013,7 +2184,14 @@ Qed.
 (** **** Exercise: 2 stars, standard, especially useful (reflect_iff) *)
 Theorem reflect_iff : forall P b, reflect P b -> (P <-> b = true).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros P b H. inversion H.
+  - split.
+    + reflexivity.
+    + intro H2. apply H0.
+  - split.
+    + intro H2. destruct H0. apply H2.
+    + intro H2. discriminate.
+Qed.
 (** [] *)
 
 (** We can think of [reflect] as a variant of the usual "if and only
@@ -2071,8 +2249,14 @@ Fixpoint count n l :=
 Theorem eqbP_practice : forall n l,
   count n l = 0 -> ~(In n l).
 Proof.
-  intros n l Hcount. induction l as [| m l' IHl'].
-  (* FILL IN HERE *) Admitted.
+  intros n l. induction l as [| h l' IHl'].
+  - simpl. intro H. intro H'. assumption.
+  - simpl. destruct (eqbP n h) as [H | H].
+    + discriminate.
+    + simpl. intros H' [H1' | H2'].
+      * apply H. rewrite -> H1'. reflexivity.
+      * apply IHl'. apply H'. apply H2'.
+Qed.
 (** [] *)
 
 (** This small example shows reflection giving us a small gain in
@@ -2181,7 +2365,9 @@ Definition manual_grade_for_nostutter : option (nat*string) := None.
     others.  Do this with an inductive relation, not a [Fixpoint].  *)
 
 Inductive merge {X:Type} : list X -> list X -> list X -> Prop :=
-(* FILL IN HERE *)
+| merge_nil : merge nil nil nil
+| merge_consl h l1 l2 l3 (H: merge l1 l2 l3) : merge (h :: l1) (h :: l2) l3
+| merge_consr h l1 l2 l3 (H: merge l1 l2 l3) : merge (h :: l1) l2 (h :: l3)
 .
 
 Theorem merge_filter : forall (X : Set) (test: X->bool) (l l1 l2 : list X),
@@ -2190,7 +2376,7 @@ Theorem merge_filter : forall (X : Set) (test: X->bool) (l l1 l2 : list X),
   All (fun n => test n = false) l2 ->
   filter test l = l1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+Admitted.
 
 (* FILL IN HERE *)
 
@@ -2231,17 +2417,27 @@ Proof.
 *)
 
 Inductive pal {X:Type} : list X -> Prop :=
-(* FILL IN HERE *)
+| pal_nil : pal []
+| pal_one x : pal [x]
+| pal_cons h t (H: pal t) : pal (h :: t ++ [h])
+
 .
 
 Theorem pal_app_rev : forall (X:Type) (l : list X),
   pal (l ++ (rev l)).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T l. induction l as [| h t IHl].
+  - simpl. apply pal_nil.
+  - simpl. rewrite -> app_assoc. apply pal_cons. apply IHl.
+Qed.
 
 Theorem pal_rev : forall (X:Type) (l: list X) , pal l -> l = rev l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T l H. induction H.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  - simpl. rewrite -> rev_app_distr. simpl. rewrite <- IHpal. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 5 stars, standard, optional (palindrome_converse)
@@ -2253,10 +2449,34 @@ Proof.
      forall l, l = rev l -> pal l.
 *)
 
+Theorem sub_palindrome_converse : forall T n (l: list T),
+    length l <= n ->
+    l = rev l -> pal l.
+Proof.
+  intro T. induction n.
+  - intros. destruct l.
+    + apply pal_nil.
+    + simpl in H. inversion H.
+  - intros. destruct l.
+    + apply pal_nil.
+    + simpl in H. simpl in H0.
+      destruct (rev l) eqn: E.
+      * rewrite -> H0. simpl. apply pal_one.
+      * inversion H0. apply pal_cons. apply IHn.
+        apply Sn_le_Sm__n_le_m in H. assert (H': length l0 <= length l).
+        { rewrite -> H3. rewrite -> app_length. simpl. rewrite -> add_comm.
+          simpl. apply le_S. apply le_n. }
+        apply (le_trans (length l0) (length l)). apply H'. apply H.
+        rewrite H3 in E. rewrite -> rev_app_distr in E. simpl in E.
+        injection E as E'. rewrite E'. reflexivity.
+Qed.
+
 Theorem palindrome_converse: forall {X: Type} (l: list X),
     l = rev l -> pal l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros T l H. apply (sub_palindrome_converse _ (length l)).
+  apply le_n. apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced, optional (NoDup)
@@ -2276,7 +2496,9 @@ Proof.
     lists (with elements of type X) that have no elements in
     common. *)
 
-(* FILL IN HERE *)
+Definition disjoint (X: Type) : list X -> list X -> Prop :=
+  fun l1 l2 =>
+    forall x, In x l1 -> ~ In x l2.
 
 (** Next, use [In] to define an inductive proposition [NoDup X
     l], which should be provable exactly when [l] is a list (with
@@ -2285,12 +2507,29 @@ Proof.
     bool []] should be provable, while [NoDup nat [1;2;1]] and
     [NoDup bool [true;true]] should not be.  *)
 
-(* FILL IN HERE *)
+Inductive NoDup (X: Type) : list X -> Prop :=
+| NoDup_nil : NoDup X []
+| NoDup_cons h t (H: NoDup X t) (H': ~ In h t) : NoDup X (h :: t)
+.
 
 (** Finally, state and prove one or more interesting theorems relating
     [disjoint], [NoDup] and [++] (list append).  *)
 
-(* FILL IN HERE *)
+Theorem NoDup_app_disjoint : forall X (l1 l2: list X),
+    disjoint X l1 l2 -> NoDup X l1 -> NoDup X l2 -> NoDup X (l1 ++ l2).
+Proof.
+  intros X l1 l2 Hdis Hdup1 Hdup2. unfold disjoint in Hdis. induction Hdup1.
+  - simpl. apply Hdup2.
+  - simpl. apply NoDup_cons.
+    + apply IHHdup1. intros x' Hin. apply Hdis. simpl. right. apply Hin.
+    + intro contra. rewrite -> In_app_iff in contra.
+      destruct contra.
+      * unfold not in H'. apply H' in H. assumption.
+      * apply (not_both_true_and_false (In h l2)).
+        split.
+        { apply H. }
+        { apply Hdis. simpl. left. reflexivity. }
+Qed.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_NoDup_disjoint_etc : option (nat*string) := None.
@@ -2310,13 +2549,20 @@ Lemma in_split : forall (X:Type) (x:X) (l:list X),
   In x l ->
   exists l1 l2, l = l1 ++ x :: l2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X x l H. induction l.
+  - inversion H.
+  - simpl in H. destruct H.
+    + exists nil, l. simpl. rewrite -> H. reflexivity.
+    + apply IHl in H. destruct H. destruct H. rewrite -> H.
+      exists (x0 :: x1). exists x2. simpl. reflexivity.
+Qed.
 
 (** Now define a property [repeats] such that [repeats X l] asserts
     that [l] contains at least one repeated element (of type [X]).  *)
 
 Inductive repeats {X:Type} : list X -> Prop :=
-  (* FILL IN HERE *)
+| repeats_nil h t (H: In h t) : repeats (h :: t)
+| repeats_cons h t (H: repeats t) : repeats (h :: t)
 .
 
 (* Do not modify the following line: *)
@@ -2340,8 +2586,7 @@ Theorem pigeonhole_principle: excluded_middle ->
   length l2 < length l1 ->
   repeats l1.
 Proof.
-  intros EM X l1. induction l1 as [|x l1' IHl1'].
-  (* FILL IN HERE *) Admitted.
+Admitted. 
 (** [] *)
 
 (* ================================================================= *)
@@ -2486,7 +2731,21 @@ Lemma app_ne : forall (a : ascii) s re0 re1,
   ([ ] =~ re0 /\ a :: s =~ re1) \/
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re0 /\ s1 =~ re1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros a s re0 re1. split.
+  - intro H. inversion H.
+    destruct s1.
+    + left. split.
+      * apply H3.
+      * apply H4.
+    + right. injection H1 as Ha Hs. exists s1 ,s2. split.
+      * rewrite -> Hs. reflexivity.
+      * split.
+        { rewrite <- Ha. apply H3. }
+        { apply H4. }
+  - intros [[H1 H2] | [s1 [s2 [H3 [H4 H5]]]]].
+    + apply (MApp []). apply H1. apply H2.
+    + rewrite -> H3. apply (MApp (a :: s1)). apply H4. apply H5.
+Qed.
 (** [] *)
 
 (** [s] matches [Union re0 re1] iff [s] matches [re0] or [s] matches [re1]. *)
@@ -2522,7 +2781,28 @@ Lemma star_ne : forall (a : ascii) s re,
   a :: s =~ Star re <->
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re /\ s1 =~ Star re.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. split.
+  - intros H. remember (a :: s) as l. remember (Star re) as re'.
+    induction H.
+    + discriminate Heqre'.
+    + discriminate Heqre'.
+    + discriminate Heqre'.
+    + discriminate Heqre'.
+    + discriminate Heqre'.
+    + discriminate Heql.
+    + injection Heqre' as H'. rewrite H' in *.
+      destruct s1 as [| h t].
+      * apply IHexp_match2. simpl in Heql. apply Heql. reflexivity.
+      * injection Heql as H1' H2'. exists t, s2. split.
+        { rewrite -> H2'. reflexivity. }
+        { split. rewrite <- H1'. apply H. apply H0. }
+  - intros [s0 [s1 [H1 [H2 H3]]]].
+    rewrite H1. assert (H': a :: s0 ++ s1 = (a :: s0) ++ s1).
+    { simpl. reflexivity. }
+    rewrite H'. apply MStarApp.
+    + apply H2.
+    + apply H3.
+Qed.
 (** [] *)
 
 (** The definition of our regex matcher will include two fixpoint
@@ -2536,8 +2816,15 @@ Definition refl_matches_eps m :=
 
     Complete the definition of [match_eps] so that it tests if a given
     regex matches the empty string: *)
-Fixpoint match_eps (re: reg_exp ascii) : bool
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint match_eps (re: reg_exp ascii) : bool :=
+  match re with
+  | EmptySet => false
+  | EmptyStr => true
+  | Char _ => false
+  | App re1 re2 => andb (match_eps re1) (match_eps re2)
+  | Union re1 re2 => orb (match_eps re1) (match_eps re2)
+  | Star _ => true
+  end.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, optional (match_eps_refl)
@@ -2547,7 +2834,48 @@ Fixpoint match_eps (re: reg_exp ascii) : bool
     [ReflectT] and [ReflectF].) *)
 Lemma match_eps_refl : refl_matches_eps match_eps.
 Proof.
-  (* FILL IN HERE *) Admitted.
+Proof.
+  unfold refl_matches_eps. intro re. induction re.
+  - simpl. apply ReflectF. unfold not. intro. inversion H.
+  - simpl. apply ReflectT. apply MEmpty.
+  - simpl. apply ReflectF. unfold not. intro. inversion H.
+  - simpl. inversion IHre1.
+    + inversion IHre2.
+      * simpl. apply ReflectT. apply (MApp []). apply H0. apply H2.
+      * simpl. apply ReflectF. unfold not. intro. inversion H3.
+        destruct s2.
+        { apply (contradiction_implies_anything ([] =~ re2)).
+          split. apply H8. apply H2. }
+        { destruct s1.
+          - discriminate H4.
+          - discriminate H4. }
+    + inversion IHre1.
+      * simpl. apply ReflectF. unfold not. intro. inversion H3.
+        destruct s1.
+        { apply (contradiction_implies_anything ([] =~ re1)).
+          split. apply H7. apply H0. }
+        { apply (contradiction_implies_anything ([] =~ re1)).
+          split. apply H2. apply H0. }
+      * simpl. apply ReflectF. unfold not. intro. inversion H3.
+        destruct s1.
+        { apply (contradiction_implies_anything ([] =~ re1)).
+          split. apply H7. apply H2. }
+        { destruct s1.
+          - discriminate H4.
+          - discriminate H4. }
+  - simpl. inversion IHre1.
+    + simpl. apply ReflectT. apply MUnionL. apply H0.
+    + simpl. inversion IHre2.
+      * apply ReflectT. apply MUnionR. apply H2.
+      * apply ReflectF. unfold not. intro. inversion H3. destruct s1.
+        { apply (contradiction_implies_anything ([] =~ re1)).
+          split. apply H6. apply H0. }
+        { apply (contradiction_implies_anything ([] =~ re1)).
+          split.  apply H6. apply H0. }
+        { apply (contradiction_implies_anything ([] =~ re2)).
+          split. apply H6. apply H2. }
+  - simpl. apply ReflectT. apply MStar0.
+Qed.   
 (** [] *)
 
 (** We'll define other functions that use [match_eps]. However, the
@@ -2574,8 +2902,18 @@ Definition derives d := forall a re, is_der re a (d a re).
     Define [derive] so that it derives strings. One natural
     implementation uses [match_eps] in some cases to determine if key
     regex's match the empty string. *)
-Fixpoint derive (a : ascii) (re : reg_exp ascii) : reg_exp ascii
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint derive (a : ascii) (re : reg_exp ascii) : reg_exp ascii :=
+  match re with
+  | EmptySet => EmptySet
+  | EmptyStr => EmptySet
+  | Char b => if eqb a b then EmptyStr else EmptySet
+  | App re1 re2 =>
+    if match_eps re1 then Union (derive a re2) (App (derive a re1) re2)
+    else App (derive a re1) re2
+  | Union re1 re2 =>
+    Union (derive a re1) (derive a re2)
+  | Star re => App (derive a re) (Star re)
+  end.
 (** [] *)
 
 (** The [derive] function should pass the following tests. Each test
@@ -2589,44 +2927,44 @@ Example d := ascii_of_nat 100.
 (** "c" =~ EmptySet: *)
 Example test_der0 : match_eps (derive c (EmptySet)) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "c" =~ Char c: *)
 Example test_der1 : match_eps (derive c (Char c)) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "c" =~ Char d: *)
 Example test_der2 : match_eps (derive c (Char d)) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "c" =~ App (Char c) EmptyStr: *)
 Example test_der3 : match_eps (derive c (App (Char c) EmptyStr)) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "c" =~ App EmptyStr (Char c): *)
 Example test_der4 : match_eps (derive c (App EmptyStr (Char c))) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "c" =~ Star c: *)
 Example test_der5 : match_eps (derive c (Star (Char c))) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "cd" =~ App (Char c) (Char d): *)
 Example test_der6 :
   match_eps (derive d (derive c (App (Char c) (Char d)))) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** "cd" =~ App (Char d) (Char c): *)
 Example test_der7 :
   match_eps (derive d (derive c (App (Char d) (Char c)))) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  simpl. reflexivity. Qed.
 
 (** **** Exercise: 4 stars, standard, optional (derive_corr)
 
@@ -2651,7 +2989,65 @@ Proof.
     [Prop]'s naturally using [intro] and [destruct]. *)
 Lemma derive_corr : derives derive.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold derives. intro a. unfold is_der. induction re.
+  - intro s. simpl. rewrite null_matches_none. apply and_comm.
+    apply null_matches_none.
+  - intro s. simpl. rewrite empty_nomatch_ne. apply and_comm.
+    apply null_matches_none.
+  - intro s. simpl. destruct (eqb a t) eqn: E.
+    + apply eqb_eq in E. rewrite E. rewrite empty_matches_eps.
+      apply char_eps_suffix.
+    + apply eqb_neq in E. rewrite char_nomatch_char.
+      * apply and_comm. apply null_matches_none.
+      * apply E.
+  - intro s. simpl. destruct (match_eps_refl re1).
+    + rewrite union_disj. split.
+      * rewrite app_ne. intros [[Hre1 Hre2] | Hexists].
+        { left. apply IHre2. apply Hre2. }
+        { right. destruct Hexists as [s0 [s1 [Hs [Ha Hs1]]]].
+          rewrite -> Hs. apply MApp.
+          - apply IHre1. apply Ha.
+          - apply Hs1. }
+      * intros [Hsd | Hsa].
+        { rewrite app_ne. left. split.
+          - apply H.
+          - apply IHre2. apply Hsd. }
+        { rewrite app_exists in Hsa.
+          destruct Hsa as [s0 [s1 [Hs [Hs0 Hs1]]]]. rewrite app_ne.
+          right. exists s0, s1. split.
+          - apply Hs.
+          - split.
+            + apply IHre1. apply Hs0.
+            + apply Hs1. }
+    + split.
+      * rewrite app_ne. intros [[Hre1 Hre2] | Hexists].
+        { destruct H. apply Hre1. }
+        { rewrite app_exists. destruct Hexists as [s2 [s3 [Hs [Ha Hs1]]]].
+          exists s2, s3. split.
+          - apply Hs.
+          - split.
+            + apply IHre1. apply Ha.
+            + apply Hs1. }
+      * rewrite app_exists. intros [s0 [s1 [Hs [Hs0 Hs1]]]].
+        rewrite app_ne. right. exists s0, s1.
+        split.
+        { apply Hs. }
+        { split.
+          - apply IHre1. apply Hs0.
+          - apply Hs1. }
+  - intro s. simpl. rewrite union_disj. rewrite IHre1. rewrite IHre2.
+    rewrite <- union_disj. reflexivity.
+  - intro s. simpl. rewrite star_ne. split.
+    + intros [s0 [s1 [Hs [Hsa Hs1]]]]. rewrite Hs. apply MApp.
+      * apply IHre. apply Hsa.
+      * apply Hs1.
+    + rewrite app_exists. intros [s0 [s1 [Hs [Hs0 Hs1]]]].
+      exists s0, s1. split.
+      * apply Hs.
+      * split.
+        { apply IHre. apply Hs0. }
+        { apply Hs1. }
+Qed.
 (** [] *)
 
 (** We'll define the regex matcher using [derive]. However, the only
@@ -2668,8 +3064,11 @@ Definition matches_regex m : Prop :=
 
     Complete the definition of [regex_match] so that it matches
     regexes. *)
-Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool :=
+  match s with
+  | nil => match_eps re
+  | h :: t => regex_match t (derive h re)
+  end.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, optional (regex_match_correct)
@@ -2687,7 +3086,15 @@ Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool
     [s =~ derive x re], and vice versa. *)
 Theorem regex_match_correct : matches_regex regex_match.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold matches_regex. induction s.
+  - intro re. simpl. destruct (match_eps_refl re).
+    + apply ReflectT. apply H.
+    + apply ReflectF. apply H.
+  - intro re. simpl. destruct (IHs (derive x re)).
+    + apply ReflectT. apply derive_corr. apply H.
+    + apply ReflectF. intro contra. apply H. apply derive_corr.
+      apply contra.
+Qed.
 (** [] *)
 
 (* 2023-12-29 17:12 *)
