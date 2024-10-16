@@ -1,0 +1,21 @@
+ Brief introduction to Tagless-final
+
+dsls.ml            Self-contained script with the code,
+                   as explained in the course notes.
+
+
+        Brief introduction to OCaml module system as to be used in the class
+
+lang.mli           Definition of a simple language of addition
+
+
+        Interpreters of the language
+eval.ml            Meta-circular evaluator
+pp.ml              Pretty-printer
+neg.ml             Negation transformer
+
+        Examples and test
+ex1.ml             Example (also a regression tests)
+
+
+Makefile           How to make it

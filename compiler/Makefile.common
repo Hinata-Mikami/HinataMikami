@@ -1,0 +1,26 @@
+# Makefile for the project: common part
+OCAML=ocaml
+OCAMLC=ocamlc
+OCAMLDEP=ocamldep
+INCLUDES=-I ../util
+CFLAGS=-Wall -W
+
+.SUFFIXES: .ml .mli .cmo .cmi .mll .mly
+
+.c.s:
+	gcc -W -Wall -O0 -S -fverbose-asm -fomit-frame-pointer $<
+
+.mli.cmi:
+	$(OCAMLC) -c $(INCLUDES) -o $@ $<
+.ml.cmo:
+	$(OCAMLC) -c $(INCLUDES) -o $@ $<
+
+.mll.ml:
+	ocamllex -o $@ $<
+
+%.ml: %.mly
+	ocamlyacc -v $*.mly && rm -f $*.mli
+
+clean::
+	rm -f *.cm[ixoa] *.cmxa *.[oa] .depend a.out tigerc
+
