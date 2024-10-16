@@ -29,4 +29,4 @@ let _ = assert (x = "((-4 + 0) + (1 + 1))")
 let x = let module M = Ex1Neg(Neg.Neg(Eval)) in M.res
 let _ = assert (x=2)
 
-let () = print_endline "All Done"
+let () = print_endline "Ex1 was All Done"
