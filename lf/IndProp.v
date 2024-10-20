@@ -842,14 +842,68 @@ Qed.
     practice exercises. *)
 
 (** **** Exercise: 5 stars, standard, optional (le_and_lt_facts) *)
+
+(*修正1・le_transで使いたいので前に*)
+(*le_n_Sを使わない*)
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  (* Search (?n <= ?m -> _ <= _).
+  Check le_n_S.
+  apply le_n_S. *)
+
+  intros n m H.
+  induction H.
+  - reflexivity.
+  - apply le_S. exact IHle.
+Qed. 
+    
+
+Lemma weakening_le : forall n m,
+  S n <= m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H.
+  - inversion H.
+    + apply le_S. reflexivity.
+    + apply le_S. apply IHm. exact H1.
+Qed. 
+  
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  (* apply le_S_n. *)
+  intros n m H.
+  (*なぜ　apply n_le_m__Sn_le_Sm が使えない？*)
+  inversion H.
+  - reflexivity.
+  - apply weakening_le in H1.
+    exact H1.
+
+Qed.
+
+
 Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
-  intros m n o.
+  (* intros m n o.
   intros H1 H2.
   rewrite H2 in H1.
   Show Proof. 
-  assumption.
+  assumption. *)
+
+  (*修正*)
+  intros m n o H1 H2.
+  induction H1.
+  - exact H2.
+  - apply le_S in H2.
+    apply Sn_le_Sm__n_le_m in H2.
+    apply IHle.
+    exact H2.
 Qed.
+
+(*修正1ここまで*)
 
 
 Theorem O_le_n : forall n,
@@ -863,20 +917,6 @@ Proof.
     assumption.
 Qed.
 
-Theorem n_le_m__Sn_le_Sm : forall n m,
-  n <= m -> S n <= S m.
-Proof.
-  Search (?n <= ?m -> _ <= _).
-  Check le_n_S.
-  apply le_n_S.
-Qed.
-
-Theorem Sn_le_Sm__n_le_m : forall n m,
-  S n <= S m -> n <= m.
-Proof.
-  apply le_S_n.
-Qed.
-
 
 
 Theorem lt_ge_cases : forall n m,
@@ -887,18 +927,13 @@ Proof.
   - right.
     unfold ">=".
     apply O_le_n.
-    (* destruct n.
-    + unfold ">=". reflexivity.
-    + unfold ">=".
-      Search (0 <= _). 
-      apply O_le_n. *)
+
   - induction n.
     + left.
       unfold "<".
       apply n_le_m__Sn_le_Sm.
       apply O_le_n.
-      (* Search (0 < _).
-      apply PeanoNat.Nat.lt_0_succ. *)
+
     + destruct IHn.
       * unfold "<" in H.
         Search (S _ <= S _).
@@ -913,30 +948,6 @@ Proof.
            apply n_le_m__Sn_le_Sm.
            assumption.
       
-           
-
-
-
-
-        (* Search "le_lt_eq_dec". (*gptから得たidea*)
-        destruct (Compare_dec.le_lt_eq_dec _ _ H) as [H1 | H2].
-        --Search (_ < _ -> S _ < S _).
-          apply Arith_base.lt_n_S_stt in H1.
-          left. exact H1.
-        --Search (_ = _  -> S _ = S _).
-          (* apply eq_S in H2. *)
-          Search (?x = ?y -> ?y = ?x).
-          apply eq_sym in H2.
-          right.
-          unfold ">=".
-          assert (H3 : m <= n).
-          { intros.
-            destruct m.
-            ++Search (0 <= _). apply O_le_n.
-            ++rewrite H2. Search (?x <= ?x). apply le_n. }
-          Search (_ <= _ -> S _ <= S _).
-          apply le_n_S in H3.
-          exact H3. *)
       * unfold ">=" in H. unfold ">=".
         right. 
         Search (?x <= ?y -> ?x <= S ?y).
@@ -973,55 +984,43 @@ Proof.
 Qed.
 
 
-  (* induction n1.
-  Search (0 <= _).
-  - split.
-    + apply O_le_n.
-    + simpl in H. assumption.
-  - destruct n2.
-    split.
-    + rewrite <- plus_n_O in H. assumption.
-    + apply O_le_n.
-    Search (_ <= S _).
-    + destruct IHn1.
-      *assert (H' : n1 + S n2 <= S n1 + S n2).
-        {apply le_S. reflexivity. }
-        rewrite H in H'. assumption.
-      * split.
-        --Search (?x + ?y <= ?z -> ?x <= ?z).
-          inversion H.
-          (* rewrite plus_n_O in H.
+(*修正2*)
 
-          apply PeanoNat.Nat.le_le_add_le in H.
-          Check PeanoNat.Nat.le_le_add_le.
-          ++ assumption.
-          ++ apply O_le_n. *)
-        -- assumption.
-Qed. *)
-
-
+(*既に証明済み*)
 Lemma sub_alc : forall x y, S x <= y -> x <= y.
 Proof.
-  intros x y H. 
-  Search (S ?x <= ?y).
-  rewrite PeanoNat.Nat.le_succ_l in H.
-  Search (?x < ?y -> ?z <= ?w).
-  apply PeanoNat.Nat.lt_le_incl in H.
-  exact H.
+  apply weakening_le.
 Qed.
 
+(*inversionで明らか*)
 Lemma sub_alc2 : forall x, x <= 0 -> S x = 1.
 Proof.
-  intros.
-  Search (?x <= 0).
+(* Search (?x <= 0).
   apply Arith_base.le_n_0_eq_stt in H.
   Search (?x = ?y -> S _ = S _).
   apply eq_S in H.
   Search (?x = ?y -> ?y = ?x).
   apply eq_sym.
-  exact H.
-Qed.
+  exact H. *)  
   
+  intros.
+  inversion H.
+  reflexivity.
+
+Qed.
+
+(*追加*)
+Lemma sub_alc3 : forall x y z,
+  x + y <= x + z -> y <= z.
+Proof.
+  intros x y z H.
+  induction x.
+  - simpl in H. exact H.
+  - apply IHx.
+    simpl in H.
+    apply Sn_le_Sm__n_le_m.
+    exact H.
+Qed.  
 
 Theorem add_le_cases : forall n m p q,
   n + m <= p + q -> n <= p \/ m <= q.
@@ -1038,33 +1037,27 @@ Proof.
         inversion H0.
         rewrite H1 in H.
         simpl in H.
-        (* apply sub_alc2 in H0.
-        rewrite H0 in H. simpl in H. *)
         apply sub_alc in H. exact H.
       * right. exact H0.
     + destruct IHn.
       * simpl in H. apply sub_alc in H. exact H.
       * simpl in H.
-        Search (S _ <= S _).
         apply Sn_le_Sm__n_le_m in H.
-        Check Compare_dec.le_lt_eq_dec.
-        (* destruct (Compare_dec.le_lt_eq_dec _ _ H0) as [H1 | H2]. *)
+
         inversion H0.
-        
         --rewrite H1 in H. simpl in H.
           apply sub_alc in H. 
-          Search (?x + _ <= ?x + _).
-          apply PeanoNat.Nat.add_le_mono_l in H.
-          right. exact H.
-        --(*unfold "<" in H1.*) 
-          left. 
+          right.
+          apply sub_alc3 in H.
+          exact H.
+        --left. 
           apply n_le_m__Sn_le_Sm.
           exact H2.
         
       * right. exact H0.
 Qed.
         
-
+(*修正2ここまで*)
 
 Theorem plus_le_compat_l : forall n m p,
   n <= m ->
@@ -1079,11 +1072,6 @@ Qed.
 
 
 
-  (* apply PeanoNat.Nat.add_le_mono_l.
-  assumption.
-Qed. *)
-
-
 Theorem plus_le_compat_r : forall n m p,
   n <= m ->
   n + p <= m + p.
@@ -1095,12 +1083,6 @@ Proof.
   exact H.
 Qed.
   
-
-(* 
-  Search (_ + _ <= _ + _).
-  apply PeanoNat.Nat.add_le_mono_r.
-  assumption.
-Qed. *)
 
 Theorem le_plus_trans : forall n m p,
   n <= m ->
@@ -1757,7 +1739,8 @@ Lemma re_not_empty_correct : forall T (re : reg_exp T),
 Proof.
   intros T re. 
   split.
-  - intros [s H]. induction H.
+  - intros [s H]. 
+    induction H.
     + simpl. reflexivity.
     + simpl. reflexivity.
     + simpl. 
@@ -1793,14 +1776,14 @@ Proof.
       * apply H0.
     + simpl in H. 
       apply orb_true_iff in H. 
-      destruct H as [H1 | H2].
-      * apply IHre1 in H1. 
-        destruct H1. 
+      destruct H.
+      * apply IHre1 in H. 
+        destruct H. 
         exists x. 
         apply MUnionL. 
         apply H.
-      * apply IHre2 in H2. 
-        destruct H2. 
+      * apply IHre2 in H. 
+        destruct H. 
         exists x. 
         apply MUnionR. 
         apply H.
