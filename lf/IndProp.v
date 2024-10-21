@@ -866,7 +866,7 @@ Proof.
   induction m.
   - inversion H.
   - inversion H.
-    + apply le_S. reflexivity.
+    + apply le_S. apply le_n. (*reflexivity. *)
     + apply le_S. apply IHm. exact H1.
 Qed. 
   
@@ -876,7 +876,6 @@ Theorem Sn_le_Sm__n_le_m : forall n m,
 Proof.
   (* apply le_S_n. *)
   intros n m H.
-  (*なぜ　apply n_le_m__Sn_le_Sm が使えない？*)
   inversion H.
   - reflexivity.
   - apply weakening_le in H1.
@@ -887,21 +886,14 @@ Qed.
 
 Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
-  (* intros m n o.
-  intros H1 H2.
-  rewrite H2 in H1.
-  Show Proof. 
-  assumption. *)
 
   (*修正*)
   intros m n o H1 H2.
-  induction H1.
-  - exact H2.
-  - apply le_S in H2.
-    apply Sn_le_Sm__n_le_m in H2.
-    apply IHle.
-    exact H2.
+  induction H2.
+  - exact H1.
+  - apply le_S. exact IHle.
 Qed.
+
 
 (*修正1ここまで*)
 
@@ -1766,11 +1758,11 @@ Proof.
       apply MChar.
     + simpl in H. 
       apply andb_true_iff in H. 
-      destruct H as [H1 H2].
-      apply IHre1 in H1. 
-      apply IHre2 in H2. 
-      destruct H1. 
-      destruct H2.
+      destruct H.
+      apply IHre1 in H. 
+      apply IHre2 in H0. 
+      destruct H. 
+      destruct H0.
       exists (x ++ x0). apply MApp.
       * apply H.
       * apply H0.
