@@ -1101,17 +1101,6 @@ Proof.
   apply le_S in H.
   exact H.
 
-  (* destruct n.
-  - unfold "<" in H. 
-    assert (H' : 0 <= 1).
-    {apply PeanoNat.Nat.le_0_1. }
-    rewrite H in H'.
-    assumption.
-  - unfold "<" in H.
-    assert (H' : S n <= S (S n)).
-    {apply le_n_S. apply le_S. reflexivity. }
-    rewrite H in H'.
-    assumption. *)
 Qed.
 
     
