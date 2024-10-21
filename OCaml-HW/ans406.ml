@@ -1,1 +1,0 @@
-let f x y = k (s k k) x y;;
