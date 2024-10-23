@@ -1,4 +1,5 @@
- Brief introduction to Tagless-final
+  Brief introduction to Tagless-final
+  Added more operations to our language
 
 dsls.ml            Self-contained script with the code,
                    as explained in the course notes.
@@ -7,15 +8,21 @@ dsls.ml            Self-contained script with the code,
         Brief introduction to OCaml module system as to be used in the class
 
 lang.mli           Definition of a simple language of addition
-
+lang2.mli          Extension with more operations
 
         Interpreters of the language
 eval.ml            Meta-circular evaluator
+eval2.ml           Meta-circular evaluator, extended
+
 pp.ml              Pretty-printer
+pp2.ml             Pretty-printer, extended
+
 neg.ml             Negation transformer
+neg2.ml            Negation transformer, extended
 
         Examples and test
 ex1.ml             Example (also a regression tests)
+ex2.ml             Example (also a regression tests), with extensions
 
 
 Makefile           How to make it

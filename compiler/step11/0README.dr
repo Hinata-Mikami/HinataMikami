@@ -1,0 +1,41 @@
+ Step 1. Compiling integer constants
+
+ Source language: an integer (signed) constant
+        Compile a program that prints that integer
+
+   Our compiler is to read the source file that should contain a
+   single signed 64-bit integer. If the source file does not contain a
+   single integer, or contains a signed integer that does not fit within
+   64-bits, the compiler must report an error. Otherwise, it is to
+   produce assembly code and, eventually, an executable that, when
+   run, prints the integer that was in the source file.
+
+
+        How to compile. Let's ask GCC. 
+int0.c          C code to print a 64-bit integer
+int.c           That's how we want the output to look like, in C.
+int.s           The assembly produced by GCC
+clean_int.s     Cleaned-up assembly with comments
+clean_int_mac.s Mac version
+
+compiler0.ml    The first version of the compiler
+
+        We need to emit the assembly. So, let's make the framework for it.
+asm.mli         Emitting assembly interface
+asm.ml          Emitting assembly: implementation
+
+compiler.ml     The compiler against the Asm interface
+
+config.ml       Configuration
+
+driver.ml       The driver that puts everything together
+
+init.c          The start-up code
+
+        Need testing framework
+prog1.tg        A sample program
+
+test_script.ml  Test script
+
+build.ml         How to make it: the build script
+Makefile        How to compile it (obsoleted)
