@@ -25,7 +25,9 @@ let rdi : register = "%rdi"
 
 type operand = string
 (* making operands *)
-let imm : int -> operand = fun x -> Printf.sprintf "$%d" x
+
+(* Fixed in Ex2 : int -> int64, %d -> %Ld*)
+let imm : int64 -> operand = fun x -> Printf.sprintf "$%Ld" x
 let reg : register -> operand = Fun.id
 
 let movq : operand -> operand -> instr = fun op1 op2 -> ins ["movq";op1;op2]

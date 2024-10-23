@@ -7,7 +7,7 @@
 extern void ti_main(void);
 
 void print_int(int64_t x) {
- printf("%lld", (long long int)x);
+  printf("%lld", (long long int)x);
 }
 
 

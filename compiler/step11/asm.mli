@@ -12,7 +12,8 @@ val rdi : register
 
 type operand                            (* abstract *)
 (* making operands *)
-val imm : int -> operand                (* immediate value *)
+(* Fixed in Ex2 : int -> int 64 *)
+val imm : int64 -> operand                (* immediate value *)
 val reg : register -> operand
 
 val movq : operand -> operand -> instr
