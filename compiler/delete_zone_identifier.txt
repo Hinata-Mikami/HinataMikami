@@ -1,3 +1,5 @@
 find ./ -type f -name '*:Zone.Identifier' -exec rm {} \;
 
 find ./ -type f -name '*:Identifier' -exec rm {} \;
+
+find ./ -type f -name '*:Zone - コピー.Identifier' -exec rm {} \;
