@@ -2330,7 +2330,9 @@ Qed.
     [nostutter]. *)
 
 Inductive nostutter {X:Type} : list X -> Prop :=
- (* FILL IN HERE *)
+ (* | nostutter0 : nostutter []
+ | nostutter1 : nostutter [x]
+ | nostutter2 x y l (P: x<>y) (H: nostutter (y::l)) : nostutter (x::y::l) *)
 .
 (** Make sure each of these tests succeeds, but feel free to change
     the suggested proof (in comments) if the given one doesn't work
@@ -2342,8 +2344,7 @@ Inductive nostutter {X:Type} : list X -> Prop :=
     just uncomment and use them as-is, but you can also prove each
     example with more basic tactics.)  *)
 
-Example test_nostutter_1: nostutter [3;1;4;1;5;6].
-(* FILL IN HERE *) Admitted.
+Example test_nostutter_1: nostutter [3;1;4;1;5;6]. Admitted.
 (* 
   Proof. repeat constructor; apply eqb_neq; auto.
   Qed.
