@@ -24,6 +24,7 @@ class ClassA:
 
 
 def run1():
+    
     class_a = ClassA()  # ClassA のインスタンス
                         # 本当はここでGCされてほしいがGCされず既存のclass_aが残ってしまっている
     class_a.add('class A')
