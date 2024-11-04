@@ -1,4 +1,4 @@
-# HinataMikami
+# Author
 2024年度住井・松田研B4の三上陽向です。
 
 # How-to-Use GitHUB
@@ -19,5 +19,14 @@ OCaml冬の課題の答案
 ## OCaml-Review
 インタプリタ演習準備
 
-## interpreter
-インタプリタ演習本編
+## interpreter / lf
+インタプリタ演習 / Coq演習 (logical foundation) 本編
+
+## compiler
+コンパイラの授業のためのレポジトリ
+
+## Rust
+Python to Rust 研究に関連するコード類
+
+## latex
+住井研フォーマット？
