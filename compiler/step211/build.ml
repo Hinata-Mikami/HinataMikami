@@ -8,16 +8,16 @@
 open Build
 
 (* Order matters! This is the link order, which is also the build order *)
-
+(* Ex7 *)
 let compiler_manifest = build_all [
   existent "../util/util.cmo";
   ocaml "config.ml";
   ocaml "sq.mli";
   ocaml "sq.ml";
-  ocaml "../step20/lang.mli";
-  ocaml "../step20/pp_ast.ml";
-  ocaml "../step20/tokenizer.ml";
-  ocaml "../step20/parser.ml";
+  ocaml "lang.mli";
+  ocaml "pp_ast.ml";
+  ocaml "tokenizer.ml";
+  ocaml "parser.ml";
   ocaml "asm.mli";
   ocaml "asm.ml";
   ocaml "compiler.ml";

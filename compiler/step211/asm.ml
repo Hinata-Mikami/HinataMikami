@@ -63,9 +63,21 @@ let movq = ins2 "movq"
 let addq = ins2 "addq"
 let subq = ins2 "subq"
 
+
 let negq = ins1 "negq"
 let incq = ins1 "incq"
 let decq = ins1 "decq"
+
+
+
+(* Ex7 *)
+let xorq = ins2 "xorq"
+let testq = ins2 "testq"
+let setz = ins1 "setz"
+let movzb = ins2 "movzb"
+
+
+
 
 type symbol = string                    (* representation of a number or
                                            address: abstract *)

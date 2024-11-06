@@ -55,6 +55,19 @@ val movq : operand -> operand -> instr
 val addq : operand -> operand -> instr
 val subq : operand -> operand -> instr
 
+
+
+
+(* Ex7 *)
+val xorq : operand -> operand -> instr
+val testq : operand -> operand -> instr
+val setz : operand -> instr
+val movzb : operand -> operand -> instr
+
+
+
+
+
 type symbol                             (* representation of a number or
                                            address: abstract *)
 
