@@ -45,9 +45,6 @@ let _ =
 let _ =
   expect "4611686018427387903" @@ test_it "4611686018427387903" cmd_parse
 
-
-
-let () = print_endline("L50")
 let max = Int64.(max_int |> to_string)
 (*
   val max : string = "9223372036854775807"
@@ -72,7 +69,7 @@ let _ =
 
 let _ = 
   expect "124" @@ test_it "000124" cmd_parse
-  let () = print_endline("L75")
+
 let _ = 
   expect_fail @@ test_it "0x16" cmd_parse
 
@@ -102,7 +99,7 @@ let _ =
 let _ =
   expect "(succ (pred (neg x)))" @@ test_it "succ pred - x " cmd_parse
 
-let () = print_endline("L105")
+
 (*Extended Tests*)
 (* Ex 4 *)
 let _ =
@@ -147,7 +144,6 @@ let _ =
 let _ =
   expect_fail @@ test_it "pred 2.5" cmd_parse
 
-let () = print_endline("L150")
 let _ =
   expect_fail @@ test_it "succpred 0" cmd_parse
 
@@ -167,7 +163,7 @@ let _ =
 
 let _ =
   expect "true" @@ test_it "true" cmd_parse
-let () = print_endline("L170")
+
 (* Ex 5 *)
 let _ =
   expect "true" @@ test_it "true" cmd_parse
@@ -202,7 +198,6 @@ let _ =
 
 
 
-let () = print_endline("L205")
 let _ =
   expect_fail @@ test_it "true false" cmd_parse
 
@@ -232,7 +227,6 @@ let _ =
 (* Testing code generation *)
 
 
-let () = print_endline("L235")
 let cmd_gen fname = [tigerc; "--dump-asm"; fname]
 
 let _ =
@@ -265,7 +259,8 @@ _ti_main:
 	addq	$8, %rsp
 	ret|q}
   @@ test_it "succ - pred 9223372036854775807" cmd_gen
- 
+
+(* Ex 6 *)
 let _ =
   expect ~comparator:comparator_asm
  {q|.text
@@ -282,6 +277,43 @@ _ti_main:
 	addq	$8, %rsp
 	ret|q}
   @@ test_it "is_zero 0" cmd_gen
+
+(*なぜエラーになる？*)
+(*出力を見ても，expected / producedに差異はない*)
+(* let _ =
+  expect ~comparator:comparator_asm
+ {q|.text
+	.globl	ti_main
+	.type	ti_main, @function
+ti_main:
+	subq	$8, %rsp
+	movq	$rdi, %rax
+	xorq	$1, %rax
+	movq	%rax, %rdi
+	call	print_bool
+	addq	$8, %rsp
+	ret|q}
+  @@ test_it "not x" cmd_gen *)
+
+let _ =
+  expect ~comparator:comparator_asm
+ {q|.text
+	.globl	_ti_main
+	.type	_ti_main, @function
+_ti_main:
+	subq	$8, %rsp
+	movq	$0, %rax
+	testq	%rax, %rax
+	setz	%al
+	movzb	%al, %rax
+	xorq	$1, %rax
+	movq	%rax, %rdi
+	call	_print_bool
+	addq	$8, %rsp
+	ret|q}
+  @@ test_it "not is_zero 0" cmd_gen
+
+
 
 (* Testing executions *)
 let () = print_endline "Testing executions"
@@ -311,17 +343,56 @@ let _ =
   expect "" @@ test_it "succ pred - x " cmd_run;
   expect "9223372036854775805\nDone" @@ test_command [execf; "-9223372036854775805"]
 
+
+(* Ex.6 *)
 let _ =
   expect "" @@ test_it "true" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "1"]
+
+let _ =
+  expect "" @@ test_it "true" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "true"]
+
+let _ =
+  expect "" @@ test_it "not false" cmd_run;
   expect "true\nDone" @@ test_command [execf; "1"]
 
 let _ =
   expect "" @@ test_it "is_zero x" cmd_run;
   expect "true\nDone" @@ test_command [execf; "0"]
 
-  let _ =
-    expect "" @@ test_it "not x" cmd_run;
-    expect "false\nDone" @@ test_command [execf; "true"]
+let _ =
+  expect "" @@ test_it "is_zero x" cmd_run;
+  expect "false\nDone" @@ test_command [execf; "1"]
+
+let _ =
+  expect "" @@ test_it "is_zero pred x" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "1"]
+
+let _ =
+  expect "" @@ test_it "is_zero succ x" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "-1"]
+
+let _ =
+  expect "" @@ test_it "not x" cmd_run;
+  expect "false\nDone" @@ test_command [execf; "true"]
+
+let _ =
+  expect "" @@ test_it "not is_zero pred x" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "3"]
+
+(* make-no-sence expressions *)
+(* 入力0/1がint由来なのかbool由来なのか区別できない *)
+(* 不正なseq *)
+(* 一貫してtrue/falseになるものとする *)
+let _ =
+  expect "" @@ test_it "is_zero x" cmd_run;
+  expect "false\nDone" @@ test_command [execf; "true"] 
+
+let _ =
+  expect "" @@ test_it "is_zero not x" cmd_run;
+  expect "true\nDone" @@ test_command [execf; "1"] 
+
 let () = print_endline "All Done"
 
 ;;

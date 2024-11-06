@@ -20,8 +20,6 @@ type repr =                             (* representation type *)
 let int  : Int64.t -> repr = fun x -> 
   (Asm.(movq (imm x) (reg rax)), 1)
 
-
-
 let varx : repr = (Asm.(movq (reg rdi) (reg rax)), 0)
 
 (* Or use something like: add Int Asm.(negq rax) *)
@@ -76,11 +74,15 @@ let observe : repr -> obs = fun (seq, i) ch ->
     call1 "print_bool" |>
     make_function (name "ti_main")  |>
     write_file ch
-  | 0 | 1 ->
+  | 1 ->
     let open Asm in
     seq |>
     call1 "print_int" |>
     make_function (name "ti_main")  |>
     write_file ch
-  | _ -> ()
-
+  | 0 |_ ->
+    let open Asm in
+    seq |>
+    call1 "print_bool" |>
+    make_function (name "ti_main")  |>
+    write_file ch
