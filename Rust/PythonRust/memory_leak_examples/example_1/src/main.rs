@@ -55,7 +55,7 @@ fn run(class_b: Rc<ClassB>) {
     println!("values: {:?}", *values);
 }
 
-fn loop() {
+fn loop_run() {
     //
     let class_b = Rc::new(ClassB::new());
     for _ in 0..3 {
@@ -64,5 +64,5 @@ fn loop() {
 }
 
 fn main() {
-    loop();
+    loop_run();
 }
