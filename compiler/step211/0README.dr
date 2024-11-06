@@ -1,0 +1,36 @@
+ Step 2.1 Compiling unary expressions with one variable
+
+ Source language: 
+        a single integer variable x
+        integer constants
+        unary operations: -, succ, pred
+
+        Define the language, abstractly
+../step20/lang.mli   The definition
+
+../step20/pp_ast.ml  Pretty-printer (maybe not so pretty)
+
+                Parser and tokenizer are as before
+../step20/tokenizer.ml         Tokenizer
+../step20/parser.ml            Parser
+
+compiler.ml          Another implementation of lang.mli: code generator
+
+config.ml            Configuration
+
+driver.ml            The driver that puts everything together
+
+        Back-end
+
+asm.mli         Assembly language
+asm.ml          Assembly language
+
+sq.mli          Sequences, with easy concatenation
+sq.ml
+
+        Testing
+test_script.ml  Test script
+
+init.c          The start-up code
+
+build.ml         How to make it: the build script
