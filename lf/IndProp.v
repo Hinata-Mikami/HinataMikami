@@ -2156,6 +2156,126 @@ Qed.
     requiring that [s2 <> []], it also requires that [length s1 +
     length s2 <= pumping_constant re]. *)
 
+(* Lemma sub_mapp : forall a b n : nat, a <= b -> a + n <= b + n.
+Proof.
+  intros a b n H.
+  induction n.
+  - simpl. Search (_ + 0 = _ ).
+    rewrite add_0_r. rewrite add_0_r with b. exact H.
+  - rewrite PeanoNat.Nat.add_succ_r. rewrite PeanoNat.Nat.add_succ_r with b n.
+    apply n_le_m__Sn_le_Sm. exact IHn.
+Qed. *)
+
+
+(*諸冨さんのアイデア*)
+  (* add_le_cases をもっと強く. MAPPで使用 *)
+Lemma add_le_cases' : forall n m p q,
+  n + m <= p + q -> 
+    (n <= p) \/ (n >= p /\ m <= q).
+  
+Proof.
+  assert (le_injection : forall n m o, n + m <= n + o -> m <= o).
+  {
+    intros. induction n as [|n' IHn'].
+    - simpl. apply H.
+    - simpl in H. apply Sn_le_Sm__n_le_m in H. apply IHn'. apply H.
+  }
+
+  intros n. induction n as [|n' IHn'].
+  - intros m p q H. left. apply O_le_n.
+  - intros m p q H. destruct IHn' with m p q as [IH | [IH1 IH2]].
+    + (* IHn' の前件 *)
+      simpl in H. apply le_trans with (S (n' + m)).
+        * apply le_S. apply le_n.
+        * apply H.
+    + (* IH 左の仮定 *)
+      inversion IH as [H1 | p' H1 H2].
+      * (* n' = p *)
+        right. split.
+        { unfold ge. apply le_S. apply le_n. }
+        {
+          rewrite H1 in H. simpl in H. apply le_S in H.
+          apply Sn_le_Sm__n_le_m in H. 
+          apply le_injection in H. apply H. 
+        }
+      * (* S n' <= p *)
+        left. apply n_le_m__Sn_le_Sm. apply H1.
+    + (* IH 右の仮定 *) 
+      unfold ge in IH1. right. split.
+      * unfold ge. apply le_S. apply IH1.
+      * apply IH2.
+Qed.
+
+  (* add_le_cases'' を leb で証明 *)
+Lemma le_false_gt : forall n m,
+  (n <= m -> False) -> n > m.
+Proof.
+  intros n. induction n as [|n' IHn'].
+  - intros m H. destruct H. apply le_0_n.
+  - intros m H. unfold gt in *. unfold lt in *. destruct m as [|m'].
+    + apply n_le_m__Sn_le_Sm. apply le_0_n.
+    + apply n_le_m__Sn_le_Sm. apply IHn'. intro contra.
+      apply n_le_m__Sn_le_Sm in contra. apply H in contra. destruct contra.
+Qed.
+
+  (* add_le_cases'' を leb で証明 *)
+Lemma leb_complete_not : forall n m,
+  n <=? m = false -> (n <= m -> False).
+Proof.
+  intros n. induction n as [|n' IHn'].
+  - intros m. simpl. discriminate.
+  - intros m H. destruct m as [|m'].
+    + intro contra. inversion contra.
+    + intro H1. apply Sn_le_Sm__n_le_m in H1. 
+      apply IHn' with m'.
+      simpl in H. apply H.
+      apply H1.
+Qed.    
+
+  (* MStarApp で使用 *)
+Lemma add_le_cases'' : forall n m p,
+  n <= m + p -> 
+    (n <= m) \/ (n <= p /\ m <= n) \/ (n <= m + p /\ m <= n /\ p <= n).
+  
+Proof.
+  intros n m p H.
+  destruct (n <=? m) eqn : Bnm.
+  - (* n <=? m = true *)
+    left.
+    apply leb_complete in Bnm. apply Bnm.
+  - (* n <=? m = false *)
+    destruct (n <=? p) eqn : Bnp.
+    + (* n <=? p = true *)
+      apply leb_complete in Bnp. right. left. split.
+      * apply Bnp.
+      * specialize (leb_complete_not n m Bnm) as Hm.
+        apply le_false_gt in Hm. unfold gt in Hm. unfold lt in Hm.
+        apply le_S in Hm. apply Sn_le_Sm__n_le_m in Hm. apply Hm.
+    + (* n <=? p = false *)
+      right. right.
+      specialize (leb_complete_not n m Bnm) as Hm. (* subgoal を作らないために specialize *)
+      specialize (leb_complete_not n p Bnp) as Hp.
+      apply le_false_gt in Hm. apply le_false_gt in Hp.
+      unfold gt in *. unfold lt in *. 
+      apply le_S in Hm. apply le_S in Hp.
+      apply Sn_le_Sm__n_le_m in Hm. apply Sn_le_Sm__n_le_m in Hp.
+      split. apply H. split. apply Hm. apply Hp. 
+Qed.
+
+  (* MApp で使用 *)
+Lemma le_add_each : forall n m p q, 
+  n <= p -> m <= q -> n + m <= p + q.
+Proof.
+  intro n. induction n as [|n' IHn'].
+  - intros. simpl. rewrite add_comm. apply le_plus_trans. apply H0.
+  - intros. inversion H as [H1 | p' H1 H2].
+    + apply plus_le_compat_l. apply H0.
+    + simpl. apply n_le_m__Sn_le_Sm. apply IHn'. 
+      * apply le_S in H1. apply Sn_le_Sm__n_le_m in H1. apply H1.
+      * apply H0.
+Qed.
+
+
 Lemma pumping : forall T (re : reg_exp T) s,
   s =~ re ->
   pumping_constant re <= length s ->
@@ -2167,135 +2287,58 @@ Lemma pumping : forall T (re : reg_exp T) s,
 
 (** You may want to copy your proof of weak_pumping below. *)
 Proof.
-  intros T re s Hmatch.
-  induction Hmatch as
-    [
-    | x
-    | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
-    | s1 re1 re2 Hmatch IH
-    | re1 s2 re2 Hmatch IH
-    | re
-    | s1 s2 re Hmatch1 IH1 Hmatch2 IH2
-    ].
-  - simpl. intros. inversion H.
-  - simpl. intros. inversion H. inversion H1.
-  - simpl. intros.
-    rewrite app_length in H.
-    Search (_ <= _ -> _ /\ _).
-    apply le_lem in H. destruct H as [H | H].
-    + (* s1 is longer than the pumping length of re1 *)
-      destruct (IH1 H) as
-        [s1'x
-          [s1'y
-            [s1'z
-              [IH1'1 [IH1'2 IH1'3]]
-            ]
-          ]
-        ].
-      exists s1'x, s1'y, (s1'z ++ s2).
-      split.
-      { rewrite IH1'1.
-        rewrite app_assoc, app_assoc, app_assoc.
-        reflexivity. }
-      split.
-      { apply IH1'2. }
-      { intros.
-        rewrite app_assoc, app_assoc.
-        apply MApp.
-        - rewrite <- app_assoc. apply IH1'3.
-        - apply Hmatch2. }
-    + (* s2 is longer than the pumping length of re2 *)
-      destruct (IH2 H) as
-        [s2'x
-          [s2'y
-            [s2'z
-              [IH2'1 [IH2'2 IH2'3]]
-            ]
-          ]
-        ].
-      exists (s1 ++ s2'x), s2'y, s2'z.
-      split.
-      { rewrite IH2'1.
-        rewrite app_assoc, app_assoc.
-        reflexivity. }
-      split.
-      { apply IH2'2. }
-      { intros.
-        rewrite <- app_assoc.
-        apply MApp.
-        - apply Hmatch1.
-        - apply IH2'3. }
-  - (* left union, pump in the same way as s1 *)
-    intros. simpl in H.
-    apply le_plus_r in H.
-    destruct (IH H) as
-      [s1'x
-        [s1'y
-          [s1'z
-            [IH1 [IH2 IH3]]
-          ]
-        ]
-      ].
-    exists s1'x, s1'y, s1'z.
-    split.
-    { apply IH1. }
-    split.
-    { apply IH2. }
-    { intros. apply MUnionL. apply IH3. }
-  - (* right union, pump in the same way as s2 *)
-    intros. simpl in H.
-    rewrite plus_comm in H.
-    apply le_plus_r in H.
-    destruct (IH H) as
-      [s2'x
-        [s2'y
-          [s2'z
-            [IH1 [IH2 IH3]]
-          ]
-        ]
-      ].
-    exists s2'x, s2'y, s2'z.
-    split.
-    { apply IH1. }
-    split.
-    { apply IH2. }
-    { intros. apply MUnionR. apply IH3. }
-  - intros. inversion H.
-  - intros. simpl in H. rewrite app_length in H.
-    destruct (length s1) eqn:E.
-    + (* if s1 is empty, pump the same way as s2 *)
-      simpl in H.
-      apply list_length_0 in E.
-      rewrite E. simpl.
-      apply (IH2 H).
-    + (* s1 non empty, pump with s1 *)
-      exists [], s1, s2.
-      split.
-      { reflexivity. }
-      split.
-      { destruct s1. discriminate.
-        intros H'. discriminate. }
-      { simpl. intros m.
-        induction m as [| m' IH].
-        - simpl. apply Hmatch2.
-        - assert (H': S m' = 1 + m').
-          { reflexivity. }
-          rewrite H'.
-          rewrite napp_plus.
-          rewrite <- app_assoc.
-          apply MStarApp.
-          + simpl. rewrite app_nil_r. apply Hmatch1.
-          + apply IH. }
-
-
-  (* intros T re s Hmatch.
+intros T re s Hmatch.
   induction Hmatch
     as [ | x | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2 ].
   - simpl. intros contra. inversion contra.
   - simpl. intros contra. inversion contra. inversion H0.
-  - simpl. intros H. rewrite -> app_length in H. apply add_le_cases in H.
+  - (* MApp *)
+    simpl. intro H.
+    rewrite app_length in H.
+    apply add_le_cases' in H as [H | [H1 H]]. (* add_le_cases をもっとつよく *)
+    + (* n <= p *)
+      apply IH1 in H. 
+      destruct H as [s2']. destruct H as [s3']. destruct H as [s4' [H [H1 [H2 H3]]]].
+      rewrite H.
+      exists s2'. exists s3'. exists (s4' ++ s2). split.
+      * rewrite <- app_assoc with T s2' (s3' ++ s4') s2.
+        rewrite <- app_assoc with T s3' s4' s2. reflexivity.
+      * split.
+        {  apply H1. }
+        {
+          split.
+          - apply le_plus_trans. apply H2.
+          - intro m. rewrite app_assoc. rewrite app_assoc with T (s2' ++ napp m s3') s4' s2.
+            apply MApp.
+            rewrite <- app_assoc. apply H3.
+            apply Hmatch2. 
+        }
+    + (* n >= p /\ m <= q *)
+      unfold ge in H1.
+      apply IH2 in H. 
+      destruct H as [s2']. destruct H as [s3']. destruct H as [s4' [H [H2 [H3 H4]]]].
+      rewrite H.
+      exists (s1 ++ s2'). exists s3'. exists s4'. split.
+      * rewrite <- app_assoc with T s1 s2' (s3' ++ s4'). reflexivity.
+      * split.
+      { apply H2. }
+      {
+        split.
+        - rewrite app_length. rewrite <- add_assoc.
+          apply le_add_each.
+          + apply H1. 
+          + apply H3.
+        - intro m. 
+          rewrite <- app_assoc with T s1 s2' (napp m s3' ++ s4').
+          apply MApp.
+          apply Hmatch1. apply H4. 
+      }
+
+  (* - simpl. intros H. 
+    rewrite app_length in H. 
+    apply add_le_cases in H.
     destruct H.
     + apply IH1 in H. destruct H. destruct H. destruct H.
       destruct H as [H1 [H2 H3]]. 
@@ -2312,18 +2355,34 @@ Proof.
               **rewrite <- app_assoc. apply H3.
               **exact Hmatch2.
     + apply IH2 in H. 
-      destruct H. destruct H. destruct H.
-      destruct H as [H1 [H2 H3]]. 
-      exists (s1 ++ x). exists x0. exists x1.
+      destruct H as [ss1 [ss2 [ss3 [H1 [H2 [H3 H4]]]]]].
+      exists (s1++ss1), ss2, ss3.
       split.
       * rewrite H1. rewrite <- app_assoc. reflexivity.
       * split.
-        -- apply H2. 
-        -- split.
-          ++ rewrite app_length. apply H.
+        --exact H2.
+        --split.
+          ++rewrite app_length.
+            assert (Hc: length s1<pumping_constant re1 \/ length s1>=pumping_constant re1).
+            {apply lt_ge_cases. }
+            destruct Hc as [Hc|Hc].
+            **apply le_S in Hc.
+              apply Sn_le_Sm__n_le_m in Hc.
+              rewrite <- add_assoc.
+              apply PeanoNat.Nat.add_le_mono.
+              --- exact Hc.
+              --- exact H3.
+            **unfold ">=" in Hc. 
+              apply IH1 in Hc as Hc'.
+              destruct (pumping_constant re1) eqn : E.
+              --- apply pumping_constant_0_false in E. inversion E. 
+              --- inversion Hc.
+                  +++induction n.
+                      *** simpl. apply n_le_m__Sn_le_Sm. exact H3.
+                      *** simpl in IHn. simpl. apply n_le_m__Sn_le_Sm. apply IHn.
           ++ intro m. rewrite <- app_assoc. apply MApp.
             ** exact Hmatch1.
-            ** apply H3.
+            ** apply H3. *)
   - simpl. intro H. apply plus_le in H. 
     destruct H as [H1 H2].
     apply IH in H1. destruct H1. destruct H. destruct H.
@@ -2333,7 +2392,10 @@ Proof.
     + exact H1'.
     + split.
       * apply H2'.
-      * intro m. apply MUnionL. apply H3'.
+      * split.
+        --apply le_plus_trans. destruct H3'. exact H.
+        --destruct H3'. intro m. apply MUnionL. apply H0.
+
   - simpl. intro H. apply plus_le in H. 
     destruct H as [H1 H2].
     apply IH in H2. destruct H2. destruct H. destruct H.
@@ -2343,10 +2405,63 @@ Proof.
     + exact H1'.
     + split.
       * exact H2'.
-      * intro m. apply MUnionR. apply H3'.
+      * split.
+        -- rewrite add_comm with (pumping_constant re1) (pumping_constant re2). 
+           apply le_plus_trans. destruct H3'. exact H.
+        -- intro m. apply MUnionR. apply H3'.
   - simpl. intro contra. inversion contra.
     apply pumping_constant_0_false in H0. destruct H0.
-  - simpl. intro H. rewrite app_length in H. simpl in IH2.
+  - (* MStarApp *)
+    simpl in *. intro H.
+    rewrite app_length in H.
+
+    apply add_le_cases'' in H as [H | [[H H1] | [H [H1 H2]]]].
+    + (* pumping_constant re <= length s1 *)
+      apply IH1 in H.
+      destruct H as [l2]. destruct H as [l3]. destruct H as [l4 [H [H1 [H2 H3]]]].
+      rewrite H. exists l2, l3, (l4 ++ s2). split.
+      * rewrite <- app_assoc with T l2 (l3 ++ l4) s2. 
+        rewrite <- app_assoc with T l3 l4 s2. reflexivity.
+      * split.
+        { apply H1. }
+        {  
+          split.
+          - apply H2.
+          - intro m. rewrite app_assoc. rewrite app_assoc. 
+            apply MStarApp.
+            + rewrite <- app_assoc. apply H3. 
+            + apply Hmatch2.
+        }
+    + (* p re <= len s2 /\ len s1 <= p re *)
+      destruct s1 as [|h1 s1'] eqn : S1. (* s1 をループ *)
+      * (* s1 = [] *) 
+        simpl. apply IH2 in H. apply H.
+      * (* s1 = h1 :: s1' *)
+        simpl in *. exists []. exists (h1 :: s1'). exists s2. split.
+        { simpl. reflexivity. }
+        {
+          simpl. split.
+          - discriminate.
+          - split.
+            + apply H1.
+            + intro m. apply napp_star. apply Hmatch1. apply Hmatch2.
+        }
+    + (* len s1 <= p re /\ len s2 <= p re *) (* H2いらない...? *)
+      destruct s1 as [|h1 s1'] eqn : S1. (* s1 をループ *)
+      * (* s1 = [] *) 
+        simpl in *. apply IH2 in H. apply H. (* 元のHが必要. rememberが使いこなせず... *)
+      * (* s1 = h1 :: s1' *)
+        simpl in *. exists []. exists (h1 :: s1'). exists s2. split.
+        { simpl. reflexivity. }
+        {
+          simpl. split.
+          - discriminate.
+          - split.
+            + apply H1.
+            + intro m. apply napp_star. apply Hmatch1. apply Hmatch2.
+        }
+
+  (* - simpl. intro H. rewrite app_length in H. simpl in IH2.
     destruct s1.
     + simpl. simpl in H. apply IH2 in H. destruct H. destruct H.
       destruct H. destruct H as [H1 [H2 H3]].
@@ -2361,12 +2476,15 @@ Proof.
       * reflexivity.
       * split.
         -- unfold not. intro contra. discriminate contra. 
-        -- intro m. induction m.
-          ++ simpl. exact Hmatch2.
-          ++ simpl. rewrite <- app_assoc.
-            apply (MStarApp (x :: s1) (napp m (x :: s1) ++ s2)).
-            apply Hmatch1. exact IHm.
-Abort.   *)
+        -- split. 
+          ++ apply le_plus_trans in H.
+          ++ intro m. induction m.
+
+            ** simpl. exact Hmatch2.
+            ** simpl. rewrite <- app_assoc.
+              apply (MStarApp (x :: s1) (napp m (x :: s1) ++ s2)).
+              apply Hmatch1. exact IHm. *)
+Qed.  
 End Pumping.
 (** [] *)
 
@@ -2961,13 +3079,53 @@ Definition manual_grade_for_check_repeats : option (nat*string) := None.
     go through _without_ assuming that [In] is decidable; if you
     manage to do this, you will not need the [excluded_middle]
     hypothesis. *)
+
+(* 畠山さんのアイデア　*)
 Theorem pigeonhole_principle: excluded_middle ->
   forall (X:Type) (l1  l2:list X),
   (forall x, In x l1 -> In x l2) ->
   length l2 < length l1 ->
   repeats l1.
 Proof.
-Admitted. 
+  intros EM X l1. induction l1 as [|x l1' IHl1'].
+  - intros l2 H1 H2. inversion H2. 
+  - intros l2 H1 H2.
+    destruct (EM (In x l1')) as [HIn | HnIn]. 
+    + apply repeats_nil.
+      apply HIn.
+    + apply repeats_cons.
+      destruct (in_split X x l2) as [l0 [l2' H3]]. 
+      * apply H1.
+        simpl. left. reflexivity. 
+      * apply IHl1' with (l0 ++ l2').
+        -- intros x0 H. 
+           apply In_app_iff.
+           simpl in H1.
+           assert (H0: In x0 l2).
+           { apply H1. right. apply H. }
+           rewrite H3 in H0.
+           apply In_app_iff in H0.
+           destruct H0.
+           ++ left.
+              apply H0.
+           ++ right.
+              destruct H0.
+              ** rewrite H0 in HnIn.
+                 exfalso.
+                 apply HnIn.
+                 apply H.
+              ** apply H0.
+        --apply f_equal with (f:=length) in H3.
+          rewrite app_length in H3.
+          rewrite add_comm in H3.
+          simpl in H3.
+          rewrite app_length.
+          rewrite add_comm.
+          rewrite H3 in H2.
+          simpl in H2.
+          apply PeanoNat.lt_S_n in H2.
+          apply H2.
+Qed.
 (** [] *)
 
 (* ================================================================= *)
