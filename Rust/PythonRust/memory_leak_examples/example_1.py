@@ -6,7 +6,7 @@ class ClassB:
     def __init__(self):
         self.__values = {}
 
-    @property
+    @property #getter : __get__ のようなもの．get_values()のような関数を定義しなくてよくなる
     def values(self):
         return self.__values
 
@@ -17,7 +17,7 @@ class ClassB:
 
 
 class ClassA:
-    class_b = ClassB()
+    class_b = ClassB() #これはグローバル変数のような状態．1度しか呼び出されない
 
     def add(self, name):
         self.class_b.add(self, name) #ClassBのaddにClassAのインスタンスを渡す
