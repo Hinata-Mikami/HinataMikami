@@ -9,7 +9,7 @@ import gc
 class Money1:
     name = ''
     symbols = []   # This is the dangerous line here
-    # print("initialized at Money1")
+    print("initialized at Money1") 
         
     def set_name(self, name):
         self.name = name
@@ -17,7 +17,9 @@ class Money1:
     def add_symbol(self, symbol):
         self.symbols.append(symbol)
 
-#実行関数(メモリリーク)
+print("Hello") #class自体が文になっていて，
+
+#実行関数(仕様)
 def run_1():
 
     for i in range(10):

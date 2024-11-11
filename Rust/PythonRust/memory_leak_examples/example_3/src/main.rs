@@ -1,10 +1,13 @@
 //構造体を定義
+//staticにできる？
 struct Money1 {
     name: String,
     symbols: Vec<String>,  //VectorでPythonのlistを定義
 }
 
 impl Money1 {
+    // name= String::new();
+    // symbols= Vec::new();
     //インスタンスを作成したときに呼び出されるもの(__init__的なもの)．
     fn new() -> Money1 {
         Money1 {
