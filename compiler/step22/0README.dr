@@ -1,0 +1,49 @@
+ Step 2.2. Compiling unary expressions with one variable
+        Integers and booleans
+
+ Source language: 
+        a single integer variable x
+        integer constants
+        true and false booleans
+        unary operations: -, succ, pred, not, is_zero
+
+        Define the language, abstractly
+../step20/lang.mli   The definition, from the previous step (as lang_20.mli)
+lang.mli             Extension: booleans
+
+../step20/pp_ast.ml         Pretty-printer, old (as pp_ast_20.ml)
+pp_ast.ml            Extension
+
+tokenizer.ml         Tokenizer, with one small extension
+
+parser.ml            Parser
+
+compiler.ml          Another implementation of lang.mli: compiler
+                     (Type-checking, etc.)
+
+../step21/compiler.ml       Code generator (as code_gen_21.ml)
+code_gen.ml          Another implementation: code generator
+
+../step21/config.ml  Configurator, as before
+
+../step21/driver.ml  Main driver, as before
+
+        Back-end
+
+../step21/asm.mli      Assembly language (as asm_21.mli)
+asm.mli         Assembly language, extension
+                Actually, adjustment
+
+../step21/asm.ml       Old implementation (as asm_impl_21.ml,
+                without signature attribution)
+asm.ml          Assembly language, a bit re-written
+
+
+        Testing
+../step21/test_script.ml Previous tests, which should pass as is
+test_script.ml    Test script: new tests
+
+init.c          The start-up code (adding print_bool)
+
+build.ml         How to make it: the build script
+

@@ -3472,6 +3472,8 @@ Definition derives d := forall a re, is_der re a (d a re).
     Define [derive] so that it derives strings. One natural
     implementation uses [match_eps] in some cases to determine if key
     regex's match the empty string. *)
+
+(* regular expression derivative*)
 Fixpoint derive (a : ascii) (re : reg_exp ascii) : reg_exp ascii :=
   match re with
   | EmptySet => EmptySet
@@ -3630,6 +3632,8 @@ Proof.
         -- apply IHre. exact Hs0.
         -- exact Hs1. 
 Qed.
+
+
 (** [] *)
 
 (** We'll define the regex matcher using [derive]. However, the only
@@ -3649,7 +3653,7 @@ Definition matches_regex m : Prop :=
 Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool :=
   match s with
   | nil => match_eps re
-  | h :: t => regex_match t (derive h re)
+  | hd :: tl => regex_match tl (derive hd re)
   end.
 (** [] *)
 
@@ -3668,14 +3672,19 @@ Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool :=
     [s =~ derive x re], and vice versa. *)
 Theorem regex_match_correct : matches_regex regex_match.
 Proof.
-  unfold matches_regex. 
+  intros s.
   induction s.
-  - intro re. simpl. destruct (match_eps_refl re).
+  - intro re. simpl. 
+    destruct (match_eps_refl re).
     + apply ReflectT. exact H.
     + apply ReflectF. exact H.
-  - intro re. simpl. destruct (IHs (derive x re)).
-    + apply ReflectT. apply derive_corr. exact H.
-    + apply ReflectF. intro contra. apply H. apply derive_corr.
+  - intro re. simpl. 
+    destruct (IHs (derive x re)).
+    + apply ReflectT. 
+      apply derive_corr. exact H.
+    + apply ReflectF. 
+      intro contra. apply H. 
+      apply derive_corr.
       exact contra.
 Qed.
 (** [] *)
