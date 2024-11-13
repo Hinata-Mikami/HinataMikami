@@ -41,26 +41,65 @@ module type lang = module type of Lang with type obs = unit
 
 (* This is the parser from the previouys step! Not extended *)
 
+
+
+(* Ex 9 *)
 let parse (ch:in_channel) (module M: lang) : unit =
   let open Tokenizer in
-  let rec loop s = match Seq.uncons s with
-  | None           -> parse_error "unexpected EOF"
-  | Some (x,t)     -> match x with
-    | Other '-'     -> loop t |> M.neg
-    | Alfnum "succ" -> loop t |> M.succ
-    | Alfnum "pred" -> loop t |> M.pred
-    | Alfnum "not"  -> loop t |> M.not
-    | Alfnum "is_zero"  -> loop t |> M.is_zero
-    | Alfnum "x"    -> if Seq.is_empty t then M.varx 
-                       else parse_error "junk after x"
-    | Alfnum "true"  -> if Seq.is_empty t then M.bool true
-                       else parse_error "junk after true"
-    | Alfnum "false"  -> if Seq.is_empty t then M.bool false
-                       else parse_error "junk after false"
-    | Num d         -> if Seq.is_empty t then Int64.of_string d |> M.int
-                       else parse_error "junk after num"
-    | t             -> parse_error "unexpected: %s" (string_of_token t)
+
+  (* Parse <add> ::= "" | "+" <atom> | <add> <add> *)
+  let rec parse_add seq expr =
+    match Seq.uncons seq with
+    | Some (Other '+', t) ->
+        let (right_expr, remaining_seq) = parse_atom t in
+        parse_add remaining_seq (M.add expr right_expr)
+    | _ -> (expr, seq)
+
+  (* Parse <atom> ::= <int> | <bool> | "x" *)
+  and parse_atom seq =
+    match Seq.uncons seq with
+    | Some (Alfnum "true", t)  -> (M.bool true, t)
+    | Some (Alfnum "false", t) -> (M.bool false, t)
+    | Some (Alfnum "x", t)     -> (M.varx, t)
+    | Some (Num d, t)          -> (M.int (Int64.of_string d), t)
+    | _ -> parse_error "unexpected atom"
+
+  (* Parse <unary> ::= "" | "-" <unary> | "not" <unary> | "succ" <unary> | "pred" <unary> | "is_zero" <unary> *)
+  and parse_unary seq =
+    match Seq.uncons seq with
+    | Some (Other '-', t) ->
+        let (unary_expr, remaining_seq) = parse_unary t in
+        (M.neg unary_expr, remaining_seq)
+    | Some (Alfnum "not", t) ->
+        let (unary_expr, remaining_seq) = parse_unary t in
+        (M.not unary_expr, remaining_seq)
+    | Some (Alfnum "succ", t) ->
+        let (unary_expr, remaining_seq) = parse_unary t in
+        (M.succ unary_expr, remaining_seq)
+    | Some (Alfnum "pred", t) ->
+        let (unary_expr, remaining_seq) = parse_unary t in
+        (M.pred unary_expr, remaining_seq)
+    | Some (Alfnum "is_zero", t) ->
+        let (unary_expr, remaining_seq) = parse_unary t in
+        (M.is_zero unary_expr, remaining_seq)
+    | Some (Other '(', t) ->
+        let (inner_expr, remaining_seq) = parse_exp t in
+        begin match Seq.uncons remaining_seq with
+        | Some (Other ')', t') -> (inner_expr, t')
+        | _ -> parse_error "missing closing parenthesis"
+        end
+    | _ -> parse_atom seq 
+
+  (* Parse <exp> ::= <unary> <atom> <add> | <unary> "(" <exp> ")" <add> | <atom> <add> | "(" <exp> ")" <add> *)
+  and parse_exp seq =
+    let (expr, remaining_seq) = parse_unary seq in
+    parse_add remaining_seq expr
+
   in
-  seq_of_channel ch |> tokenizer |> loop |> M.observe
+  let (parsed_expr, _) = seq_of_channel ch |> tokenizer |> parse_exp in
+  M.observe parsed_expr
+
+
+
 
 

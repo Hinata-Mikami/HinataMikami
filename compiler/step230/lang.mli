@@ -6,3 +6,5 @@ val bool : bool -> repr
 
 val not     : repr -> repr
 val is_zero : repr -> repr
+
+val add : repr -> repr -> repr

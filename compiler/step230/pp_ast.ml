@@ -8,5 +8,7 @@ let bool : bool -> repr   = string_of_bool
 
 let not      : repr -> repr = prepend "not "      >> paren
 let is_zero  : repr -> repr = prepend "is_zero "  >> paren
+let add : repr -> repr -> repr = fun x y ->
+  "(" ^ x ^ " + " ^ y ^ ")"
 
 
