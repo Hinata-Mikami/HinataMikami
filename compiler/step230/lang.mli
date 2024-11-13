@@ -7,4 +7,5 @@ val bool : bool -> repr
 val not     : repr -> repr
 val is_zero : repr -> repr
 
+(* Ex 9 *)
 val add : repr -> repr -> repr
