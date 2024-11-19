@@ -20,11 +20,12 @@ let open struct
 %token <int64> INT
 %token TRUE FALSE
 %token NOT SUCC PRED ISZERO
-%token VARX
+%token VAR
 %token LPAREN RPAREN
 %token <string> IDENT
 %token PLUS MINUS TIMES DIV
 %token <string * Lexing.position> STRING
+%token LET VAL IN END ASSIGN  (* Ex 12 *)
 %token EOF
 
 /* Precedences and associativities.
@@ -79,6 +80,7 @@ exp:
  | PRED simple   { M.pred $2 }
  | ISZERO simple { M.is_zero $2 }
  | exp PLUS atom { M.add $1 $3 }
+ | LET decl IN exp END { M.local $2 $4 } (* Ex 12 *)
 ;
 
 simple:
@@ -90,7 +92,12 @@ atom:
    INT   { M.int $1 }
  | TRUE  { M.bool true }
  | FALSE { M.bool false }
- | VARX  { M.varx }
+ | VAR   { M.var $1 }
+;
+
+(* Ex 12 *)
+decl:
+  VAL IDENT ASSIGN exp { (M.var $2, $4) }
 ;
 
 %%

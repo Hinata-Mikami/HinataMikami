@@ -20,10 +20,12 @@ let compiler_manifest = build_all [
  *)
   ocaml "../step20/lang.mli" ~rename:"lang_20";
   ocaml "../step22/lang.mli" ~rename:"lang_22";
-  ocaml "../step23/lang.mli";
+  ocaml "../step23/lang.mli" ~rename:"lang_23"; 
+  ocaml "lang.mli"; (* Ex 12 *)
   ocaml "../step20/pp_ast.ml" ~rename:"pp_ast_20";
   ocaml "../step22/pp_ast.ml" ~rename:"pp_ast_22";
-  ocaml "../step23/pp_ast.ml";
+  ocaml "../step23/pp_ast.ml" ~rename:"pp_ast_23";
+  ocaml "pp_ast.ml"; (* Ex 12 *)
   ocamlyacc "parser.mly";
   ocamllex "lexer.mll";
   (*
@@ -36,6 +38,8 @@ let compiler_manifest = build_all [
   ocaml "../step23/code_gen.ml";
   ocaml "../step23/compiler.ml";
   *)
+
+
   ocaml "driver.ml";
  ]
 

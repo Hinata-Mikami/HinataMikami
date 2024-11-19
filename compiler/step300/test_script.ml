@@ -30,6 +30,14 @@ let _ =
   cmd_parse
 
 (* Add more *)
+(* Ex 12 *)
+
+
+
+
+
+
+
 
 let () = print_endline "All Done"
 
