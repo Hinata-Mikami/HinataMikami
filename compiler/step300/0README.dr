@@ -1,0 +1,35 @@
+ Step 3.0a. Compiling unary expressions with one variable and
+     simple binary expressions (that is, binary expressions
+     whose one operand requires no computation)
+     AND local variables
+
+     Only parsing so far
+
+ Source language: 
+       a single integer variable x
+       integer (signed) constants
+       true and false booleans
+       unary operations: -, succ, pred, not
+       parentheses
+       local variables
+       binary operations: + - * / with standard precedence
+
+
+        Define the language, abstractly
+lang.mli             The definition
+
+pp_ast.ml            Pretty-printer (maybe not so pretty)
+../step23/pp_ast.ml         Previous version, to be extended in the above
+
+lexer.mll            Lexer, TO EXTEND
+parser.mly           Parser, TO EXTEND
+
+driver.ml            Main driver, adjusted for lexer
+
+        Testing
+test_script_24.ml  Earlier test script (restricted to parsing)
+test_script.ml     Test script
+
+build.ml         How to make it: the build script
+
+

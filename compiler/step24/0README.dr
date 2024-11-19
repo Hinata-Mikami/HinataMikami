@@ -1,0 +1,34 @@
+ Step 24. Compiling unary expressions with one variable and
+     simple binary expressions (that is, binary expressions
+     whose one operand requires no computation)
+     This time, using ocamllex/ocamlyacc
+
+ For details, see
+    https://kenichi-asai.github.io/lex-yacc/
+
+ Source language: 
+       a single integer variable x
+       integer (signed) constants
+       true and false booleans
+       unary operations: -, succ, pred, not
+       parentheses
+       binary operations: + with standard precedence
+
+
+ This module only replaces the parser/lexer
+ Therefore, see
+../step23/0README.dr    for the rest
+
+
+lexer.mll             Lexer
+parser.mly            Parser
+
+driver.ml            Main driver, adjusted for lexer
+
+
+        Testing
+test_script_21.ml  Test script, adjusted for negative numbers
+test_script.ml  Test script from the earlier step, adjusted
+
+build.ml         How to make it: the build script
+
