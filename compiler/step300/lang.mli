@@ -12,7 +12,7 @@ val bool : bool -> atom
 
 val var : vname -> atom                 (* instead of varx *)
 
-val local : vname * repr  -> repr -> repr
+val local : (vname * repr) list  -> repr -> repr (* Ex 13 *)
 
 val atomic : atom -> repr
 
