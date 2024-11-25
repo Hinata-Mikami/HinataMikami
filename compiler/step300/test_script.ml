@@ -116,6 +116,13 @@ let _ =
   |q}
   cmd_parse
 
+let _ = 
+  expect "(let [x,1] 1)" @@ test_it 
+  {q|
+  let val x := 1 in 1 end
+  |q}
+  cmd_parse
+
 
 let () = print_endline "All Done"
 
