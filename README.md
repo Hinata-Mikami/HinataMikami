@@ -30,3 +30,9 @@ Python to Rust 研究に関連するコード類
 
 ## latex
 住井研フォーマット？
+
+## git エラー対応
+```
+git pull origin main --rebase
+
+```
