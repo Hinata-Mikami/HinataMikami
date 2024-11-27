@@ -4,7 +4,7 @@ import gc
 
 
 #メモリリークが発生する例
-#name や symbols の初期化は1度しか行われず，
+
 #グローバル変数のような状態になってしまっている
 class Money1:
     name = ''

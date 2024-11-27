@@ -12,12 +12,11 @@ let local : vname * repr -> repr -> repr = fun (name,exp) body ->
 
 (* Ex 13 *)
 (* 複数のdeclに対応 *)
-let local : (vname * repr) list -> repr -> repr = fun decls body ->
+
+let local (decls :(vname * repr) list) (body : repr) : repr =
   let decl_str =
     List.fold_right (fun (name, exp) acc ->
       Printf.sprintf "[%s,%s] %s" name exp acc
     ) decls body
   in
   Printf.sprintf "(let %s)" decl_str
-
-  
