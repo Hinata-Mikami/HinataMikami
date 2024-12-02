@@ -229,7 +229,7 @@ fn main() {
                                // おっと、1要素余分!
         match xs.get(i) {
             Some(xval) => println!("{}: {}", i, xval),
-            None => println!("Slow down! {} is too far!", i),
+            None => println!("Slow down! {} is too far!", i), 
         }
     }
 
