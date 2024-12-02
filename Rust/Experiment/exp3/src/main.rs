@@ -7,9 +7,6 @@ struct Person {
     age: u8,
 }
 
-// ユニット
-struct Unit;
-
 // タプル
 struct Pair(i32, f32);
 
@@ -58,9 +55,6 @@ fn main() {
         top_left: Point { x: left_edge, y: top_edge },
         bottom_right: bottom_right,
     };
-
-    // ユニットをインスタンス化
-    let _unit = Unit;
 
     // タプルをインスタンス化
     let pair = Pair(1, 0.1);
