@@ -34,6 +34,7 @@ def main():
     print(f"second point: ({bottom_right.x}, {bottom_right.y})")
     
     x, y = point.x, point.y
+    del point 
     
     _rectangle = Rectangle(
         top_left = Point(x, y),

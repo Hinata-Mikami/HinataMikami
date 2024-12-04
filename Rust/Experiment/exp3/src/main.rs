@@ -50,6 +50,8 @@ fn main() {
     // `let`を使用してpointをデストラクトする。
     let Point { x: left_edge, y: top_edge } = point;
 
+    let point2 = point; //? x や yを構造体にして書き込みを様々行ってみる
+
     let _rectangle = Rectangle {
         // 構造体の定義とインスタンスの作成を同時に行う
         top_left: Point { x: left_edge, y: top_edge },

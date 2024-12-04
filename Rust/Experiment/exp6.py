@@ -10,5 +10,8 @@ def main():
     class1.next = class2
     class2.next = class1
     
+    print(class1)
+    print(class2.next)
+    
 if __name__ == "__main__":
     main() 

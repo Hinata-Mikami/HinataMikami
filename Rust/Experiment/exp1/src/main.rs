@@ -1,6 +1,6 @@
 fn main() {
     println!("Hello world!");
-
+    
     println!("main was called!");
     sub();
 }
