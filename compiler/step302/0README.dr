@@ -1,0 +1,44 @@
+  Step 302. Parsing and type-checking unary expressions with one variable and
+     simple binary expressions (that is, binary expressions
+     whose one operand requires no computation)
+     AND local variables
+
+ Source language: 
+       a single integer variable x
+       integer (signed) constants
+       true and false booleans
+       unary operations: -, succ, pred, not, is_zero
+       parentheses
+       local variables
+       binary operations: +
+
+
+        Define the language, abstractly
+../step300/lang.mli             The definition
+
+
+../step300/pp_ast.ml            Pretty-printer (maybe not so pretty)
+
+../step30/lexer.mll            Lexer
+parser.mly                     Parser, slighlty improved
+
+compiler.ml          Another implementation of lang.mli: type-checker
+                     TO ADJUST/EXTEND
+
+../step23/code_gen.ml   As before
+
+
+../step24/driver.ml  Main driver, adjusted for lexer
+
+../step22/init.c     The start-up code (as before)
+
+        Back-end: as in step24
+
+        Testing
+test_script_21.ml  Earlier test script, adjusted: xxx is accepted now
+test_script_22.ml  Earlier test script
+test_script.ml  Test script
+
+build.ml         How to make it: the build script
+
+

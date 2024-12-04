@@ -31,9 +31,22 @@ let _ =
 
 (* Add more *)
 
-let () = print_endline "All Done"
 
-;;
+(* Testing successful compilation *)
+(* We are *not* testing running of the compiled code *)
+
+let cmd_run fname = [tigerc; "-o"; execf; fname]
+
+let _ = expect "" @@ test_it "1 + x + 3" cmd_run
+
+let _ = expect "" @@ test_it "let val y := 1+x in y end" cmd_run
+
+let _ = 
+  expect_fail @@ test_it "y" cmd_run
+
+(* Add more *)
+
+let () = print_endline "All Done"
 
 ;;
 

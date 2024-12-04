@@ -16,21 +16,16 @@ let parse (lexfun : Lexing.lexbuf -> token) (lexbuf : Lexing.lexbuf)
 let open struct
 %}
 
-/* Tokens */ 
+/* Tokens */
 %token <int64> INT
 %token TRUE FALSE
 %token NOT SUCC PRED ISZERO
-// %token VARX (* Ex 13 *)
 %token LPAREN RPAREN
 %token <string> IDENT
 %token PLUS MINUS TIMES DIV
 %token <string * Lexing.position> STRING
+%token LET IN VAL END COLONEQUAL
 %token EOF
-%token LET VAL IN END ASSIGN  (* Ex 13 *)
-
-
-
-
 
 /* Precedences and associativities.
 
@@ -55,6 +50,9 @@ conflicts.
 The precedences must be listed from low to high.
 */
 
+%nonassoc IN            /* absolute lowest precedence */
+%nonassoc LET
+%nonassoc COLONEQUAL
 %left PLUS MINUS        /* lowest precedence */
 %left TIMES DIV         /* medium precedence */
 %nonassoc prec_unary_minus   /* marker for the prefix op */
@@ -76,6 +74,17 @@ start:
     { $1 }
 ;
 
+/*
+  A local binding is in the scope (environment) of the previous bindings.
+  Thus we desugar
+     let decl1 decl2 ... declN in body end
+  as
+     let decl1 in let decl2 ... in let declN in body end end ... end
+
+  See parser.mly in the next step (step31) for an alternative way
+  to parse let-blocks
+*/
+
 exp:
   simple { $1 }
  | MINUS simple  { M.neg $2 }
@@ -84,7 +93,7 @@ exp:
  | PRED simple   { M.pred $2 }
  | ISZERO simple { M.is_zero $2 }
  | exp PLUS atom { M.add $1 $3 }
- | LET decls IN exp END { M.local $2 $4 } (* Ex 12 *)
+ | LET decls exp END { List.fold_right M.local $2 $3}
 ;
 
 simple:
@@ -96,20 +105,18 @@ atom:
    INT   { M.int $1 }
  | TRUE  { M.bool true }
  | FALSE { M.bool false }
- | IDENT  { M.var $1 }
+ | IDENT { M.var $1 }
 ;
 
-(* Ex 13 *)
 decls:
-  decl { [$1] }             
-| decl decls { $1 :: $2 }    
+  VAL IDENT COLONEQUAL exp decls_  { ($2,$4) :: $5 }
 ;
 
-decl:
-  VAL IDENT ASSIGN exp { ($2, $4) }
+decls_:
+  IN       { [] }
+ | decls   { $1 }
 ;
-
-
+  
 %%
 (* Trailer *)
 end in

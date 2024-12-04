@@ -1,0 +1,46 @@
+  Step 3.0. Compiling unary expressions with one variable and
+     simple binary expressions (that is, binary expressions
+     whose one operand requires no computation)
+     AND local variables
+
+     Only parsing so far, and pretty-printer showing the scoping
+
+ Source language: 
+       a single integer variable x
+       integer (signed) constants
+       true and false booleans
+       unary operations: -, succ, pred, not
+       parentheses
+       local variables
+       binary operations: + with standard precedence
+
+
+        Define the language, abstractly
+../step300/lang.mli             The definition
+
+
+../step300/pp_ast.ml      Pretty-printer, traditional (doesn't show scope)
+                         (as pp_ast_ns.ml)
+
+pp_ast_env.ml        Pretty-printer showing scope, using the Environment
+                     semantics for variables
+pp_ast_qna.ml        the same using the Question-and-Answer semantics
+
+
+
+lexer.mll            Lexer
+parser.mly           Parser
+
+../step300/driver.ml  driver as before (restricted to parsing)
+
+        Testing
+test_script_21.ml  Earlier test scripts, adjusted  
+test_script_22.ml     (only parsing, small differences)
+test_script.ml     Test script for variables
+
+build.ml         How to make it: the build script
+
+        Scratch, unfinished
+
+pp_ast_tem.ml        Scope-showing pretty-printer with the Template semantics
+pp_ast2.ml           Earlier attempt, by overriding sequences

@@ -33,13 +33,7 @@ let keyword_table =
     ("pred",  PRED);
     ("not",   NOT);
     ("is_zero",  ISZERO);
-    (* ("x",     VARX); *)
-
-    (* Ex 12 *)
-    ("let",   LET);    
-    ("val",   VAL);     
-    ("in",    IN);  
-    ("end",   END);  
+    ("x",     VARX);
 ]
 
 (* To buffer string literals *)
@@ -184,15 +178,6 @@ rule token = parse
       { update_loc lexbuf 0;
         token lexbuf }
   | eof { EOF }
-
-  (* Ex 13 *)
-  | "let"  { LET }
-  | "val"  { VAL }
-  | "in"   { IN }
-  | "end"  { END }
-  | ":="   { ASSIGN }
-
-
   | (_ as illegal_char)
       { error lexbuf (Illegal_character illegal_char) }
 
@@ -215,11 +200,9 @@ and string = parse
       { error lexbuf Eol_in_string }
   | eof
       { error_loc !string_start_loc Unterminated_string }
-
   | (_ as c)
       { store_string_char c;
         string lexbuf }
-
 
 (* Postlude *)
 
