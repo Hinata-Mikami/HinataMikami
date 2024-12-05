@@ -45,7 +45,6 @@ type obs = C.obs                        (* observation type *)
 
 (* let observe : repr -> obs = C.observe *)
 
-
 (* Ex19 *)
 let ty_env : (vname * C.Ty.t) list ref = ref []
 

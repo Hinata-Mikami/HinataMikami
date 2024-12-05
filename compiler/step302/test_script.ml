@@ -44,7 +44,24 @@ let _ = expect "" @@ test_it "let val y := 1+x in y end" cmd_run
 let _ = 
   expect_fail @@ test_it "y" cmd_run
 
-(* Add more *)
+(* Add more *)  
+(* Ex 18 *)
+let _ = expect "" @@ test_it "succ 1" cmd_run
+
+let _ = expect "" @@ test_it "pred x" cmd_run
+
+let _ = expect "" @@ test_it "not (is_zero 1)" cmd_run
+
+let _ = expect "" @@ test_it "not (is_zero (let val y := 1 in y end))" cmd_run
+
+let _ = expect_fail @@ test_it "pred true" cmd_run
+
+let _ = expect_fail @@ test_it "not (succ x)" cmd_run
+
+let _ = expect_fail @@ test_it "let val x := 1 in (not x) end" cmd_run
+
+
+
 
 let () = print_endline "All Done"
 
