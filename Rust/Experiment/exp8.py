@@ -21,3 +21,9 @@ if __name__ == "__main__":
     obj = ImmutableObject(x=10, y=20)
     print(obj.x)  # 10
     # obj.x = 30  # AttributeError: Cannot modify immutable object
+    
+    obj1 = ImmutableObject(x=[1, 2, 3])
+    print(obj1.x[1])
+    
+    obj1.x[1] = 0
+    print(obj1.x[1]) # エラーにならない
