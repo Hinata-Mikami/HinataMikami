@@ -4,7 +4,7 @@ obj2 = "Hello world!"
 print(f"obj1's id is : {id(obj1)}")
 print(f"obj2's id is : {id(obj2)}")
 
-# is はオブジェクトの等価性を確認
+# is はオブジェクトの 同一性　を確認
 # https://docs.python.org/3/reference/expressions.html#is-not
 # 6.10.3 Identity comparisons
 print(obj1 is obj2)

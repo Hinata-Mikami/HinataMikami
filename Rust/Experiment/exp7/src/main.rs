@@ -7,6 +7,7 @@ fn main() {
     println!("{}", std::ptr::eq(a, b)); //true
 
     let mut c: &'static str = "Hello world!";
+    c.get_unchecked_mut(0..0) = 'x';
     println!("{}", std::ptr::eq(a, c)); //true
 
     c = "Hello World!";
@@ -18,5 +19,4 @@ fn main() {
     let b = String::from("Hello world!");
 
     println!("{}", std::ptr::eq(&a, &b)); //false
-    
 }

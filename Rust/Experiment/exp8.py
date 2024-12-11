@@ -22,8 +22,8 @@ if __name__ == "__main__":
     print(obj.x)  # 10
     # obj.x = 30  # AttributeError: Cannot modify immutable object
     
-    obj1 = ImmutableObject(x=[1, 2, 3])
-    print(obj1.x[1])
+    # obj1 = ImmutableObject(x=[1, 2, 3])
+    # print(obj1.x[1])
     
-    obj1.x[1] = 0
-    print(obj1.x[1]) # エラーにならない
+    # obj1.x[1] = 0
+    # print(obj1.x[1]) # エラーにならない

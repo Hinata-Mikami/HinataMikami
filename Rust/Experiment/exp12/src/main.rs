@@ -40,7 +40,6 @@ fn main() {
         // aの次の要素は = {:?}
         println!("a next item = {:?}", a.tail());
 
-
         let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&a))));
 
         // b作成後のaの参照カウント = {}
@@ -54,6 +53,8 @@ fn main() {
             *link.borrow_mut() = Rc::clone(&b);
         }
 
+
+
         // aを変更後のbの参照カウント = {}
         println!("b rc count after changing a = {}", Rc::strong_count(&b));
         // aを変更後のaの参照カウント = {}
@@ -63,6 +64,11 @@ fn main() {
         // 次の行のコメントを外して循環していると確認してください; スタックオーバーフローします
         // println!("a next item = {:?}", a.tail());        // aの次の要素 = {:?}
 
+        if let Some(link) = a.tail() {
+            *link.borrow_mut() = Rc::new(Nil);
+        }      
+        drop(a);
+        drop(b); 
     }
 
     //println!(Rc::strong_count(&a)); //Error! aはスコープから外れている
