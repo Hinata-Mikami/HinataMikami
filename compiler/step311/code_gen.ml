@@ -45,3 +45,73 @@ let observe : repr -> obs = fun seq ch ->
   let locals = !vreg_cnt in
   make_function ~locals (Asm.name "ti_main") seq |>
   Sq.iter (Asm.print ch)
+
+
+(* Comparison and arithmetic operations *)
+
+let equal : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi); (* Load second operand into %rdi *)
+    cmpq (reg rdi) (reg rax); (* Compare %rax and %rdi *)
+    sete (reg al); (* Set AL to 1 if equal *)
+    movzb (reg al) (reg rax) (* Move result to %rax *)
+  ] lhs
+
+let ne : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cmpq (reg rdi) (reg rax);
+    setne (reg al); (* Set AL to 1 if not equal *)
+    movzb (reg al) (reg rax)
+  ] lhs
+
+let lt : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cmpq (reg rdi) (reg rax);
+    setl (reg al); (* Set AL to 1 if less than *)
+    movzb (reg al) (reg rax)
+  ] lhs
+
+let le : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cmpq (reg rdi) (reg rax);
+    setle (reg al); (* Set AL to 1 if less than or equal *)
+    movzb (reg al) (reg rax)
+  ] lhs
+
+let mt : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cmpq (reg rdi) (reg rax);
+    setg (reg al); (* Set AL to 1 if greater than *)
+    movzb (reg al) (reg rax)
+  ] lhs
+
+let me : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cmpq (reg rdi) (reg rax);
+    setge (reg al); (* Set AL to 1 if greater than or equal *)
+    movzb (reg al) (reg rax)
+  ] lhs
+
+let minus : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    subq (reg rdi) (reg rax) (* Subtract %rdi from %rax *)
+  ] lhs
+
+let times : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    imulq (reg rdi) (reg rax) (* Multiply %rax by %rdi *)
+  ] lhs
+
+let div : repr -> atom -> repr = fun lhs rhs ->
+  snocs Asm.[
+    movq rhs (reg rdi);
+    cqto; (* Sign extend RAX into RDX:RAX for division *)
+    idivq (reg rdi) (* Divide RDX:RAX by %rdi; result in %rax *)
+  ] lhs

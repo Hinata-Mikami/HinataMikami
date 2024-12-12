@@ -46,6 +46,32 @@ let is_zero  : repr -> repr = Qna.lift1 C.is_zero
 
 let add : repr -> atom -> repr = Qna.lift2 C.add
 
+module Ty = Types
+
+let type_cnv3 (outtyp : Ty.t) (cgen : 'a->'b->'c) =
+  fun (ty1,c1) (ty2,c2) -> Ty.check_type ty1 ty2; (outtyp, cgen c1 c2)
+
+let equal = type_cnv3 Ty.bool Code_gen.equal
+let ne = type_cnv3 Ty.bool Code_gen.ne
+let lt = type_cnv3 Ty.bool Code_gen.lt
+let le = type_cnv3 Ty.bool Code_gen.le
+let me = type_cnv3 Ty.bool Code_gen.me
+let mt = type_cnv3 Ty.bool Code_gen.mt
+let minus = type_cnv2 Ty.int Ty.int Ty.int Code_gen.minus
+let times = type_cnv2 Ty.int Ty.int Ty.int Code_gen.times
+let div = type_cnv2 Ty.int Ty.int Ty.int Code_gen.div
+
+
+let equal  : repr -> atom -> repr = Qna.lift2 equal
+let ne  : repr -> atom -> repr = Qna.lift2 ne
+let lt  : repr -> atom -> repr = Qna.lift2 lt
+let le  : repr -> atom -> repr = Qna.lift2 le
+let mt  : repr -> atom -> repr = Qna.lift2 mt
+let me  : repr -> atom -> repr = Qna.lift2 me
+let minus  : repr -> atom -> repr = Qna.lift2 minus
+let times  : repr -> atom -> repr = Qna.lift2 times
+let div  : repr -> atom -> repr = Qna.lift2 div
+
 (* Introducing a local variable, and answering questions about it *)
 let local : vname * repr -> repr -> repr = fun (name,exp) body ->
   let* (ty,blk) = exp in

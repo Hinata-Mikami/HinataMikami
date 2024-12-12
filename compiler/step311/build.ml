@@ -18,13 +18,16 @@ let compiler_manifest = build_all [
   ocaml "../step23/types.mli";
   ocaml "../step23/types.ml";
   ocaml "qna.ml";
-  ocaml "../step300/lang.mli";
+  ocaml "../step300/lang.mli" ~rename:"Lang_300";
+  ocaml "lang.mli";
   ocaml "../step20/pp_ast.ml" ~rename:"pp_ast_20";
   ocaml "../step22/pp_ast.ml" ~rename:"pp_ast_22";
   ocaml "../step23/pp_ast.ml" ~rename:"pp_ast_23";
-  ocaml "../step300/pp_ast.ml";
-  ocamlyacc "../step302/parser.mly";
-  ocamllex  "../step30/lexer.mll";
+  ocaml "../step300/pp_ast.ml"~rename:"pp_ast_300";
+  ocaml "pp_ast.ml";
+  (* Ex21 *)
+  ocamlyacc "parser.mly";
+  ocamllex  "lexer.mll";
   ocaml "../step22/asm.mli" ~rename:"asm_22";
   ocaml "asm.mli";
   ocaml "../step22/asm.ml" ~rename:"asm_impl_22";
@@ -44,7 +47,7 @@ let runtime_manifest = build_all [
 let tests = test [
   "test_script_21.ml";
   "test_script_22.ml";
-  "../step24/test_script.ml";
+  "test_script_24.ml";
   "test_script.ml";
   ]
 

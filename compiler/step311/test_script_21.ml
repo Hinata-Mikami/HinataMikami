@@ -78,8 +78,9 @@ let _ =
 let _ =
   expect "(neg x)" @@ test_it "- x" cmd_parse
 
-let _ =
-  expect_fail @@ test_it "succpred-x" cmd_parse
+(* "succpred" という変数名として見れてしまう*)
+(* let _ =
+  expect_fail @@ test_it "succpred-x" cmd_parse *)
 
 (* ZZZ need parentheses now *)
 let _ =
