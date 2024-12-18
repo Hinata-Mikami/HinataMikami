@@ -1,0 +1,48 @@
+ Step 32. Compiling arbitrary expressions AND local variables
+          Many binary operators on integers and booleans
+
+ Source language: 
+       a single integer variable x
+       integer (signed) constants
+       true and false booleans
+       unary operations: -, succ, pred, not
+       parentheses
+       local variables
+       binary operations: + - *, &, |,
+       = <> < <= > >=
+       with the standard precedence
+
+
+       Define the language, abstractly
+lang.mli             The definition
+../step300/lang.mli    Previous definition to extend (as lang_30.ml)
+
+pp_ast.ml            Pretty-printer (maybe not so pretty)
+../step300/pp_ast.ml    Previous version (as pp_ast_30)
+
+lexer.mll            Lexer
+parser.mly           Parser
+
+compiler.ml          Another implementation of lang.mli: compiler
+                     (Type-checking, etc.)
+../step31/compiler.ml       To be extended (as compiler_31)
+
+
+../step31/0README.dr Other things
+
+code_gen.ml          Another implementation: code generator
+../step31/code_gen.ml       Previous version (as code_gen.ml)
+
+        Back-end 
+
+asm.mli            Extended Assembly
+asm.ml
+../step31/asm.mli         as asm_31.mli
+../step31/asm.ml          as asm_impl_31.ml
+
+        Testing
+test_script_21.ml  Earlier test script, adjusted: succpred-x is accepted now
+test_script_24.ml  Earlier test script, adjusted: full binary is supported
+test_script.ml  Test script
+
+build.ml         How to make it: the build script

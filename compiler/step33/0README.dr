@@ -1,0 +1,33 @@
+ Step 33. Compiling arbitrary expressions AND local variables
+          Optimization: don't let-bind temporary variables to atoms
+          Further, optimize user-specified let-bindings
+
+ Source language: Same as in Step 32
+       full expression language over variables and many binary operations
+       One global variable `x' 
+
+
+        Define the language, abstractly
+lang.mli             Small extension: local_atom
+../step32/lang.mli   The earlier language (as lang_32.mli)
+
+pp_ast.ml            The extension
+../step32/pp_ast.ml  The earlier pretty-printer (as pp_ast_32)
+
+lexer.mll            Lexer  (leading _ are not longer allowed in identifiers)
+parser.mly           Parser
+
+compiler.ml          A very small extension: local_atom
+../step32/compiler.ml    Earlier compiler (as compiler_32)
+
+
+        All other things are the same as before
+
+        Testing
+test_script_21.ml  Earlier test script, adjusted: succpred-x is accepted now
+test_script_24.ml  Earlier test script, adjusted: complex expr now work
+test_script_32.ml  Earlier test script, adjusted
+test_script.ml  Test script
+
+build.ml         How to make it: the build script
+
