@@ -1,12 +1,10 @@
 import threading
-import time
+# https://docs.python.org/ja/3.13/library/threading.html
 
 def worker(shared_data):
-    # 各スレッドが共有データを参照
     print(shared_data)
 
 def main():
-    # このデータはスレッド間で共有されます
     apple = "the same apple"
 
     threads = []
@@ -14,10 +12,10 @@ def main():
     for _ in range(10):
         thread = threading.Thread(target=worker, args=(apple,))
         threads.append(thread)
-        thread.start()
+        thread.start()     #targetの実行
 
     for thread in threads:
-        thread.join()
+        thread.join()      #threadの終了を待つ
 
 
 if __name__ == "__main__":

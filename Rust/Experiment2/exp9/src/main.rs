@@ -13,6 +13,7 @@ fn main() {
         // reference in the memory heap.
         let apple = Arc::clone(&apple);
 
+        // https://doc.rust-lang.org/std/thread/fn.spawn.html
         thread::spawn(move || {
             // As Arc was used, threads can be spawned using the value allocated
             // in the Arc variable pointer's location.
