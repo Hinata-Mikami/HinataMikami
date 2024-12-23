@@ -12,3 +12,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# gcを呼べば即時解放可能

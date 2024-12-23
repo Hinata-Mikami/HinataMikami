@@ -24,3 +24,6 @@ fn main() {
     // Make sure all Arc instances are printed from spawned threads.
     thread::sleep(Duration::from_secs(1));
 }
+
+//Mutex(ロックを取る)を使うor clone
+//appleは書き換えできるか？

@@ -4,3 +4,4 @@ fn main() {
 }
 
 // https://doc.rust-jp.rs/rust-by-example-ja/std/box.html
+// Box化することの意義
