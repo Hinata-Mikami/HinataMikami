@@ -63,6 +63,17 @@ typedef struct tistring_s {
   char body [255];
 } * tistring;
 
+// tistring型定義に基づく比較関数
+int compare_tistrings(const struct tistring_s* a, const struct tistring_s* b) {
+    // サイズが異なる場合、小さい方が先
+    if (a->size != b->size) {
+        return (a->size < b->size) ? -1 : 1;
+    }
+    // サイズが同じ場合、内容を比較
+    return memcmp(a->body, b->body, a->size);
+}
+
+
 void print(tistring s) {
   if( fwrite(s->body, s->size, 1, stdout) != 1)
     perror("fwrite error"), exit(10);

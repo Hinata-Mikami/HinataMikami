@@ -22,4 +22,5 @@ let global_fns : (Lang.vname * (Asm.symbol * Ty.function_t)) list = [
   ("print",       (Asm.name "print",        ([Ty.string],  Ty.void)));
   ("random",      (Asm.name "ti_random",    ([Ty.int;Ty.int], Ty.int)));
   ("seed",        (Asm.name "seed",         ([Ty.int],     Ty.void)));
+  ("compare_tistrings", (Asm.name "compare_tistrings", ([Ty.string; Ty.string], Ty.bool)));
 ]

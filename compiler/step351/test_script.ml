@@ -150,6 +150,18 @@ let _ =
 
 
 
+(* Ex 26, 27 *)
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"a\" = \"a\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf]
+
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"11\" <= \"2\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf]
 let () = print_endline "All Done"
 
 ;;

@@ -43,3 +43,8 @@ let string : string -> repr = fun s ->
    segment_text ();
    leaq (rip_offset slabel) rax;
   ]
+
+let comparison (f: Asm.operand -> Asm.instr) : 
+  repr -> atom -> repr = fun ins a ->
+  snocs Asm.([cmpq a (reg rax); f (reg al); movzb (reg al) (reg rax)]) ins
+
