@@ -1,0 +1,48 @@
+ Step 35. Compiling arbitrary expressions AND local variables
+     and mutable variables and function calls to library functions
+     and strings (also more function calls)
+
+ Source language: 
+       full expression language over variables
+       local variables, including mutable
+       calls to library functions
+
+
+       Define the language, abstractly
+lang.mli             Extensions
+../step34/lang.mli   The earlier language (as lang_34)
+
+pp_ast.ml            The extension
+../step34/pp_ast.ml         The earlier pretty-printer (as pp_ast_34)
+
+parser.mly           Parser: adding string literals
+
+types.mli            Extended type language, with string type
+types.ml
+../step34/types.mli     as types_34
+../step34/types.ml      as types_impl_34
+
+globals.ml           Global functions, extended
+
+compiler.ml          Extended type-checker
+../step34/compiler.ml       Earlier compiler (as compiler_34)
+
+
+code_gen.ml          Extended code generator
+../step34/code_gen.ml       Earlier code generator (as code_gen_34)
+
+asm.mli              Extended Assembly: 
+asm.ml                 support for strings and better support for functions
+asm_32.mli           Original
+asm_impl_32.ml
+
+
+init.c               Updated init: more functions
+
+        All other things are the same as before
+
+        Testing
+test_script.ml  Test script
+
+build.ml         How to make it: the build script
+
