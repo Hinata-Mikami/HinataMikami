@@ -37,6 +37,4 @@ fn main() {
     // スレッド終了を待つ
     thread::sleep(Duration::from_secs(1));
 
-    // メインスレッドでの値確認
-    println!("Final value: {}", *apple2.lock().unwrap());
 }
