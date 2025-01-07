@@ -1,9 +1,10 @@
 struct MyString(String);
+// struct MyString2(&String);
 
 // struct MyStr(&str);  
 // Error : expected named lifetime parameter
 
-struct MyStr<'a>(&'a str);
+struct MyStr<'a>(&'a str); // a は static  strはプログラムが終了するまで残る（コードと一緒に）
 // OK
 
 impl Drop for MyString {
@@ -16,6 +17,11 @@ impl Drop for MyStr<'_> {
     fn drop(&mut self) {
         println!("Dropping MyStr: {}", self.0);
     }
+}
+
+fn a () -> &'static str {
+    let s = "HELLO";
+    return s;
 }
 
 fn main() {

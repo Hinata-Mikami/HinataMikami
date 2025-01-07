@@ -7,12 +7,13 @@ class MyString:
         
 def take_ownership(s : MyString):
     print(f"In take_ownership: {s.name}")
-    del s # 不要?
+    # del s # 不要
     
 def borrow_string(s : MyString):
     print(f"In borrow_string: {s.name}")
     
-    
+
+# 動的に実行時にownershipを管理するライブラリ(静的にできない場合) (drop)
 def borrow_mut_string(s : MyString):
     tmp = " (modified)"
     s.name = s.name + tmp
