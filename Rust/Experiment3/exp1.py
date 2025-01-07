@@ -45,7 +45,13 @@ def main():
     s3 = "C"
     s31 = s3
     print(s31)
-    del s3
+    del s3, s31   # LTが切れるのでdrop : 結局Rustコードを読んでLTを推測するしかない？
+    
+    s4 = "D"
+    s41 = s4
+    print(s4)
+    print(s41)
+    del s4, s41
     
 
 if __name__ == "__main__":

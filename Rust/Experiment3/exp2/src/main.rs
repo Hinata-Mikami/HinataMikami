@@ -8,7 +8,6 @@ fn incr_count() {
     }
 } 
 
-
 fn main() {
 
     println!("{} {}", HELLO, LANG);
