@@ -151,6 +151,17 @@ let _ =
 
 
 (* Ex 26, 27 *)
+let _ = 
+  expect_fail
+  @@ test_it "print_bool(\"a\" <= 2)" 
+  cmd_gen
+
+let _ = 
+  expect_fail
+  @@ test_it "print_bool(true <> \"true\")" 
+  cmd_gen
+
+
 let _ =
   expect ""
   @@ test_it "print_bool(\"a\" = \"a\")"
@@ -159,10 +170,46 @@ let _ =
 
 let _ =
   expect ""
-  @@ test_it "print_bool(\"11\" <= \"2\")"
+  @@ test_it "print_bool(\"a\" <> \"A\")"
      cmd_run;
    expect "true\nDone" @@ test_command_stdin "100\n" [execf]
-let () = print_endline "All Done"
+
+
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"11\" <= \"2\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf] 
+
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"2\" < \"11\")"
+     cmd_run;
+   expect "false\nDone" @@ test_command_stdin "100\n" [execf]
+
+
+
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"abc\" > \"ab\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf]
+
+ let _ =
+  expect ""
+  @@ test_it "print_bool(\"あいう\" < \"かきく\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf] 
+ 
+let _ =
+  expect ""
+  @@ test_it "print_bool(\"\" <= \"a\")"
+     cmd_run;
+   expect "true\nDone" @@ test_command_stdin "100\n" [execf] 
+
+
+
+   let () = print_endline "All Done"
 
 ;;
 

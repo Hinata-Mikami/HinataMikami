@@ -23,14 +23,14 @@ let band : repr -> atom -> repr =
 (* The functionality is also polymorphic, for the time being ...*)
 
 let type_cnv_comp 
-    (cgen: 'a->'b->'c) : (Ty.t * 'a) -> (Ty.t * 'b) -> (Ty.t * 'c) =
+    (cgen: 'a->'b->'c): (Ty.t * 'a) -> (Ty.t * 'b) -> (Ty.t * 'c) =
     fun (ty1,c1) (ty2,c2) -> 
       Ty.check_type ty1 ty2;
       (Ty.bool, cgen c1 c2)
 
-let eq  : repr -> atom -> repr = type_cnv_comp CG.eq   |> lift2
-let neq : repr -> atom -> repr = type_cnv_comp CG.neq  |> lift2
-let lt  : repr -> atom -> repr = type_cnv_comp CG.lt   |> lift2
-let leq : repr -> atom -> repr = type_cnv_comp CG.leq  |> lift2
-let gt  : repr -> atom -> repr = type_cnv_comp CG.gt   |> lift2
-let geq : repr -> atom -> repr = type_cnv_comp CG.geq  |> lift2
+let eq  : repr -> atom -> repr = type_cnv_comp CG.eq  |> lift2
+let neq : repr -> atom -> repr = type_cnv_comp CG.neq |> lift2
+let lt  : repr -> atom -> repr = type_cnv_comp CG.lt  |> lift2
+let leq : repr -> atom -> repr = type_cnv_comp CG.leq |> lift2
+let gt  : repr -> atom -> repr = type_cnv_comp CG.gt  |> lift2
+let geq : repr -> atom -> repr = type_cnv_comp CG.geq |> lift2

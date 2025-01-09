@@ -22,5 +22,11 @@ let global_fns : (Lang.vname * (Asm.symbol * Ty.function_t)) list = [
   ("print",       (Asm.name "print",        ([Ty.string],  Ty.void)));
   ("random",      (Asm.name "ti_random",    ([Ty.int;Ty.int], Ty.int)));
   ("seed",        (Asm.name "seed",         ([Ty.int],     Ty.void)));
-  ("compare_tistrings", (Asm.name "compare_tistrings", ([Ty.string; Ty.string], Ty.bool)));
-]
+  (* ("compare_tistrings", (Asm.name "compare_tistrings", ([Ty.string; Ty.string], Ty.bool))); *)
+  ("eq_str",        (Asm.name "eq_s",         ([Ty.string; Ty.string], Ty.bool)));
+  ("neq_str",       (Asm.name "neq_s",        ([Ty.string; Ty.string], Ty.bool)));
+  ("lt_str",        (Asm.name "lt_s",         ([Ty.string; Ty.string], Ty.bool)));
+  ("leq_str",       (Asm.name "leq_s",        ([Ty.string; Ty.string], Ty.bool)));
+  ("gt_str",        (Asm.name "gt_s",         ([Ty.string; Ty.string], Ty.bool)));
+  ("geq_str",       (Asm.name "geq_s",        ([Ty.string; Ty.string], Ty.bool)));
+  ]

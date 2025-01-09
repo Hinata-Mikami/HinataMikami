@@ -63,14 +63,43 @@ typedef struct tistring_s {
   char body [255];
 } * tistring;
 
-// tistring型定義に基づく比較関数
-int compare_tistrings(const struct tistring_s* a, const struct tistring_s* b) {
-    // サイズが異なる場合、小さい方が先
-    if (a->size != b->size) {
-        return (a->size < b->size) ? -1 : 1;
-    }
-    // サイズが同じ場合、内容を比較
-    return memcmp(a->body, b->body, a->size);
+// int compare_tistrings(const struct tistring_s* a, const struct tistring_s* b) {
+//     uint32_t min_size = (a->size < b->size) ? a->size : b->size;
+    
+//     for (uint32_t i = 0; i < min_size; i++) {
+//         if (a->body[i] != b->body[i]) {
+//             return (a->body[i] < b->body[i]) ? -1 : 1;
+//         }
+//     }
+
+//     if (a->size < b->size) return -1;  
+//     if (a->size > b->size) return 1;  
+
+//     return 0;
+// }
+
+bool eq_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) == 0;
+}
+
+bool neq_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) != 0;
+}
+
+bool lt_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) < 0;
+}
+
+bool leq_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) <= 0;
+}
+
+bool gt_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) > 0;
+}
+
+bool geq_str(tistring s1, tistring s2){
+  return strcmp(s1->body, s2->body) >= 0;
 }
 
 
