@@ -5,4 +5,6 @@ def main():
     print(f"{s21}")
     print(f"{s2}")
     
+if __name__ == "__main__":
+    main()
     
