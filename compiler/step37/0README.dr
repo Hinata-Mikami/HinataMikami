@@ -1,0 +1,39 @@
+ Step 37. Compiling arbitrary expressions AND local variables
+     and mutable variables and function calls to library functions
+     and strings
+     and full conditional expressions
+     and loops
+
+ Source language: 
+       full expression language over variables
+       local variables, including mutable
+       calls to library functions
+       strings
+       conditional expressions
+       while, do loops
+
+        Define the language, abstractly
+lang.mli             Extensions
+../step36/lang.mli   The earlier language (as lang_36)
+
+pp_ast.ml            The extension
+../step36/pp_ast.ml         The earlier pretty-printer (as pp_ast_36)
+
+lexer.mll            Lexer
+parser.mly           Parser
+
+compiler.ml          Extended type-checker
+../step36/compiler.ml       Earlier compiler (as compiler_36)
+
+code_gen.ml          Extended code generator
+../step36/code_gen.ml       Earlier code generator (as code_gen_36)
+
+        All other things are the same as before
+
+        Testing
+test_script_1.ml  Test script, of elif
+test_script_2.ml  Test script, of while/for
+
+
+build.ml         How to make it: the build script
+
