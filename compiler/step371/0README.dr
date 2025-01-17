@@ -1,0 +1,42 @@
+ Step 36. Compiling arbitrary expressions AND local variables
+     and mutable variables and function calls to library functions
+     and strings
+     and conditional expressions
+     (and improved string relational operators)
+
+ Source language: 
+       full expression language over variables
+       local variables, including mutable
+       calls to library functions
+       strings
+       conditional expressions
+
+        Define the language, abstractly
+lang.mli             Extensions
+../step35/lang.mli   The earlier language (as lang_35)
+
+pp_ast.ml            The extension
+../step35/pp_ast.ml         The earlier pretty-printer (as pp_ast_35)
+
+lexer.mll            Lexer
+parser.mly           Parser
+
+compiler.ml          Extended type-checker
+../step35/compiler.ml       Earlier compiler (as compiler_35)
+
+code_gen.ml          Extended code generator
+../step35/code_gen.ml       Earlier code generator (as code_gen_35)
+
+        All other things are the same as before
+
+        Back-end 
+
+asm.mli            Extended Assembly
+asm.ml
+
+init.c             Extension: string functions (over ../step35/init.c)
+
+test_script.ml  Test script
+
+build.ml         How to make it: the build script
+

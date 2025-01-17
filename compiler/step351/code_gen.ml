@@ -44,7 +44,24 @@ let string : string -> repr = fun s ->
    leaq (rip_offset slabel) rax;
   ]
 
-let comparison (f: Asm.operand -> Asm.instr) : 
-  repr -> atom -> repr = fun ins a ->
-  snocs Asm.([cmpq a (reg rax); f (reg al); movzb (reg al) (reg rax)]) ins
 
+
+  (* let comparison_string (f: Asm.operand -> Asm.instr) :
+  repr -> atom -> repr = fun ins a ->
+    let open Asm in
+    snocs Asm.[
+      movq a (reg rdi);
+      movq (reg rax) (reg rsi); 
+      call (Asm.name "compare_tistrings");
+      test (reg rax) (reg rax); 
+      f (reg al);
+      movzb (reg al) (reg rax);
+    ] ins
+
+
+let eq_s  : repr -> atom -> repr = comparison_string Asm.sete
+let neq_s : repr -> atom -> repr = comparison_string Asm.setne
+let lt_s  : repr -> atom -> repr = comparison_string Asm.setl
+let leq_s : repr -> atom -> repr = comparison_string Asm.setle
+let gt_s  : repr -> atom -> repr = comparison_string Asm.setg
+let geq_s : repr -> atom -> repr = comparison_string Asm.setge *)
