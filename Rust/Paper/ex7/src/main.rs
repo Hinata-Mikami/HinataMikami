@@ -1,9 +1,8 @@
 fn main() {
-    let s1 = vec![String::from("s1")];
+    let v1 = vec![1];
 
-    let mut s2 = s1.clone();
-    s2[0].push_str(" : modified");
-    println!("{}", s1[0]);
-    println!("{}", s2[0]);
-
+    let mut v2 = v1.clone();
+    v2[0] += 1;
+    println!("v1[0] : {}", v1[0]);
+    println!("v2[0] : {}", v2[0]);
 }

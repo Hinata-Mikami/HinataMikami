@@ -1,8 +1,9 @@
 fn main() {
-    let mut s1 = vec![String::from("s1")];
+    let mut v1 = vec![1];
 
-    let s2 = &mut s1;
-    s2[0].push_str(" : modified");
-    println!("{}", s2[0]);
-    println!("{}", s1[0]);
+    let v2 = &mut v1;
+    v2[0] += 1;
+
+    println!("v2[0] : {}", v2[0]);
+    println!("v1[0] : {}", v1[0]);
 }

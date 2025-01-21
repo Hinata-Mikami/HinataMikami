@@ -1,8 +1,7 @@
 fn main() {
-    let s2 : &str = "s2";
+    let s1 : String = String::from("s1");
     
-    let s21 = s2;
-    println!("{}", s21);
+    let s2 = &s1;
     println!("{}", s2);
+    println!("{}", s1);
 }
-

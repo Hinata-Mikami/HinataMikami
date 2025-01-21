@@ -1,9 +1,8 @@
+struct Mystruct(i32);
+
 fn main() {
+    let x1 = Mystruct(1);
+    let x2 = x1;
 
-    let s1 : String = String::from("s1");
-
-    let s11 = s1;
-    println!("s11 : {}", s11);
-
+    println!("value of x2 : {}", x2.0);    
 }
-

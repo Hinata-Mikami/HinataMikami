@@ -1,12 +1,12 @@
 import copy
 
 def main():
-    s1 = ["s1"]
+    v1 = [1]
 
-    s2 = copy.deepcopy(s1)
-    s2[0] += " : modified"
-    print(s1[0]) 
-    print(s2[0])
+    v2 = copy.deepcopy(v1)
+    v2[0] += 1
+    print(f"v1[0] : {v1[0]}") 
+    print(f"v2[0] : {v2[0]}")
 
 if __name__ == "__main__":
     main()

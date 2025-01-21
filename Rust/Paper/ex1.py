@@ -1,12 +1,14 @@
-def main():
+class Mystruct(int):
+    def __init__(self, value):
+        self.value = value
 
-    s1 = "s1"
+def main():
+    x1 = Mystruct(1)
+    x2 = x1
+    del x1
     
-    s11 = s1
-    del s1
-    
-    print(f"s11 : {s11}")
-    
+    print(f"value of x2 : {x2.value}")
 
 if __name__ == "__main__":
     main()
+    
