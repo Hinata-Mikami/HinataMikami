@@ -6,3 +6,4 @@ fn main() {
 
     println!("value of x2 : {}", x2.0);    
 }
+

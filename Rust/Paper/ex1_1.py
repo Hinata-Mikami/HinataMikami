@@ -8,7 +8,7 @@ def main():
     del x1
     
     x2 = give_ownership()
-    print(f"value of x4 : {x2.value}")
+    print(f"value of x2 : {x2.value}")
     
 def take_ownership(mystruct : Mystruct):
     print(f"value of received struct : {mystruct.value}")
