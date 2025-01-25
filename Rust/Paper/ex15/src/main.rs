@@ -1,7 +1,7 @@
 use List::{Cons, Nil};
 use std::rc::Rc;
 use std::cell::RefCell;
-#[derive(Debug)]
+
 enum List {
     Cons(i32, RefCell<Rc<List>>),
     Nil,
@@ -15,7 +15,6 @@ impl List {
         }
     }
 }
-
 
 impl Drop for List {
     fn drop(&mut self) {
@@ -38,7 +37,8 @@ fn main() {
         if let Some(link) = a.tail() {
             *link.borrow_mut() = Rc::clone(&b);
         }
-
+        
+        // println!("{:?}", a.tail());  // stack overflow
         drop(a);
         drop(b); 
     }

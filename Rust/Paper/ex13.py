@@ -3,7 +3,7 @@ import sys
 def main():
     a = 1
     b = a
-    print(f"a = {a}, b = {b}")
+    print(f"a : {a}, b : {b}")
     print(f"Reference count: {sys.getrefcount(a)}") 
 
     # https://docs.python.org/ja/3/library/sys.html
