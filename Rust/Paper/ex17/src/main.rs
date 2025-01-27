@@ -1,23 +1,21 @@
 use std::time::Duration;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
-use std::sync::Mutex;
 
 fn main() {
+    let numbers: Arc<Mutex<Vec<i32>>> 
+                = Arc::new(Mutex::new(vec![]));
 
-    let apple: Arc<Mutex<String>> 
-        = Arc::new(Mutex::new(String::from("an apple")));
-
-    for i in 0..10 {
-        let apple: Arc<Mutex<String>> = Arc::clone(&apple);
+    for i in 0..5 {
+        let numbers = Arc::clone(&numbers);
 
         thread::spawn(move || {
-            let mut locked_apple = apple.lock().unwrap();
-            *locked_apple = format!("thread {}'s apple", i);
-            println!("Modified: {}", locked_apple);
+            let mut locked_numbers 
+                    = numbers.lock().unwrap();
+            locked_numbers.push(i);
+            println!("{:?}", locked_numbers);
         });
     }
 
     thread::sleep(Duration::from_secs(1));
 }
-

@@ -1,24 +1,25 @@
 import threading
+import time
 
 def main():
-        
-    apple = "an apple"
-    
-    threads = []
-    
-    for i in range(10):
-        def update_value():
-            with threading.Lock():
-                nonlocal apple
-                apple = f"thread {i}'s apple"
-                print(f"Modified: {apple}")
+    numbers = []
+    lock = threading.Lock()  
 
-        t = threading.Thread(target=update_value)
+    def add_number(i):
+        with lock:
+            numbers.append(i)
+            print(f"Modified: {numbers}")
+
+    threads = []
+    for i in range(10):
+        t = threading.Thread(target=add_number, args=(i,))
         threads.append(t)
         t.start()
-        
+
     for t in threads:
-            t.join()
+        t.join()
+
+
 
 if __name__ == "__main__":
     main()
