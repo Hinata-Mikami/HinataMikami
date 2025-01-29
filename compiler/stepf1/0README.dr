@@ -1,0 +1,53 @@
+ Step 40. Compiling arbitrary expressions AND local variables
+     and mutable variables and function calls to library functions
+     and strings
+     and conditional expressions
+     and loops
+     and local function definitions 
+     (without accessing data of the parent)
+
+ Source language: 
+       full expression language over variables
+       local variables, including mutable
+       calls to library functions
+       strings
+       conditional expressions
+       loops
+       local function definitions
+
+        Define the language, abstractly
+lang.mli             Extensions, to the earlier language (as lang_3)
+
+pp_ast.ml            The extension, to the earlier pretty-printer (as pp_ast_3)
+
+lexer.mll            Lexer
+parser.mly           Parser
+
+compiler.ml          Extended type-checker (to the earlier compiler_3)
+
+types.mli            Adding reading of the type
+types.ml
+
+code_gen.ml          Extended code generator (to the earlier code_gen_3)
+code_gen_31.ml       Re-implemented ../step31/code_gen.ml
+
+        All other things are the same as before
+
+        Back-end 
+
+asm.mli            Extended Assembly (to the earlier asm_3)
+asm.ml
+
+        Extended sequences
+sq.mli
+../step21/sq.mli        The interface to extend
+sq.ml                   The sequence with annotations
+sq_base.ml              The base implementation
+
+        Testing
+test_script.ml  Test script
+test_script_1.ml  Test cases that fail now but should work
+                  when access to the parent env is implemented
+
+build.ml         How to make it: the build script
+

@@ -343,6 +343,44 @@ let _ =
     cmd_run;
   expect "false\nDone" @@ test_command [execf]
 
+(* Ex 37 *)
+let _ = 
+  expect "(letfun (unstop(x:int):int (let [__t_1,(call unstop (add x 1))] (mul x __t_1))) (call unstop 0))" 
+  @@ test_it "let function unstop(x:int):int = x * unstop(x+1) in unstop(0) end"
+  cmd_parse
+
+
+let _ =
+  expect ""
+  @@ test_it {q|
+   let function factrial(x:int):int = 
+   if x <= 1 then 1 else x * factrial(x - 1) fi
+   in
+   let val r := factrial(5) in
+     print_int(r)
+   end
+   end|q}
+     cmd_run;
+   expect "120\nDone" @@ test_command [execf]
+
+let _ =
+ expect ""
+ @@ test_it {q|
+  let function sum(x:int):int = 
+  if x <= 1 then 1 else x + sum(x - 1) fi
+  in
+  let val r := sum(10) in
+    print_int(r)
+  end
+  end|q}
+    cmd_run;
+  expect "55\nDone" @@ test_command [execf]
+
+(* Ex 38 *)
+
+
+
+
 (* TODO
 let _ =
  expect ""
@@ -353,8 +391,8 @@ let _ =
        in print_int(sum_of_squares(2, 3))
    end|q}
     cmd_run;
-  expect "13\nDone" @@ test_command [execf]
-*)
+  expect "13\nDone" @@ test_command [execf] *)
+
 
 let () = print_endline "All Done"
 

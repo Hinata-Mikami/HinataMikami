@@ -57,7 +57,7 @@ let binary (op: M.repr->M.atom->M.repr) (e1:exp_atom) (e2:exp_atom) : M.repr =
 %token IF THEN ELSE ELIF FI
 %token BARBAR AMPERAMPER
 %token FOR TO DO DONE WHILE
-%token COLON FUNCTION AND
+%token COLON FUNCTION
 %token EOF
 
 /* Precedences and associativities.
@@ -98,7 +98,7 @@ The precedences must be listed from low to high.
 %nonassoc prec_appl          /* marker for the highest precedence */
 
 /* Finally, the first tokens of simple_expr are above everything else. */
-%nonassoc TRUE FALSE INT IDENT LPAREN STRING IDENTPAREN IF FOR WHILE AND
+%nonassoc TRUE FALSE INT IDENT LPAREN STRING IDENTPAREN IF FOR WHILE
 
 /* Entry points */
 
@@ -210,20 +210,8 @@ letblock:
    VAL IDENT COLONEQUAL atom lbrest         { M.local_atom ($2,$4) $5 }
  | VAL IDENT COLONEQUAL exp_complex lbrest  { M.local ($2,$4) $5 }
  | VAR IDENT COLONEQUAL exp lbrest          { M.local ~mut:true ($2,$4) $5 }
- | fun_decls IN exp END { M.fundecl $1 $3 } /* 変更 */
-;
-
-fun_decls:
-  FUNCTION IDENTPAREN decl_args_opt RPAREN ret_type_opt exp and_rest {
-    ($2, ($3, $5), $6) :: $7
-  }
-;
-
-and_rest:
-  AND fun_decls { $2 }
-| { [] }
-;
-
+ | FUNCTION IDENTPAREN decl_args_opt RPAREN ret_type_opt exp lbrest {
+     M.fundecl $2 ($3,$5) $6 $7 }
 ;
 
 lbrest:
