@@ -4,12 +4,12 @@ class Mystruct():
         
 def main():
     x1 = Mystruct(1)
-    
+    x2 = Mystruct(2) ##
     # <scope>
-    x2 = x1
+    x21 = x1
     del x1
-    print(x2.value)
-    del x2
+    print(x21.value)
+    del x21
     # </scope>
     
 if __name__ == "__main__":

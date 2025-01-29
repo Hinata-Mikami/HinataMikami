@@ -1,4 +1,4 @@
-#[derive(Debug)]
+// #[derive(Debug)]
 struct MyStruct {
     vec1: Vec<i32>,
     vec2: Vec<i32>,
