@@ -8,7 +8,9 @@ def main():
     del x1
     
     print(f"value of x2 : {x2.value}")
-
+    
+    # 長いコード
+    
 if __name__ == "__main__":
     main()
     
