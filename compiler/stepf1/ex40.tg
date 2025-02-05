@@ -1,0 +1,39 @@
+let function collatz(n:int):bool =
+    let val tmp := (
+        let var ans := 0 in
+        (
+            let var tmp2 := n in 
+            ((
+                while (tmp2 >= 2) do ((tmp2 := tmp2 - 2);(ans := ans + 1)) done
+            ); ans)
+            end
+        ) end
+    ) 
+    in
+        let val tmp3 := 2*tmp 
+        in 
+        (
+            if n = 1 then print_int(n); print_line(); true
+            elif n < 1 then print_int(n); print_line(); false
+            elif (tmp3 = n) then print_int(n); print_line(); collatz(tmp)
+            else print_int(n); print_line(); collatz(3*n + 1)
+            fi
+        )end 
+    end
+
+in
+    print_bool(collatz(-1)); print_line();
+    print_bool(collatz(0)); print_line();
+    print_bool(collatz(5)); print_line();
+    print_bool(collatz(10)); print_line();
+    print_bool(collatz(10000))
+end
+
+
+
+
+
+
+
+
+

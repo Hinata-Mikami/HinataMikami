@@ -34,9 +34,9 @@ fn main() {
         let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
         let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&a))));
 
-        if let Some(link) = a.tail() {
-            *link.borrow_mut() = Rc::clone(&b);
-        }
+        // if let Some(link) = a.tail() {
+        //     *link.borrow_mut() = Rc::clone(&b);
+        // }
         
         // println!("{:?}", a.tail());  // stack overflow
         drop(a);

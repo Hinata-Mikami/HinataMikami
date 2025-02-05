@@ -1,9 +1,13 @@
-fn main() {
-    let s1 = String::from("s1");
+struct Mystruct(i32);
 
+fn main() {
+    let x1 = Mystruct(1);
+    let x2 = Mystruct(2);
     {
-        let s11 = s1;
-        println!("{}", s11);
+        let x2 = x1;
+        println!("{}", x2.0);
+        // 長いコード
     }
-    // println!("{}", s1;  Error!
+    println!("{}", x2.0);
 }
+

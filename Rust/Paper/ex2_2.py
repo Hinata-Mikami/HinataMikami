@@ -6,8 +6,7 @@ def main():
     del v2
     print(v1[0])
     
-    v1 = [0, 1]
-    print(v1[0])
+    # 長いコード
     
 if __name__ == "__main__":
     main()

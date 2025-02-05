@@ -24,7 +24,7 @@ let map_cg_repr : (CG.repr -> CG.repr) -> (repr -> repr) = fun f ->
   though. Can you see which?)
  *)
 
-let fundecl : vname -> ((vname*tname) list * tname) -> repr -> repr -> repr =
+(* let fundecl : vname -> ((vname*tname) list * tname) -> repr -> repr -> repr =
   fun name (args,ret) body rest ->
     let argnames = List.map fst args in
     check_duplicates argnames;
@@ -53,6 +53,26 @@ let fundecl : vname -> ((vname*tname) list * tname) -> repr -> repr -> repr =
     in
     Ty.check_type ty ret_ty ~msg:": inferred and declared return type";
     Qna.handle (FunQ.plug (name,(link_name,funtype))) rest |>
-    map_cg_repr (Sq.(@) body_blk)
+    map_cg_repr (Sq.(@) body_blk) *)
 
 
+let fundecl funcs rest =
+  let env =
+    List.map (fun (name, (args, ret), _) ->
+      let ret_ty = Ty.of_string ret in
+      let argtypes = List.map (fun (_, tname) -> Ty.of_string tname) args in
+      let funtype = (argtypes, ret_ty) in
+      let link_name = CG.local_fun_name name in
+      (name, (link_name, funtype))
+    ) funcs
+  in
+  let fundecls = List.map (fun (name, (args, ret), body) ->
+    let link_name = CG.local_fun_name name in
+    CG.fundecl link_name (List.map snd args, Ty.of_string ret) map_cg_repr (fun argreprs ->
+      let args = List.map2 (fun (x, _) y -> (x, y)) args argreprs in
+      let argbody = List.fold_right local args body in
+      Qna.handle env argbody
+      
+    )
+  ) funcs in
+  Qna.handle env rest |> map_cg_repr (Sq.concat fundecls)

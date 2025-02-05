@@ -50,7 +50,7 @@ let local_fun_name : Lang.vname -> Asm.symbol = fun name ->
    Local functions need their own counter.
  *)
 
-let fundecl : Asm.symbol -> Types.function_t -> 
+(* let fundecl : Asm.symbol -> Types.function_t -> 
    ((repr -> repr) -> ('a -> 'a)) -> (repr list -> 'a) -> 'a 
    = fun link_name (args,ret_ty) xmap bodyk ->
   let rec loop tys regs = match (tys,regs) with
@@ -73,4 +73,22 @@ let fundecl : Asm.symbol -> Types.function_t ->
     let locals = List.length vars in
     Sq.set_annot [] body |>
     Sq.map (Asm.substitute_pseudo_op (allocate vars)) |>
-    make_function ~local_fun:true ~locals link_name)
+    make_function ~local_fun:true ~locals link_name) *)
+
+let fundecl : Asm.symbol -> Types.function_t -> ((repr -> repr) -> ('a -> 'a)) -> (repr list -> 'a) -> 'a 
+  = fun link_name (args, ret_ty) xmap bodyk ->
+  let rec loop tys regs = match (tys, regs) with
+  | ([], _) -> []
+  | (_, []) -> Util.fail "Too many arguments in function definition"
+  | (ty::tys, r::regs) when List.exists (Types.eq ty) Types.[int;bool;string] ->
+      Sq.one Asm.(movq (reg r) (reg rax)) :: loop tys regs
+  | (ty::_, _) -> Util.fail "Unsupported argument type %s" (Types.to_string ty)
+  in 
+  loop args Asm.reg_arguments |> bodyk |>
+  xmap (fun body ->
+    let vars = Sq.get_annot body in
+    let locals = List.length vars in
+    Sq.set_annot [] body |>
+    Sq.map (Asm.substitute_pseudo_op (allocate vars)) |>
+    make_function ~local_fun:true ~locals link_name
+  )

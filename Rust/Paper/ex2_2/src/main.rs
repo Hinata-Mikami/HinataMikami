@@ -5,6 +5,5 @@ fn main() {
     println!("{}", v2[0]);
     println!("{}", v1[0]);
 
-    v1 = vec![0, 1];
-    println!("{}", v1[0]);
+    // 長いコード
 }

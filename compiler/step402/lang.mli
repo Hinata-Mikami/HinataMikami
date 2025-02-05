@@ -5,4 +5,4 @@ include module type of Lang_3
 
 type tname = string
 
-val fundecl : vname -> ((vname*tname) list * tname) -> repr -> repr -> repr
+val fundecl : (vname * ((vname * tname) list * tname) * repr) list -> repr -> repr

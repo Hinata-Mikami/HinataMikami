@@ -6,6 +6,7 @@ fn main() {
 
     let x2 = give_ownership();
     println!("value of x2 : {}", x2.0);
+    // 実行時間の長いコード
 }
 
 fn take_ownership(mystruct : Mystruct){

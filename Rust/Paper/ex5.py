@@ -6,6 +6,7 @@ def main():
     print(f"v2[0] : {v2[0]}")
     del v2 
     print(f"v1[0] : {v1[0]}")
+    # 長いコード
 
 if __name__ == "__main__":
     main()
