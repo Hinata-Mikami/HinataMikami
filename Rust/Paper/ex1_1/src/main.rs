@@ -1,11 +1,14 @@
+fn main() {
+    function();
+}
 struct Mystruct(i32);
 
-fn main() {
+fn function(){
     let x1 = Mystruct(10);
     take_ownership(x1);
-
     let x2 = give_ownership();
     println!("value of x2 : {}", x2.0);
+
     // 実行時間の長いコード
 }
 

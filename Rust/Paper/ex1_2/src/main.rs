@@ -1,18 +1,18 @@
-// #[derive(Debug)]
-struct MyStruct {
-    vec1: Vec<i32>,
-    vec2: Vec<i32>,
+#[derive(Debug)]
+struct Point {
+    x : i32,
+    y : i32,
 }
 
 fn main() {
-    let mut mystruct = MyStruct {
-        vec1: vec![1, 2, 3],
-        vec2: vec![4, 5, 6],
-    };
+    let mut p = Point {x : 1, y : 2};
 
-    let mut vec11 = mystruct.vec1;
-    vec11 = vec![0, 0, 0];
-    // println!("{:?}", mystruct);       Error!
-    // println!("{:?}", mystruct.vec21); Error!
-    println!("{:?}", mystruct.vec2);  
+    let mut x_mut = &mut p.x;
+    *x_mut = 0;
+    let y_ref = &p.y; 
+
+    println!("{:?}", y_ref);    
+    // println!("{:?}", p);  Error! 
+    println!("{:?}", x_mut);  
+    println!("{:?}", p);
 }

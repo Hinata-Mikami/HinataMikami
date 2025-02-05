@@ -8,12 +8,15 @@ fn incr_count() {
     }
 } 
 
-fn main() {
+fn function() {
     println!("{}, {}!", HELLO, WORLD);
 
-    // 可変な静的変数を使用する際はunsafeブロックが必要
     unsafe {
         incr_count();
         println!("Count: {}", COUNTER);
     }
+}
+
+fn main() {
+    function();
 }

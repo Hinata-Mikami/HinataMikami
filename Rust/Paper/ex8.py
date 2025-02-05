@@ -6,12 +6,15 @@ def incr_count():
     global COUNTER
     COUNTER += 1
 
-def main():
+def function():
     print(f"{HELLO}, {WORLD}!")
     
     incr_count()
     global COUNTER
     print(f"Count: {COUNTER}")
+    
+def main():
+    function()
     
     
 if __name__ == "__main__":
