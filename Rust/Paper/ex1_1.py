@@ -9,7 +9,7 @@ def main():
     
     x2 = give_ownership()
     print(f"value of x2 : {x2.value}")
-    # 長いコード
+    # 実行時間の長いコード
     
 def take_ownership(mystruct : Mystruct):
     print(f"value of received struct : {mystruct.value}")
