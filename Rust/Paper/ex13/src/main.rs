@@ -1,11 +1,18 @@
 use std::rc::Rc;
+use std::cell::RefCell;
 
-fn main() {
+struct Point{x : i32, y : i32}
+
+fn rc_example() {
     
-    let a = Rc::new(1);
+    let a = Rc::new(RefCell::new(Point{x : 0, y : 0}));
     let b = Rc::clone(&a);
-    println!("a: {}, b: {}", a, b);
+    b.borrow_mut().x = 1;
+    println!("a.x: {}, b.x: {}", a.borrow().x, b.borrow().x);
     println!("Reference count: {}", Rc::strong_count(&a));
 
 }
 
+fn main() {
+    rc_example();
+}

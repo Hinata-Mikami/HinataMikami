@@ -2,7 +2,7 @@ use std::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-fn main() {
+fn arc_example() {
     let numbers: Arc<Mutex<Vec<i32>>> 
                 = Arc::new(Mutex::new(vec![]));
 
@@ -14,8 +14,13 @@ fn main() {
                     = numbers.lock().unwrap();
             locked_numbers.push(i);
             println!("{:?}", locked_numbers);
+            // 実行時間の長いコード
         });
     }
 
     thread::sleep(Duration::from_secs(1));
+}
+
+fn main() {
+    arc_example();
 }

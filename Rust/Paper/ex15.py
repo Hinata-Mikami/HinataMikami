@@ -11,7 +11,7 @@ class Cons:
         print(f"Dropping Cons with value: {self.value}")
 
 
-def main():
+def list_example():
     a = Cons(5, Nil()) 
     b = Cons(10, a) 
 
@@ -21,6 +21,9 @@ def main():
     del b
 
     print("Hello world!")
+    
+def main():
+    list_example()
 
 if __name__ == "__main__":
     main()

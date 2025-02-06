@@ -1,7 +1,7 @@
 import threading
 import time
 
-def main():
+def arc_example():
     numbers = []
     lock = threading.Lock()  
 
@@ -19,7 +19,8 @@ def main():
     for t in threads:
         t.join()
 
-
+def main():
+    arc_example()
 
 if __name__ == "__main__":
     main()

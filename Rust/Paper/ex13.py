@@ -1,15 +1,19 @@
 import sys
 
-def main():
-    a = 1
-    b = a
-    print(f"a : {a}, b : {b}")
-    print(f"Reference count: {sys.getrefcount(a)}") 
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-    # https://docs.python.org/ja/3/library/sys.html
-    # Immortal objects have very large refcounts 
-    # that do not match the actual number of references 
-    # to the object.
+def rc_example():
+    a = Point(0, 0)
+    b = a
+    b.x = 1
+    print(f"a.x : {a.x}, b.x : {b.x}")
+    print(f"Reference count: {sys.getrefcount(a)-1}") 
+
+def main():
+    rc_example()
 
 if __name__ == "__main__":
     main()
