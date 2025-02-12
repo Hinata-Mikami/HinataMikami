@@ -37,6 +37,12 @@ fn main() {
 #[derive(Clone)] // クローンに必要
 struct Point{ x : i32, y : i32 }
 
+impl Drop for Point {
+    fn drop(&mut self) {
+        println!("Dropping Point: x = {}, y = {}", self.x, self.y);
+    }
+}
+
 fn f11(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
@@ -45,8 +51,9 @@ fn f11(){
 fn f12(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
-    println!("here");
+    println!("p.x = {}", p.x);
     // ... pを使わないコード ...
+    println!("The end of f12");
 }
 
 // この時点で，より早く解放したい場合の drop or del / null の議論 
@@ -55,7 +62,9 @@ fn f13(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
     let q = p;
+    // p は使用不可
     // ... qを使うコード ...
+    println!("q.x = {}", q.x);
 }
 
 // p は python では使えるがrust では使えない
@@ -68,6 +77,8 @@ fn f14(){
 
 fn g14(q : Point){
     // ... qを使うコード ... // ここでpython で q = None をしても消えないがRustでは消える
+    drop(q);
+    println!("The end of g14");
 }
 
 
@@ -83,10 +94,12 @@ fn f15(){
 }
 
 fn f16(){
+    let p = Point{x : 0, y : 0};
+    // drop(p); // するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
+    // p = Point{x : 345, y : 12}; // Error!
     let p = Point{x : 12, y : 345};
-    // drop(p) するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
-    // p = Point{x : 345, y : 12}; Error!
 }
+
 
 fn f21(){
     let mut p = Point{x : 12, y : 345};
