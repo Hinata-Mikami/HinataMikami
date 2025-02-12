@@ -49,12 +49,16 @@ fn f12(){
     // ... pを使わないコード ...
 }
 
+// この時点で，より早く解放したい場合の drop or del / null の議論 
+
 fn f13(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
     let q = p;
     // ... qを使うコード ...
 }
+
+// p は python では使えるがrust では使えない
 
 fn f14(){
     let p = Point{x : 12, y : 345};
@@ -63,14 +67,15 @@ fn f14(){
 }
 
 fn g14(q : Point){
-    // ... qを使うコード ...
+    // ... qを使うコード ... // ここでpython で q = None をしても消えないがRustでは消える
 }
+
 
 fn f15(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
     let q = if false { 
-                p; 
+                p; //このpのdropはいつ？
             } else {
                 Point{x : 345, y : 12 };
             };
@@ -79,6 +84,7 @@ fn f15(){
 
 fn f16(){
     let p = Point{x : 12, y : 345};
+    // drop(p) するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
     // p = Point{x : 345, y : 12}; Error!
 }
 
@@ -126,7 +132,7 @@ fn f26(){
     let mut p = Point{x : 12, y : 345};
     p = Point{x : 345, y : 12};
 }
-
+// mut は指してるオブジェクトが変わる？自分自身が変わる？mutの意味は？
 
 
 fn f33(){
@@ -330,6 +336,8 @@ fn list_example() {
     // 5, 10は解放されている旨表示される
 }
 
+
+// arc, mutex 
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::thread;
