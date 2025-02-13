@@ -100,6 +100,10 @@ fn f16(){
     let p = Point{x : 12, y : 345};
 }
 
+fn f17(){
+    // 所有権の部分的移動
+}
+
 
 fn f21(){
     let mut p = Point{x : 12, y : 345};
@@ -250,9 +254,8 @@ fn scope_example() {
     {
         let q = p;
         println!("{}", q.x);
-        
+        // 実行時間の長いコード
     }
-    // 実行時間の長いコード
 }
 
 fn scope_example2() {
