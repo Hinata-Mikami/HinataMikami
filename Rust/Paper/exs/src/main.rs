@@ -52,6 +52,7 @@ fn f12(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
     println!("p.x = {}", p.x);
+    
     // ... pを使わないコード ...
     println!("The end of f12");
 }
@@ -62,23 +63,39 @@ fn f13(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
     let q = p;
-    // p は使用不可
     // ... qを使うコード ...
     println!("q.x = {}", q.x);
+    // println!("q.x = {}", p.x); // Error
 }
 
 // p は python では使えるがrust では使えない
 
 fn f14(){
     let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
+    // ... p を使うコード ...
     g14(p);
+    // ... p を使わないコード ...
 }
 
 fn g14(q : Point){
-    // ... qを使うコード ... // ここでpython で q = None をしても消えないがRustでは消える
+    // ... q を使うコード ...
     drop(q);
     println!("The end of g14");
+}
+
+fn f142(){
+    let p = Point{x : 12, y : 345};
+    // ...
+    g142(p);
+    // ...
+    println!("The end of f142");
+}
+
+fn g142(q : Point){
+    // ... 
+    let q = Point{x : 0, y : 0};
+    // ...
+    println!("The end of g142");
 }
 
 
@@ -131,8 +148,10 @@ fn f24(){
 }
 
 fn g24(q : Point){
-    // ... qを使うコード ...
+    q = Point{x : 0, y : 0};
+    println!("The end of g24")
 }
+
 
 fn f25(){
     let mut p = Point{x : 12, y : 345};

@@ -57,26 +57,44 @@ def f13():
     # ... pを使うコード ...
     q = p
     # ... qを使うコード ...
-    print(f"p.x = {p.x}")
     print(f"q.x = {q.x}")
-
+    print(f"p.x = {p.x}")
+    
 def f131():
     p = Point(12, 345)
     # ... pを使うコード ...
     q = p
     del p
-    # Rust と同様に p は使用不可に
     # ... qを使うコード ...
-    print(f"The end of f13. q.x = {q.x}")
+    print(f"q.x = {q.x}")
+    # print(f"p.x = {p.x}") # Error
+    
     
 def f14():
     p = Point(12, 345)
+    # ... p を使うコード ...
     g14(p)
+    # ... p を使うコード ...
     
 def g14(q : Point):
     # ... qを使うコード ...
-    q = None
+    del q  # メモリ解放されない
     print("The end of g14")
+    
+def f142():
+    p = Point(12, 345)
+    # ...
+    g142(p)
+    del p
+    # ...
+    print("The end of f142")
+    
+def g142(q : Point):
+    # ...
+    q = Point(0, 0)
+    # ...
+    print("The end of g142")
+    
 
 def f15():
     p = Point(12, 345)
@@ -107,10 +125,12 @@ def f23():
 def f24():
     p = Point(12, 345)
     g24(p)
+    del p
     
 def g24(q : Point):
     # ... qを使うコード ...
-    print(f"q.x = {q.x}")
+    q = Point(0, 0)
+    print("The end of g24")
     
 def f25():
     p = Point(12, 345)
