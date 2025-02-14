@@ -85,6 +85,7 @@ def f142():
     p = Point(12, 345)
     # ...
     g142(p)
+    print("here")
     del p
     # ...
     print("The end of f142")
@@ -99,7 +100,7 @@ def g142(q : Point):
 def f15():
     p = Point(12, 345)
     q = p if False else Point(345, 12)
-    print(f"{p.x}")
+    print("The end of f15")
     
 def f16():
     p = Point(0, 0)

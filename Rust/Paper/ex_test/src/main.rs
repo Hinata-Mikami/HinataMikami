@@ -10,20 +10,13 @@ impl Drop for Point {
     }
 }
 
+
 fn function() {
-    let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    g142(p);
-    println!("The end of f142");
+    let mut x = Point{x:0, y:0};
+    x = Point{x:1, y:1};
+    let x = Point{x:2, y:2};
+    println!("here")
 }
-
-fn g142(q : Point){
-    // ... qを使うコード ...
-    let q = Point{x : 0, y : 0};
-    // ... 実行時間の長いコード ...
-    println!("The end of g142");
-}
-
 
 fn main() {
     function();

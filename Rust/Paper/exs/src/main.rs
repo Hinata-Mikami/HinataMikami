@@ -101,24 +101,33 @@ fn g142(q : Point){
 
 fn f15(){
     let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
+    // ...
     let q = if false { 
-                p; //このpのdropはいつ？
+                p
             } else {
                 Point{x : 345, y : 12 };
-            };
+            }
     // println!("{}", p.x); Error!
+    println!("The end of f15");
 }
 
 fn f16(){
     let p = Point{x : 0, y : 0};
-    // drop(p); // するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
+    drop(p); // するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
     // p = Point{x : 345, y : 12}; // Error!
     let p = Point{x : 12, y : 345};
 }
 
+struct Mystruct{x : String, y : i32}
+
 fn f17(){
-    // 所有権の部分的移動
+    let p = Mystruct{x : String::from('x'), y : 345};
+    let p_x = p.x;
+    let p_x2 = p.x; // Error
+    // let q = p;      // Error
+    let p_y = p.y;
+    // ...
+    println!("The end of f17")
 }
 
 

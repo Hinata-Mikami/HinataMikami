@@ -8,16 +8,8 @@ class Point():
         
 def function():
     p = Point(12, 345)
-    g142(p)
-    del p
-    print("The end of f142")
-    
-    
-def g142(q : Point):
-    # ... qを使うコード ...
-    q = Point(0, 0)
-    # ... 実行時間の長いコード ...
-    print("The end of g142")
+    q = p if False else Point(345, 12)
+    print("The end of f15")
 
 
 def main():
