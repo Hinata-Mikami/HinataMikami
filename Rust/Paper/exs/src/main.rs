@@ -232,40 +232,54 @@ fn f41(){
     let mut p = Point{x : 12, y : 345};
     let q = &mut p;
     // ... q を使うコード ...
-    // println!("p.x = {}", p.x);  // Error
-    println!("q.x = {}", q.x);
-    println!("p.x = {}", p.x); 
+    // println!("p.x = {}", p.x);   // Error
+    println!("q.x = {}", q.x);      // q のライフタイム終了
+    println!("p.x = {}", p.x);      // Ok
 }
 
 fn f42(){
     let mut p = Point{x : 12, y : 345};
     let q = &mut p;
-    // let r = &mut p;  // Error
-    // ... q や r を使うコード ...
-    println!("q.x = {}", q.x);     
+    // let r = &mut p;          // Error (不変参照も不可)
+    // ... q を使うコード ...
+    println!("q.x = {}", q.x);  // q のライフタイム終了
+    let r = &mut p;             // Ok  
 }
 
+
 fn f43(){
-    let p = Point{x : 12, y : 345};
-    let q = &p;
+    let mut p = Point{x : 12, y : 345};
+    let q = &mut p;
     let r = q;
-    let s = &r;
+    let s = &mut r;
     // ...
     println!("s.x = {}", s.x);
 }
 
+fn f461(){
+    let mut p = Point{x : 12, y : 345};
+    let q = &mut p;
+    *q = Point{x : 345, y : 12};    // 元の値は drop
+    // p.x = 0;                     // Error
+    // ... q を使用するコード ... 
+    println!("q.x = {}", q.x);      // ライフタイム終了
+    // ... q を使用しないコード ...   // p は使用できる
+    println!("p.x = {}", p.x);
+}
 
 fn f46(){
     let mut p = Point{x : 12, y : 345};
-    let mut q = &mut p;
-    *q = Point{x : 345, y : 12};
+    let q = &mut p;
+    *q = Point{x : 345, y : 12};    // p への再代入 元の値が drop
+    let p = Point{x : 0, y : 0};    // シャドーイング
+    println!("p.x = {}", p.x);      // p は再定義されているので使用可能
+    println!("q.x = {}", q.x);      // q のライフタイム終了
 }
 
 fn f53(){
     let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    let q = p.clone();
-    // ... qを使うコード ...
+    let q = p.clone();      // Rust のクローンは Rc 等を除き deepcopy
+    // ... p や q を使うコード ...
 }
 
 fn f54(){
@@ -289,25 +303,36 @@ fn f55(){
     println!("{}", p.x); 
 }
 
-fn scope_example() {
-    let p = Point{x : 12, y : 345};
+fn scope_example0() {
+    let mut p = Point{x : 12, y : 345};
     {
-        let q = p;
+        let mut q = p;
+        println!("{}", q.x);
+        q = Point{x : 0, y : 0};    // 再代入 元の値 drop
+        // ... 実行時間の長いコード ...
+        println!("Inner scope end");
+    }
+    println!("Function end");
+}
+
+fn scope_example() {
+    let mut p = Point{x : 12, y : 345};
+    let mut q = Point{x : 345, y : 12};
+    {
+        q = p;                // p1 の値が drop
         println!("{}", q.x);
         // 実行時間の長いコード
     }
+    println!("End");
 }
 
 fn scope_example2() {
     let p1 = Point{x : 12, y : 345};
-    let p2 = Point{x : 345, y : 12};
     {
-        let p2 = p1;
-        println!("{}", p2.x);
-        
+        let p1 = Point{x : 0, y : 0};
+        println!("inside : {}", p1.x);
     }
-    println!("{}", p2.x);
-    // 実行時間の長いコード
+    println!("outside : {}", p1.x);
 }
 
 static HELLO: &str = "Hello";
@@ -385,11 +410,8 @@ fn list_example() {
         drop(b); 
     }
 
-    println!("Hello world!");
+    println!("End");  // Cons(5, _) や Cons(10, _) は drop されない
 
-    // 要素の5や10はdropされていないことがわかる．
-    // if let ... をコメントアウトして循環参照を解除すると
-    // 5, 10は解放されている旨表示される
 }
 
 

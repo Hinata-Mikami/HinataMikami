@@ -1,0 +1,8 @@
+[package]
+name = "ex15_1"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dumpster = "1.1.0"
+dumpster_derive = "1.1.0"

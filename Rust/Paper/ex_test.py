@@ -7,11 +7,14 @@ class Point():
         print(f"Dropping Point : x = {self.x}, y = {self.y}")
         
 def function():
-    p = Point(12, 345)
-    q = p
-    # ... q を使うコード ...
-    print(f"q.x = {q.x}")
-    print(f"p.x = {p.x}")
+    p1 = Point(12, 345)
+    
+    # <scope>
+    p11 = Point(0, 0)   # 変数名を変更
+    print(f"inside : {p11.x}")
+    del p11
+    # </scope>
+    print(f"outside : {p1.x}")
 
 
 def main():

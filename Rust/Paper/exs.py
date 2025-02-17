@@ -195,45 +195,66 @@ def f41():
     q = p
     # ... q を使うコード ...
     print(f"q.x = {q.x}")
+    del q   # ライフタイム終了と同時に del
     print(f"p.x = {p.x}")
     
-    
+def f42():
+    p = Point(12, 345)
+    q = p
+    # ... qを使うコード ...
+    print(f"q.x = {q.x}")
+    del q   # ライフタイム終了と同時に del
+    r = p
     
 def f43():
     p = Point(12, 345)
-    # ... pを使うコード ...
     q = p
-    # ... qを使うコード
-    
-def f44():
+    p = Point(345, 12)
+    p = Point(0, 0)
+    print(f"p.x = {p.x}")
+    print(f"q.x = {q.x}")
+    del q
+    # ... q を使わないコード ...
+
+def f460():
     p = Point(12, 345)
-    # ... pを使うコード ...
-    g44(p)
+    q = p
+    q = Point(345, 12)          # Rust では元の値が drop
+    # ... q を使用するコード ...
+    print(f"q.x = {q.x}")
+    del q                       # q と p は別オブジェクト
+                                # q のオブジェクトが drop されてしまう
+    # ... q を使用しないコード ...
+    print(f"p.x = {p.x}")    
 
-
-def g44(q : Point):
-    # ... qを使うコード ...
-    pass
-
-def f45():
+def f461():
     p = Point(12, 345)
-    # ... pを使うコード ...
-    q = p if False else Point(345, 12)
-    print(f"{p.x}" ) 
-
+    q = p                       # 可変借用を一時的な所有権の移動と考える
+    del p                       #
+    q = Point(345, 12)
+    # ... q を使用するコード ...
+    print(f"q.x = {q.x}")
+    p = q                       # 所有権の返却
+    del q                       #
+    # ... q を使用しないコード ...
+    print(f"p.x = {p.x}")
 
 def f46():
     p = Point(12, 345)
     q = p
     q = Point(345, 12)
+    p = Point(0, 0)
+    print(f"p.x = {p.x}")
+    print(f"q.x = {q.x}")
+    del q
+    # ... q を使わないコード ...
 
 import copy
 
 def f53():
     p = Point(12, 345)
-    # ... pを使うコード ...
     q = copy.deepcopy(p)
-    # ... qを使うコード ...
+    # ... p や q を使うコード ...
 
 
 def f54():
@@ -255,38 +276,56 @@ def f55():
 def scope(p):
     q = p
     print(q.x)
+    q = Point(0, 0)     # Rust ではここで drop
+    # 実行時間の長いコード
+    print("Inner scope end")
 
-def scope_example0() :
+def scope_example00() :
     p = Point(12, 345)
     
     scope(p)
     del p
     
-    # 実行時間の長いコード
+    print("Function end")
+
     
+def scope_example0() :
+    p = Point(12, 345)
+    
+    # <scope>
+    q = p               
+    del p
+    print(q.x)
+    q = Point(0, 0)     # Rust ではここで drop
+    # ... 実行時間の長いコード ...
+    print("Inner scope end")
+    del q
+    #</scope>
+    
+    print("Function end")
+    
+        
 def scope_example():
     p = Point(12, 345)
-
+    q = Point(345, 12)
     # <scope>
     q = p
     del p
     print(q.x)
+    # 実行時間の長いコード
     del q
-    # 実行時間の長いコード 
     # </scope>
+    print("End")
     
 def scope_example2():
     p1 = Point(12, 345)
-    p2 = Point(345, 12)
     
     # <scope>
-    p21 = p1
-    del p1
-    print(p21.x)
+    p11 = Point(0, 0)   # 変数名を変更
+    print(f"inside : {p11.x}")
     del p21
-    # 実行時間の長いコード
     # </scope>
-    print(f"value of x2 : {p2.x}")
+    print(f"outside : {p1.x}")
     
 HELLO = "Hello"
 WORLD = "World"

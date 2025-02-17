@@ -12,14 +12,13 @@ impl Drop for Point{
 
 
 fn function() {
-    let mut p = Point{x : 12, y : 345};
-    let q = &mut p;
-    // ... q を使うコード ...
-    // println!("p.x = {}", p.x);  // Error
-    println!("q.x = {}", q.x);
-    println!("p.x = {}", p.x);     // Ok
+    let p1 = Point{x : 12, y : 345};
+    {
+        let p1 = Point{x : 0, y : 0};
+        println!("inside : {}", p1.x);
+    }
+    println!("outside : {}", p1.x);
 }
-
 
 fn main() {
     function();

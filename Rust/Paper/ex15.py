@@ -20,7 +20,7 @@ def list_example():
     del a
     del b
 
-    print("Hello world!")
+    print("End")
     
 def main():
     list_example()
