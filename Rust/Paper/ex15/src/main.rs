@@ -37,6 +37,12 @@ fn list_example() {
         if let Some(link) = a.tail() {
             *link.borrow_mut() = Rc::clone(&b);
         }
+
+        
+        // if let Some(link) = a.tail() {
+        //     *link.borrow_mut() = Rc::new(Nil);
+        // }
+        
         
         // println!("{:?}", a.tail());  // stack overflow
         drop(a);

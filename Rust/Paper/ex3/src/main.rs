@@ -1,7 +1,7 @@
 fn main() {
     // 解放されるタイミングの確認用
     check_drop();
-    println!("Check if s2 is dropped before this comment.");
+    println!("End of the program");
 }
 
 // 所有権を持つオブジェクトのメモリがいつ解放されるかは，
@@ -16,10 +16,11 @@ impl Drop for MyString {
 
 fn check_drop() {
 
-    let s2 = MyString(String::from("s2"));
+    let mut s2 = MyString(String::from("_____________"));
+    s2 = MyString(String::from("s2")); //s2自身が変わる？ 所有者がいなくなったらdropされる
 
     let s21 = s2;                   // 所有権移動 s2は以後無効
     println!("s21 : {}", s21.0);
 
-    println!("Check if s2 is dropped after this comment.");
-}                                   // LT終了によるメモリ解放 : s21
+    println!("End.");
+}
