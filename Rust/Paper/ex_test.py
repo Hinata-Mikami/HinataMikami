@@ -9,11 +9,9 @@ class Point():
 def function():
     p = Point(12, 345)
     q = p
-    r = q
-    s = r
-    # ...
+    # ... q を使うコード ...
     print(f"q.x = {q.x}")
-    print(f"s.x = {s.x}") 
+    print(f"p.x = {p.x}")
 
 
 def main():
