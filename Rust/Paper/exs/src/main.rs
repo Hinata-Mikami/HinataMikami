@@ -14,6 +14,8 @@ fn main() {
     f24();
     f25();
     f26();
+    f31();
+    f32();
     f33();
     f34();
     f35();
@@ -64,8 +66,7 @@ fn f13(){
     // ... pを使うコード ...
     let q = p;
     // ... qを使うコード ...
-    println!("q.x = {}", q.x);
-    // println!("q.x = {}", p.x); // Error
+    // let r = p; // Error
 }
 
 // p は python では使えるがrust では使えない
@@ -101,21 +102,18 @@ fn g142(q : Point){
 
 fn f15(){
     let p = Point{x : 12, y : 345};
-    // ...
-    let q = if false { 
-                p
-            } else {
-                Point{x : 345, y : 12 };
-            }
+    // ... p を使うコード 
+    let q = if false { p } 
+            else {Point{x : 345, y : 12 }};
     // println!("{}", p.x); Error!
     println!("The end of f15");
 }
 
 fn f16(){
     let p = Point{x : 0, y : 0};
-    drop(p); // するとうまくいくの？Python で書いた時の解放のタイミングを比較して...
     // p = Point{x : 345, y : 12}; // Error!
     let p = Point{x : 12, y : 345};
+    println!("The end of f16")
 }
 
 struct Mystruct{x : String, y : i32}
@@ -174,38 +172,51 @@ fn f25(){
 }
 
 fn f26(){
-    let mut p = Point{x : 12, y : 345};
-    p = Point{x : 345, y : 12};
+    let mut p = Point{x : 0, y : 0};
+    p = Point{x : 12, y : 345};          // 再代入
+    println!("p.x = {}", p.x);
+    let mut p = Point{x : 67, y : 890};  // シャドーイング
+    println!("The end of f16")
 }
 // mut は指してるオブジェクトが変わる？自分自身が変わる？mutの意味は？
 
 
+fn f31(){
+    let p = Point{x : 12, y : 345};
+    let q = &p;
+    // ... p や q を使うコード ...
+    println!("p.x = {}", p.x);
+    println!("q.x = {}", q.x); 
+}
+
+fn f32(){
+    let p = Point{x : 12, y : 345};
+    let q = &p;
+    let r = &p;
+    // ... q や r を使うコード ...
+    println!("q.x = {}", q.x);
+    println!("r.x = {}", r.x);     
+}
+
 fn f33(){
     let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
     let q = &p;
-    // ... qを使うコード ...
+    let r = q;
+    let s = &r;  // 不変参照の不変参照
+    // ...
+    println!("q.x = {}", q.x);  // 所有権は存在しない
+    println!("s.x = {}", s.x);
 }
 
-fn f34(){
+
+
+fn f36(){
     let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    g34(&p);
-}
-
-fn g34(q : &Point){
-    // ... qを使うコード ...
-}
-
-fn f35(){
-    let p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    let q = if false { 
-                &p; 
-            } else {
-                &Point{x : 345, y : 12 };
-            };
-    println!("{}", p.x); 
+    let q = &p;
+    // ...
+    let p = Point{x : 0, y : 0};    // シャドーイング
+    println!("p.x = {}", p.x);
+    println!("q.x = {}", q.x);
 }
 
 fn f37(){
@@ -215,33 +226,34 @@ fn f37(){
     println!("{}", p.x); 
 }
 
-fn f43(){
+
+
+fn f41(){
     let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
     let q = &mut p;
-    // ... qを使うコード ...
+    // ... q を使うコード ...
+    // println!("p.x = {}", p.x);  // Error
+    println!("q.x = {}", q.x);
+    println!("p.x = {}", p.x); 
 }
 
-fn f44(){
+fn f42(){
     let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    g44(&mut p);
+    let q = &mut p;
+    // let r = &mut p;  // Error
+    // ... q や r を使うコード ...
+    println!("q.x = {}", q.x);     
 }
 
-fn g44(q : &Point){
-    // ... qを使うコード ...
+fn f43(){
+    let p = Point{x : 12, y : 345};
+    let q = &p;
+    let r = q;
+    let s = &r;
+    // ...
+    println!("s.x = {}", s.x);
 }
 
-fn f45(){
-    let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    let mut q = if false { 
-                &mut p; 
-            } else {
-                &mut Point{x : 345, y : 12 };
-            };
-    println!("{}", p.x); 
-}
 
 fn f46(){
     let mut p = Point{x : 12, y : 345};

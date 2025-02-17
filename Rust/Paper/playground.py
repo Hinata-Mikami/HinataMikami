@@ -5,21 +5,16 @@ class Point():
     
     def __del__(self):
         print(f"Dropping Point : x = {self.x}, y = {self.y}")
-        
-def function():
-    p = Point(12, 345)
-    q = p
-    r = q
-    s = r
-    # ...
-    print(f"q.x = {q.x}")
-    print(f"s.x = {s.x}") 
-
 
 def main():
-    function()
-    print("The end of the main function")
+    print("start")
+    p = Point(12, 345)
+    del p   # ファイナライザが呼ばれる
 
-
+    p1 = Point(67, 890)
+    p2 = p1
+    del p1  # ファイナライザは呼ばれない
+    print("end")
+    
 if __name__ == '__main__':
     main()

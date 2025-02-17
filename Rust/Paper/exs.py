@@ -76,6 +76,7 @@ def f14():
     g14(p)
     # ... p を使うコード ...
     
+    
 def g14(q : Point):
     # ... qを使うコード ...
     del q  # メモリ解放されない
@@ -99,16 +100,20 @@ def g142(q : Point):
 
 def f15():
     p = Point(12, 345)
+    # ... p を使うコード ...
     q = p if False else Point(345, 12)
+    del p
     print("The end of f15")
     
 def f16():
     p = Point(0, 0)
-    p = Point(345, 12) # Python では再代入とlet宣言の区別ができない
+    p = Point(345, 12) # 禁止できない
     p = Point(12, 345)
+    print("The end of f16")
     
 def f21():
     p = Point(12, 345)
+    # ... pを使うコード ...
     
 def f22():
     p = Point(12, 345)
@@ -140,30 +145,43 @@ def f25():
     del p
     
 def f26():
+    p = Point(0, 0)
     p = Point(12, 345)
-    p = Point(345, 12)
+    print(f"p.x = {p.x}")
+    p = Point(67, 890)
+    print("The end of f16")
     
+def f31():
+    p = Point(12, 345)
+    q = p
+    # ... p や q を使うコード ...
+    print(f"p.x = {p.x}")
+    print(f"q.x = {q.x}")
+
+def f32():
+    p = Point(12, 345)
+    q = p
+    r = p
+    # ... p や q を使うコード ...
+    print(f"q.x = {q.x}")
+    print(f"r.x = {r.x}")
+
 def f33():
     p = Point(12, 345)
-    # ... pを使うコード ...
     q = p
-    # ... qを使うコード ...
-    
-def f34():
-    p = Point(12, 345)
-    # ... pを使うコード ...
-    g34(p)
-    del p
-    
-def g34(q : Point):
-    # ... qを使うコード ...
+    r = q
+    s = r
+    # ...
     print(f"q.x = {q.x}")
+    print(f"s.x = {s.x}")    
     
-def f35():
+def f36():
     p = Point(12, 345)
-    # ... pを使うコード ...
-    q = p if False else Point(345, 12)
+    q = p
+    # ...
+    p = Point(0, 0)
     print(f"p.x = {p.x}")
+    print(f"q.x = {q.x}")    
     
 def f37():
     p = Point(12, 345)
@@ -171,6 +189,15 @@ def f37():
     p_y = p.y
     del p_x, p_y
     print(f"p.x = {p.x}")
+
+def f41():
+    p = Point(12, 345)
+    q = p
+    # ... q を使うコード ...
+    print(f"q.x = {q.x}")
+    print(f"p.x = {p.x}")
+    
+    
     
 def f43():
     p = Point(12, 345)
