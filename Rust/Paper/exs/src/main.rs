@@ -155,7 +155,8 @@ fn f24(){
 }
 
 fn g24(q : Point){
-    q = Point{x : 0, y : 0};
+    q = Point{x : 0, y : 0};    // 元の値を drop
+    // ... 実行時間の長いコード ...
     println!("The end of g24")
 }
 

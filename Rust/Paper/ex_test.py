@@ -7,14 +7,14 @@ class Point():
         print(f"Dropping Point : x = {self.x}, y = {self.y}")
         
 def function():
-    p1 = Point(12, 345)
+    p = Point(12, 345)
+    g24(p)
+    del p
     
-    # <scope>
-    p11 = Point(0, 0)   # 変数名を変更
-    print(f"inside : {p11.x}")
-    del p11
-    # </scope>
-    print(f"outside : {p1.x}")
+def g24(q : Point):
+    q = Point(0, 0)     # Rust ではここで drop
+    # ... 実行時間の長いコード ...
+    print("The end of g24")
 
 
 def main():

@@ -134,8 +134,8 @@ def f24():
     del p
     
 def g24(q : Point):
-    # ... qを使うコード ...
-    q = Point(0, 0)
+    q = Point(0, 0)     # Rust ではここで drop
+    # ... 実行時間の長いコード ...
     print("The end of g24")
     
 def f25():
