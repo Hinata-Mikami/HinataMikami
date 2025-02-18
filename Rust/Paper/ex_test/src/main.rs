@@ -13,14 +13,13 @@ impl Drop for Point{
 
 fn function() {
     let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    g24(p);
-}
-
-fn g24(mut q : Point){
-    q = Point{x : 0, y : 0};    // 元の値を drop
-    // ... 実行時間の長いコード ...
-    println!("The end of g24")
+    let q = &mut p;
+    *q =  Point{x : 345, y : 12};    // 元の値は drop
+    // p.x = 0;                     // Error
+    // ... q を使用するコード ... 
+    println!("q.x = {}", q.x);      // ライフタイム終了
+    // ... q を使用しないコード ...   // p は使用できる
+    println!("p.x = {}", p.x);
 }
 
 fn main() {
