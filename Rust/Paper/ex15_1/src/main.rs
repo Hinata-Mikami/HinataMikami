@@ -9,6 +9,7 @@ enum List {
     Nil,
 }
 
+// tail 関数， Drop トレイトの実装（省略）
 impl List {
     fn tail(&self) -> Option<&RefCell<Gc<List>>> {
         match *self {
@@ -40,18 +41,10 @@ fn list_example() {
             *link.borrow_mut() = Gc::clone(&b);
         }
 
-        
-        // println!("{:?}", a.tail());  // stack overflow
         drop(a);
         drop(b); 
-        dumpster::unsync::collect();
     }
-
     println!("End");
-
-    // 要素の5や10はdropされていないことがわかる．
-    // if let ... をコメントアウトして循環参照を解除すると
-    // 5, 10は解放されている旨表示される
 }
 
 fn main(){
