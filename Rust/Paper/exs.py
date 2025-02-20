@@ -45,6 +45,14 @@ def f11():
     p = Point(12, 345)
     # ... pを使うコード ...
 
+def f3():
+    p = Point(12, 345)
+    if True:
+        q = p
+        del p
+        
+    print("f3 end")
+
 def f12():
     p = Point(12, 345)
     # ... pを使うコード ...

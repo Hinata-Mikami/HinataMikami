@@ -10,7 +10,7 @@ class Cons:
     def __del__(self):
         print(f"Dropping Cons with value: {self.value}")
 
-
+import gc
 def list_example():
     a = Cons(5, Nil()) 
     b = Cons(10, a) 
@@ -19,6 +19,7 @@ def list_example():
 
     del a
     del b
+    gc.collect()
 
     print("End")
     
