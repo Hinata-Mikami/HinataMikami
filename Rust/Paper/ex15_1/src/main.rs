@@ -9,7 +9,6 @@ enum List {
     Nil,
 }
 
-// tail 関数， Drop トレイトの実装（省略）
 impl List {
     fn tail(&self) -> Option<&RefCell<Gc<List>>> {
         match *self {

@@ -50,14 +50,6 @@ fn f11(){
     // ... pを使うコード ...
 }
 
-fn f3(){
-    let p = Point{x : 12, y : 345};
-    {
-        let q = p;
-    }
-    // ... p や q を使用しないコード ...
-    println!("f3 end");
-}
 fn f12(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
@@ -67,8 +59,6 @@ fn f12(){
     println!("The end of f12");
 }
 
-// この時点で，より早く解放したい場合の drop or del / null の議論 
-
 fn f13(){
     let p = Point{x : 12, y : 345};
     // ... pを使うコード ...
@@ -76,8 +66,6 @@ fn f13(){
     // ... qを使うコード ...
     // let r = p; // Error
 }
-
-// p は python では使えるがrust では使えない
 
 fn f14(){
     let p = Point{x : 12, y : 345};
@@ -88,41 +76,30 @@ fn f14(){
 
 fn g14(q : Point){
     // ... q を使うコード ...
-    drop(q);
     println!("The end of g14");
 }
 
-fn f142(){
-    let p = Point{x : 12, y : 345};
-    // ...
-    g142(p);
-    // ...
-    println!("The end of f142");
-}
-
-fn g142(q : Point){
-    // ... 
-    let q = Point{x : 0, y : 0};
-    // ...
-    println!("The end of g142");
-}
-
-
 fn f15(){
-    let p = Point{x : 12, y : 345};
-    // ... p を使うコード 
-    let q = if false { p } 
-            else {Point{x : 345, y : 12 }};
-    // println!("{}", p.x); Error!
-    println!("The end of f15");
-}
-
-fn f16(){
     let p = Point{x : 0, y : 0};
     // p = Point{x : 345, y : 12}; // Error!
     let p = Point{x : 12, y : 345};
-    println!("The end of f16")
+    println!("The end of f15")
 }
+
+fn f7(){
+    let p = Point{x : 12, y : 345};
+    // ... p を使うコード 
+    let q = if false { 
+                p 
+            } 
+            else {
+                Point{x : 345, y : 12 }
+            };
+    // println!("{}", p.x); Error!
+    println!("The end of f7");
+}
+
+
 
 struct Mystruct{x : String, y : i32}
 
@@ -136,24 +113,9 @@ fn f17(){
     println!("The end of f17")
 }
 
-
 fn f21(){
     let mut p = Point{x : 12, y : 345};
     // ... pを使うコード ...
-}
-
-fn f22(){
-    let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    println!("here");
-    // ... pを使わないコード ...
-}
-
-fn f23(){
-    let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    let q = p;
-    // ... qを使うコード ...
 }
 
 fn f24(){
@@ -162,32 +124,20 @@ fn f24(){
     g24(p);
 }
 
-fn g24(q : Point){
+fn g24(mut q : Point){
     q = Point{x : 0, y : 0};    // 元の値を drop
     // ... 実行時間の長いコード ...
     println!("The end of g24")
 }
 
-
 fn f25(){
-    let mut p = Point{x : 12, y : 345};
-    // ... pを使うコード ...
-    let mut q = if false { 
-                p; 
-            } else {
-                Point{x : 345, y : 12 };
-            };
-    //println!("{}", p.x); //Error!
-}
-
-fn f26(){
     let mut p = Point{x : 0, y : 0};
     p = Point{x : 12, y : 345};          // 再代入
     println!("p.x = {}", p.x);
     let mut p = Point{x : 67, y : 890};  // シャドーイング
-    println!("The end of f16")
+    println!("The end of f25")
 }
-// mut は指してるオブジェクトが変わる？自分自身が変わる？mutの意味は？
+
 
 
 fn f31(){
@@ -211,10 +161,8 @@ fn f33(){
     let p = Point{x : 12, y : 345};
     let q = &p;
     let r = q;
-    let s = &r;  // 不変参照の不変参照
     // ...
     println!("q.x = {}", q.x);  // 所有権は存在しない
-    println!("s.x = {}", s.x);
 }
 
 
@@ -241,7 +189,6 @@ fn f41(){
     let mut p = Point{x : 12, y : 345};
     let q = &mut p;
     // ... q を使うコード ...
-    // println!("p.x = {}", p.x);   // Error
     println!("q.x = {}", q.x);      // q のライフタイム終了
     println!("p.x = {}", p.x);      // Ok
 }
@@ -249,20 +196,20 @@ fn f41(){
 fn f42(){
     let mut p = Point{x : 12, y : 345};
     let q = &mut p;
-    // let r = &mut p;          // Error (不変参照も不可)
+    // let r = &mut p;              // Error (不変参照も不可)
+    // println!("p.x = {}", p.x);   // Error
     // ... q を使うコード ...
-    println!("q.x = {}", q.x);  // q のライフタイム終了
-    let r = &mut p;             // Ok  
+    println!("q.x = {}", q.x);      // q のライフタイム終了
+    let r = &mut p;                 // Ok  
 }
-
 
 fn f43(){
     let mut p = Point{x : 12, y : 345};
     let q = &mut p;
-    let r = q;
-    let s = &mut r;
-    // ...
-    println!("s.x = {}", s.x);
+    // ... q を使用するコード ... 
+    *q = Point{x : 0, y : 0};       // q のライフタイム終了
+    // ... q を使用しない実行時間の長いコード ...
+    println!("p.x = {}", p.x);      // ok
 }
 
 fn f461(){
@@ -285,7 +232,7 @@ fn f46(){
     println!("q.x = {}", q.x);      // q のライフタイム終了
 }
 
-fn f53(){
+fn f51(){
     let p = Point{x : 12, y : 345};
     let q = p.clone();      // Rust のクローンは Rc 等を除き deepcopy
     // ... p や q を使うコード ...
@@ -312,28 +259,18 @@ fn f55(){
     println!("{}", p.x); 
 }
 
-fn scope_example0() {
+fn scope_example() {
     let mut p = Point{x : 12, y : 345};
     {
         let mut q = p;
-        println!("{}", q.x);
-        q = Point{x : 0, y : 0};    // 再代入 元の値 drop
+        // ... q を使用するコード ...
+        q = Point{x : 0, y : 0};    // 元の値 は drop される
         // ... 実行時間の長いコード ...
         println!("Inner scope end");
     }
     println!("Function end");
 }
 
-fn scope_example() {
-    let mut p = Point{x : 12, y : 345};
-    let mut q = Point{x : 345, y : 12};
-    {
-        q = p;                // p1 の値が drop
-        println!("{}", q.x);
-        // 実行時間の長いコード
-    }
-    println!("End");
-}
 
 fn scope_example2() {
     let p1 = Point{x : 12, y : 345};

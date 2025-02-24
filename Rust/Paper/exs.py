@@ -45,18 +45,11 @@ def f11():
     p = Point(12, 345)
     # ... pを使うコード ...
 
-def f3():
-    p = Point(12, 345)
-    if True:
-        q = p
-        del p
-        
-    print("f3 end")
-
 def f12():
     p = Point(12, 345)
     # ... pを使うコード ...
     print(f"p.x = {p.x}")
+    
     # ... p を使わないコード ...
     print("The end of f12")
     
@@ -65,8 +58,7 @@ def f13():
     # ... pを使うコード ...
     q = p
     # ... qを使うコード ...
-    print(f"q.x = {q.x}")
-    print(f"p.x = {p.x}")
+    r = p
     
 def f131():
     p = Point(12, 345)
@@ -74,9 +66,7 @@ def f131():
     q = p
     del p
     # ... qを使うコード ...
-    print(f"q.x = {q.x}")
-    # print(f"p.x = {p.x}") # Error
-    
+    # r = p  # Error!
     
 def f14():
     p = Point(12, 345)
@@ -84,57 +74,39 @@ def f14():
     g14(p)
     # ... p を使うコード ...
     
-    
 def g14(q : Point):
     # ... qを使うコード ...
-    del q  # メモリ解放されない
     print("The end of g14")
     
 def f142():
     p = Point(12, 345)
     # ...
     g142(p)
-    print("here")
     del p
     # ...
     print("The end of f142")
     
 def g142(q : Point):
     # ...
-    q = Point(0, 0)
-    # ...
     print("The end of g142")
+    # ここで解放されてほしい
     
-
 def f15():
+    p = Point(0, 0)
+    p = Point(345, 12) # 禁止できない
+    p = Point(12, 345)
+    print("The end of f15")
+    
+def f7():
     p = Point(12, 345)
     # ... p を使うコード ...
     q = p if False else Point(345, 12)
     del p
-    print("The end of f15")
-    
-def f16():
-    p = Point(0, 0)
-    p = Point(345, 12) # 禁止できない
-    p = Point(12, 345)
-    print("The end of f16")
+    print("The end of f7")    
     
 def f21():
     p = Point(12, 345)
     # ... pを使うコード ...
-    
-def f22():
-    p = Point(12, 345)
-    # ... pを使うコード ...
-    print("here")
-    # ... pを使用しないコード ...
-    
-def f23():
-    p = Point(12, 345)
-    # ... pを使うコード ...
-    q = p
-    del p
-    # ... q を使うコード ... 
     
 def f24():
     p = Point(12, 345)
@@ -147,17 +119,11 @@ def g24(q : Point):
     print("The end of g24")
     
 def f25():
-    p = Point(12, 345)
-    # ... pを使うコード ...
-    q = p if False else Point(345, 12)
-    del p
-    
-def f26():
     p = Point(0, 0)
     p = Point(12, 345)
     print(f"p.x = {p.x}")
     p = Point(67, 890)
-    print("The end of f16")
+    print("The end of f25")
     
 def f31():
     p = Point(12, 345)
@@ -178,10 +144,9 @@ def f33():
     p = Point(12, 345)
     q = p
     r = q
-    s = r
     # ...
     print(f"q.x = {q.x}")
-    print(f"s.x = {s.x}")    
+  
     
 def f36():
     p = Point(12, 345)
@@ -203,26 +168,51 @@ def f41():
     q = p
     # ... q を使うコード ...
     print(f"q.x = {q.x}")
-    del q   # ライフタイム終了と同時に del
+    del q                   # q のライフタイム終了と同時に del
     print(f"p.x = {p.x}")
-    
+
 def f42():
     p = Point(12, 345)
-    q = p
+    q = p                  
+    r = p                   # 禁止したい
+    print(f"p.x = {p.x}")   # 禁止したい
     # ... qを使うコード ...
     print(f"q.x = {q.x}")
-    del q   # ライフタイム終了と同時に del
-    r = p
+    del q                   # q のライフタイム終了と同時に del
+    r = p                   # ok
+
+def f421():
+    p = Point(12, 345)
+    q = p                   # Rust の 「可変借用」
+    del p                   # p を一旦使用不可に
+    # r = p                 # Error!
+    # print(f"p.x = {p.x}") # Error!
+    # ... qを使うコード ...
+    print(f"q.x = {q.x}")
+    p = q                   # q のライフタイム終了と同時に p を復活
+    del q                   # q のライフタイム終了と同時に del
+    r = p                   # ok
     
 def f43():
     p = Point(12, 345)
-    q = p
-    p = Point(345, 12)
-    p = Point(0, 0)
-    print(f"p.x = {p.x}")
-    print(f"q.x = {q.x}")
+    q = p                   # Rust の 「可変借用」
+    # ... q を使用するコード ...
+    q = Point(0, 0)
     del q
-    # ... q を使わないコード ...
+    # ... q を使用しない実行時間の長いコード ...
+    print(f"p.x = {p.x}")
+    
+def f431():
+    p = Point(12, 345)
+    q = p                   # Rust の 「可変借用」
+    del p                   # p を一旦使用不可に
+    # ... q を使用するコード ...
+    q = Point(0, 0)
+    p = q                   # q のライフタイム終了と同時に p を復活
+    del q                   # q のライフタイム終了と同時に del
+    # ... q を使用しない実行時間の長いコード ...
+    print(f"p.x = {p.x}")
+    
 
 def f460():
     p = Point(12, 345)
@@ -258,8 +248,7 @@ def f46():
     # ... q を使わないコード ...
 
 import copy
-
-def f53():
+def f51():
     p = Point(12, 345)
     q = copy.deepcopy(p)
     # ... p や q を使うコード ...
@@ -284,11 +273,11 @@ def f55():
 def scope(p):
     q = p
     print(q.x)
-    q = Point(0, 0)     # Rust ではここで drop
+    q = Point(0, 0)     # Rust では元の値が drop
     # 実行時間の長いコード
     print("Inner scope end")
 
-def scope_example00() :
+def scope_example0() :
     p = Point(12, 345)
     
     scope(p)
@@ -297,17 +286,17 @@ def scope_example00() :
     print("Function end")
 
     
-def scope_example0() :
+def scope_example() :
     p = Point(12, 345)
     
     # <scope>
     q = p               
     del p
-    print(q.x)
+    # ... q を使用するコード ...
     q = Point(0, 0)     # Rust ではここで drop
     # ... 実行時間の長いコード ...
     print("Inner scope end")
-    del q
+    del q               # スコープ終了時に変数名を使用不可に
     #</scope>
     
     print("Function end")
@@ -331,7 +320,7 @@ def scope_example2():
     # <scope>
     p11 = Point(0, 0)   # 変数名を変更
     print(f"inside : {p11.x}")
-    del p21
+    del p11
     # </scope>
     print(f"outside : {p1.x}")
     

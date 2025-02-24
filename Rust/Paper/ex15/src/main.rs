@@ -38,11 +38,9 @@ fn list_example() {
             *link.borrow_mut() = Rc::clone(&b);
         }
 
-        
-        if let Some(link) = a.tail() {
-            *link.borrow_mut() = Rc::new(Nil);
-        }
-        
+        // if let Some(link) = a.tail() {
+        //     *link.borrow_mut() = Rc::new(Nil);
+        // }
         
         // println!("{:?}", a.tail());  // stack overflow
         drop(a);
@@ -50,10 +48,6 @@ fn list_example() {
     }
 
     println!("End");
-
-    // 要素の5や10はdropされていないことがわかる．
-    // if let ... をコメントアウトして循環参照を解除すると
-    // 5, 10は解放されている旨表示される
 }
 
 fn main(){

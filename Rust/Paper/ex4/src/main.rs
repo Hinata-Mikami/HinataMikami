@@ -1,4 +1,4 @@
-fn main() {
+fn f8() {
     let mut s1 = String::from("s1");
     
     let s2 = &mut s1;
@@ -7,3 +7,6 @@ fn main() {
     println!("{}", s1);
 }
 
+fn main(){
+    f8();
+}
