@@ -43,8 +43,8 @@ fn list_example() {
         // }
         
         // println!("{:?}", a.tail());  // stack overflow
-        drop(a);
-        drop(b); 
+        // drop(a);
+        // drop(b); 
     }
 
     println!("End");

@@ -12,14 +12,13 @@ impl Drop for Point {
 
 
 fn function() {
-    let mut p = Point{x : 12, y : 345};
-    let q = &mut p;
-    // ... q を使用するコード ... 
-    *q = Point{x : 0, y : 0};       // q のライフタイム終了
-    // ... q を使用しない実行時間の長いコード ...
-    println!("p.x = {}", p.x);      // ok
+    let mut s1 = String::from("s1");
+    
+    let s2 = &mut s1;
+    s2.push_str(" : modified");
+    println!("{}", s2);
+    println!("{}", s1);
 }
-
 fn main() {
     function();
     println!("main end");

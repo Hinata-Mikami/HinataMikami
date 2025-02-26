@@ -8,15 +8,13 @@ class Point():
 
         
 def function():
-    p = Point(12, 345)
-    q = p                   # Rust の 「可変借用」
-    del p                   # p を一旦使用不可に
-    # ... q を使用するコード ...
-    q = Point(0, 0)
-    p = q                   # q のライフタイム終了と同時に p を復活
-    del q                   # q のライフタイム終了と同時に del
-    # ... q を使用しない実行時間の長いコード ...
-    print(f"p.x = {p.x}")
+    s1 = "s1"
+    
+    s2 = s1
+    s2 += " : modified"
+    print(f"{s2}")
+    print(f"{s1}")
+    
 def main():
     function()
     print("main end")
