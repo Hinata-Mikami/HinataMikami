@@ -7,14 +7,19 @@ class Point():
         print(f"Dropping Point : x = {self.x}, y = {self.y}")
 
 def main():
-    print("start")
-    p = Point(12, 345)
-    del p   # ファイナライザが呼ばれる
-
-    p1 = Point(67, 890)
-    p2 = p1
-    del p1  # ファイナライザは呼ばれない
-    print("end")
+    f()
+    
+def f():
+    p = Point(0, 1)
+    x = [p]
+    g(x) 
+    del p
+    
+def g(x):
+    p = x[0]
+    x[0] = None
+    del p
+    print("here")
     
 if __name__ == '__main__':
     main()

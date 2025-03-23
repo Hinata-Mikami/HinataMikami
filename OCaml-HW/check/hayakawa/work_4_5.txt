@@ -1,0 +1,4 @@
+twice twice は以下のように働く。curry化された関数のため、2段階目では f (f x) という関数を二度繰り返す処理を行う。
+このように twice twice f x は f (f (f (f x))) として作用する。
+
+twice twice f x -> twice f (f x) -> f (f (f (f x)))

@@ -1,0 +1,7 @@
+let a_2' = 0;;      (*valid*)
+let ____ = 0;;      (*valid*)
+let Cat = 0;;       (*invalid*)
+let _'_'_ = 0;;     (*valid*)
+let 7eleven = 0;;   (*invalid*)
+let 'ab2_ = 0;;     (*invalid*)
+let _ = 0;;         (*valid*)
