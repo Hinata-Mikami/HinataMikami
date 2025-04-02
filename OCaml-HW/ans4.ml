@@ -19,6 +19,7 @@ let avg = uncurry curried_avg in avg (4.0, 5.3);;
 let rec repeat f n x =
   if n > 0 then repeat f (n - 1) (f x) else x;;
 
+
 let fib n =
   let (fibn, _) =
   (* (x1, x0) -> (x2, x1) = (x1+x0 + x1)*)
@@ -28,6 +29,10 @@ in fibn;;
 
 
 (*4-3*)
+let id x = x;;
+
+let ($) f g x = f (g x);;
+
 let rec funny f n =
   if n = 0 then id
   else if n mod 2 = 0 then funny (f $ f) (n / 2)
@@ -54,6 +59,15 @@ let twice f x = f (f x);;
 
 (*
   twice twice f x
+  -> twice g x  (g = twice f とおく)
+  -> g (g x)
+  -> (twice f) (twice f x)
+  -> twice f (f (f x))
+  -> f (f (f (f x)))
+*)
+
+(*
+  twice twice f x
 ->twice (twice f x)
 ->twice (f (f x))
 = twice f$f x
@@ -64,4 +78,6 @@ let twice f x = f (f x);;
 
 
 (*4-6*)
+let k x y = x;;
+let s x y z = x z (y z);;
 let f x y = k (s k k) x y;;

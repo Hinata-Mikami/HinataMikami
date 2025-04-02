@@ -1,0 +1,11 @@
+OCaml　では関数は call-by-value で評価されるため，
+関数呼び出しの前に引数の評価を行う．
+したがって fact 1 では cond の評価を行う前に fact 0 を実行しようとし，
+スタックオーバーフローになる．
+if 文の then , else 以下は遅延評価されるためこのようなことは起こらない
+
+let rec fact n = cond ((n = 1), 1, n * fact (n-1));;
+
+    fact 1
+->  cond ((1 = 1), 1, 1 * fact(1-1));;
+->  cond (true, 1, 1 * fact(0))
