@@ -1,0 +1,20 @@
+opam-version: "2.0"
+maintainer: "Ralf Jung <jung@mpi-sws.org>"
+authors: "The RustBelt Team"
+license: "BSD"
+homepage: "https://plv.mpi-sws.org/rustbelt/"
+bug-reports: "https://gitlab.mpi-sws.org/iris/lambda-rust/issues"
+dev-repo: "git+https://gitlab.mpi-sws.org/iris/lambda-rust.git"
+
+synopsis: "LambdaRust Coq formalization for RustHornBelt"
+description: """
+A fork of RustBelt which extends typing judgments with specification to make
+it possible to easily prove the functionnal correctness of well-typed program.
+"""
+
+depends: [
+  "coq-iris" { (= "dev.2025-03-25.0.79d33e24") | (= "dev") }
+]
+
+build: [make "-j%{jobs}%"]
+install: [make "install"]
