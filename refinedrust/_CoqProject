@@ -25,3 +25,5 @@
 -Q _build/default/stdlib/spin/target/verify/spin stdlib.spin.spin
 -Q _build/default/stdlib/spin/theories/ stdlib.spin.theories
 
+-Q _build/default/case_studies/evenint/output/evenint refinedrust.examples.evenint
+-Q _build/default/case_studies/evenint2/output/evenint2 refinedrust.examples.evenint2
