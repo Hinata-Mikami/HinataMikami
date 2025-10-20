@@ -27,3 +27,4 @@
 
 -Q _build/default/case_studies/evenint/output/evenint refinedrust.examples.evenint
 -Q _build/default/case_studies/evenint2/output/evenint2 refinedrust.examples.evenint2
+-Q _build/default/case_studies/alias/output/alias refinedrust.examples.alias

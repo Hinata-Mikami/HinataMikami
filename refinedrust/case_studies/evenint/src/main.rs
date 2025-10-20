@@ -82,10 +82,6 @@ impl EvenInt {
 // を追加
 
 
-// self.add_even(&EvenInt::new(2)); で解決できる気はするが
-// 別途 add_even を示さないといけない
-
-
 // 以下エラー文
 // Shelved goal remaining in  "EvenInt_add_two" !
 // Goal:
