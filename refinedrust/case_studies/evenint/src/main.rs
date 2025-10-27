@@ -6,13 +6,10 @@
 
 fn main() {
     let mut a;
-    let b;
-    unsafe {
-        a = EvenInt::new(0);
-        b = EvenInt::new(2);
-    }
 
-    a.add_even(&b);
+    a = EvenInt::new(0);
+
+    a.add_two();
     assert!(a.get() % 2 == 0);  // 検証したいこと
 }
 
@@ -32,7 +29,7 @@ impl EvenInt {
     #[rr::requires("Zeven x")]  //事前条件
     #[rr::returns("x")]         //事後条件
     /// Create a new even integer.
-    pub unsafe fn new(x: i32) -> Self {
+    pub fn new(x: i32) -> Self {
         Self {num: x}
     }
 
@@ -43,7 +40,7 @@ impl EvenInt {
     #[rr::requires("(x + 1 ≤ MaxInt i32)%Z")]
     #[rr::observe("γ": "(-[#(x+1)%Z] : plist place_rfn _)")] //事後条件（たぶん）
     /// Internal function. Unsafely add 1, making the integer odd.
-    unsafe fn add(&mut self) {
+    fn add(&mut self) {
         self.num += 1;
     }
 
@@ -65,10 +62,10 @@ impl EvenInt {
     pub fn add_two(&mut self) {
         self.num;
 
-        unsafe {
+        
             self.add();
             self.add();
-        }
+        
     }
 }
 
