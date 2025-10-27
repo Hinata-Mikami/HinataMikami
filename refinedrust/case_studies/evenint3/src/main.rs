@@ -15,17 +15,18 @@ fn add_one(x: i32) -> i32 {
 #[rr::requires("Zeven x")]
 #[rr::requires("(x + 2 ≤ MaxInt i32)%Z")]
 #[rr::returns("x + 2")]
-#[rr::ensures("Zeven (x + 2)")] // 手動で証明を追加
+#[rr::ensures("Zeven (x + 2)")] // 手動で証明を追加 : Zeven(x + 2) -> Zeven x , Zeven 2
 fn add_two(x: i32) -> i32 {
     let y = add_one(x);
     let z = add_one(y);
     z
 }
 
-fn main() {
+fn main(){
 
     let a = 0; 
     let b = add_two(a); 
 
     assert!(b % 2 == 0); 
+
 }
