@@ -29,5 +29,7 @@
 -Q _build/default/case_studies/evenint2/output/evenint2 refinedrust.examples.evenint2
 -Q _build/default/case_studies/evenint3/output/evenint3 refinedrust.examples.evenint3
 
--Q _build/default/case_studies/raw_pointer/output/alias refinedrust.examples.raw_pointer
+-Q _build/default/case_studies/raw_pointer/output/raw_pointer refinedrust.examples.raw_pointer
 -Q _build/default/case_studies/alias/output/alias refinedrust.examples.alias
+
+-Q _build/default/case_studies/tst/output/tst refinedrust.examples.tst
