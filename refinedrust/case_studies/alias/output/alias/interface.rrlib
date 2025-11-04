@@ -1,15 +1,5 @@
 {
-  "items": [
-    {
-      "kind": "adt",
-      "path": [
-        "UnsafeAliasedPtr"
-      ],
-      "rtype": "UnsafeAliasedPtr_rt",
-      "semtype": "UnsafeAliasedPtr_ty",
-      "syntype": "UnsafeAliasedPtr_st"
-    }
-  ],
+  "items": [],
   "refinedrust_module": "generated_specs_alias",
   "refinedrust_name": "alias",
   "refinedrust_path": "refinedrust.examples.alias.generated"
