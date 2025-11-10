@@ -23,4 +23,3 @@ fn main() {
     assert!(x == 1);
 
 }
-

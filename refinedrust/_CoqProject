@@ -33,3 +33,4 @@
 -Q _build/default/case_studies/alias/output/alias refinedrust.examples.alias
 
 -Q _build/default/case_studies/tst/output/tst refinedrust.examples.tst
+-Q _build/default/case_studies/pointer/output/pointer refinedrust.examples.pointer

@@ -13,6 +13,7 @@ unsafe fn write_raw(ptr: *mut i32, val: i32) {
     *ptr = val;
 }
 
+#[rr::returns("()")]
 fn main() {
 
     let mut x = 0;
@@ -26,6 +27,5 @@ fn main() {
     unsafe { write_raw(p_alias, 2); }
 
     assert!(x == 2);
-
 }
 

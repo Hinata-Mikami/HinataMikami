@@ -11,6 +11,7 @@ fn main() {
 
     a.add_two();
     assert!(a.get() % 2 == 0);  // 検証したいこと
+    // assert! (1 == 2) など
 }
 
 // RefinedRustの数理モデルはCoqの整数Zを使う
