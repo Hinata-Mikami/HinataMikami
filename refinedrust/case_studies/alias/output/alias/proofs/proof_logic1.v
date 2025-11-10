@@ -1,16 +1,16 @@
 From caesium Require Import lang notation.
 From refinedrust Require Import typing shims.
 From refinedrust.examples.alias.generated Require Import generated_code_alias generated_specs_alias.
-From refinedrust.examples.alias.generated Require Import generated_template_main.
+From refinedrust.examples.alias.generated Require Import generated_template_logic1.
 
 Set Default Proof Using "Type".
 
 Section proof.
 Context `{!typeGS Σ}.
-Lemma main_proof (π : thread_id) :
-  main_lemma π.
+Lemma logic1_proof (π : thread_id) :
+  logic1_lemma π.
 Proof.
-  main_prelude.
+  logic1_prelude.
 
   repeat liRStep; liShow.
 

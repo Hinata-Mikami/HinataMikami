@@ -14,18 +14,30 @@ unsafe fn write_raw(ptr: *mut i32, val: i32) {
 }
 
 #[rr::returns("()")]
-fn main() {
-
+fn logic1(){
     let mut x = 0;
     
     let p: *mut i32 = &mut x;
     unsafe { write_raw(p, 1); }
 
-    assert!(x == 1);
+    assert!(x == 1);    
+}
 
+#[rr::returns("()")]
+fn logic2(){
+    let mut x = 0;
+    
+    let p: *mut i32 = &mut x;
     let p_alias: *mut i32 = p;
     unsafe { write_raw(p_alias, 2); }
 
     assert!(x == 2);
+}
+
+fn main() {
+
+    logic1();
+    logic2();
+    
 }
 
