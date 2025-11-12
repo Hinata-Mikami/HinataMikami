@@ -30,7 +30,9 @@ fn mut_ref_add_42(x : &mut i32) {
 #[rr::returns("()")]
 fn mut_ref_add_client() {
     let mut z = 1;
-    mut_ref_add_42(&mut z);
+    let zr = &mut z;
+    // mut_ref_add_42(&mut z);
+    mut_ref_add_42(zr);
     assert!(z == 43);
 }
 

@@ -11,7 +11,7 @@ struct Data{
 }
 
 
-#[rr::params("data", "val")]  // 使用する変数宣言
+#[rr::params("data" : "Z", "val" : "Z")]  // 使用する変数宣言
 #[rr::args("data", "val" @ "int i32")]  // write 関数の引数との対応
 #[rr::returns("val")]  // 返り値は Data だがモデル上は val
 fn write(mut data: Data, val : i32) -> Data {
@@ -21,12 +21,12 @@ fn write(mut data: Data, val : i32) -> Data {
 
 
 // この辺のノーテーションはチュートリアルを参考にした
-#[rr::params("v", "γ", "val" : "Z")]
+#[rr::params(v : "Z", "γ", val : "Z")]
 #[rr::args("(#v, γ)", "val" @ "int i32")] 
 #[rr::returns("()")]
 #[rr::observe("γ": "val")]
 fn write_pointer(ptr: &mut Data, val: i32) {
-    ptr.value = val;
+    (*ptr).value = val;
 }
 
 
@@ -41,8 +41,10 @@ fn logic1() {
 #[rr::returns("()")]
 fn logic2() {
     let mut d = Data{value : 0};
+
     let p = &mut d;
     write_pointer(p, 42);
+ 
     assert!(d.value == 42);
 }
 

@@ -34,3 +34,5 @@
 
 -Q _build/default/case_studies/tst/output/tst refinedrust.examples.tst
 -Q _build/default/case_studies/pointer/output/pointer refinedrust.examples.pointer
+-Q _build/default/case_studies/pointer2/output/pointer2 refinedrust.examples.pointer2
+-Q _build/default/case_studies/pointer0/output/pointer0 refinedrust.examples.pointer0
