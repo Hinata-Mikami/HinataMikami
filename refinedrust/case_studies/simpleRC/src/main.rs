@@ -2,38 +2,79 @@
 #![register_tool(rr)]
 #![feature(custom_inner_attributes)]
 
-// ヒープ領域に確保されるデータ
+// sub functions
+#[rr::trusted]
+#[rr::params("x", "T")]
+#[rr::args("(0, x)")]
+#[rr::returns("(0, x)")]
+fn box_new<T>(t: T) -> Box<T> {
+    Box::new(t)
+}
 
+#[rr::trusted]
+#[rr::params("x", "T")]
+#[rr::args("x" @ "T")]
+#[rr::exists("l", "c")]
+#[rr::returns("l")]
+#[rr::ensures(#type "l" : "(c, x)" @ "int i32 * T")] 
+fn box_into_raw<T>(b: Box<T>) -> *mut T {
+    Box::into_raw(b)
+}
+
+#[rr::trusted]
+#[rr::params("l", "x")]
+#[rr::args("l")]
+#[rr::exists("T")]
+#[rr::requires(#type "l" : "(0, x)" @ "int i32 * T")] 
+#[rr::returns("(0, x)")]
+unsafe fn box_from_raw<T>(ptr: *mut T) -> Box<T> {
+    Box::from_raw(ptr)
+}
+
+// ヒープ領域に確保されるデータ
+#[rr::refined_by("(c, x)")]
+#[rr::invariant("0 < c")]
 struct RcInner<T> {
+    #[rr::field("c" @ "int i32")]
     count: usize,
+    #[rr::field("x")]
     data: T,
 }
 
 // ユーザが使用するスマートポインタ
+#[rr::refined_by("l")]
+#[rr::exists("c", "x", "T")]
+#[rr::invariant(#type "l" : "(c, x)" @ "int i32 * T")]
 struct SimpleRC<T> {
+    #[rr::field("l")]
     ptr: *mut RcInner<T>,
 }
 
 impl<T> SimpleRC<T> {
     
-    fn new(data: T) -> Self{
+    #[rr::params("x", "T")]
+    #[rr::args("x" @ "T")]
+    #[rr::exists("l", "c")]
+    #[rr::returns("l")]
+    // TODO : 事後条件
+    #[rr::ensures(#type "l" : "(c, x)" @ "int i32 * T")]
+    #[rr::ensures("c = 1")]
+    
+    fn new(data: T) -> Self {
 
-        // RcInner (data と count) をヒープに確保
-        // boxed は RcInner へのポインタ
-        let boxed = Box::new(
-            RcInner {
-                count: 1,
-                data,
-            }
-        );
+        let inner = RcInner {
+            count: 1,
+            data,
+        };
+        
+        let boxed = box_new(inner);
 
-        // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.into_raw
-        // ヒープ上のデータへの raw ポインタを取得して SimpleRC を作成
-        // Box はメモリ管理を放棄
-        return SimpleRC { ptr: Box::into_raw(boxed) };
+        let ptr = box_into_raw(boxed);
+
+        return SimpleRC { ptr };
     }
 
-    /// 現在の参照カウントを取得
+    // 現在の参照カウントを取得
     pub fn rc_count(&self) -> usize {
         return unsafe { (*self.ptr).count }
     }
@@ -58,11 +99,7 @@ impl<T> Drop for SimpleRC<T> {
             (*self.ptr).count -= 1;
 
             if (*self.ptr).count == 0 {
-                println!("Dropping data");
-                // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.from_raw
-                // raw ポインタを Box に戻す
-                // 所有者がいないため Box の Drop がメモリを解放してくれる
-                let _ = Box::from_raw(self.ptr);
+                let _ = box_from_raw(self.ptr);
             }
         }
     }
@@ -71,21 +108,19 @@ impl<T> Drop for SimpleRC<T> {
 
 
 fn main(){
-    let a = SimpleRC::new("a"); // a (RC管理) を作る
+    let a = SimpleRC::new('a');
 
     assert!(a.rc_count() == 1); // Rc(a) = 1
 
     {
-        let b = a.clone();      // b (a のクローン) を作る 
-        let c = b.clone();      // c (b のクローン) を作る  
-
+        let b = a.clone();
+        let c = b.clone(); 
         assert!(a.rc_count() == 3); // Rc(a) = 3
 
-        drop(c);    // c を破棄  
+        drop(c); 
         assert!(a.rc_count() == 2); // Rc(a) = 2
 
     }   // drop(b) が実行される
 
     assert!(a.rc_count() == 1); // Rc(a) = 1
-
 }   // drop(a) が実行され，a が free される   
