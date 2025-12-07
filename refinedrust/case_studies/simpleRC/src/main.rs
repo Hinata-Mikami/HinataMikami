@@ -33,7 +33,8 @@ unsafe fn box_from_raw<T>(ptr: *mut T) -> Box<T> {
 
 // ヒープ領域に確保されるデータ
 #[rr::refined_by("(c, x)")]
-#[rr::invariant("0 < c")]
+#[rr::invariant("1 <= c")]
+// rc>=1ならば data が有効
 struct RcInner<T> {
     #[rr::field("c" @ "int i32")]
     count: usize,
@@ -45,10 +46,12 @@ struct RcInner<T> {
 #[rr::refined_by("l")]
 #[rr::exists("c", "x", "T")]
 #[rr::invariant(#type "l" : "(c, x)" @ "int i32 * T")]
+// RcInnerのrc >= 1 
 struct SimpleRC<T> {
     #[rr::field("l")]
     ptr: *mut RcInner<T>,
 }
+// simpleRC の数 (RcInnerを参照している数) == RcInner.count
 
 impl<T> SimpleRC<T> {
     
@@ -78,6 +81,12 @@ impl<T> SimpleRC<T> {
     pub fn rc_count(&self) -> usize {
         return unsafe { (*self.ptr).count }
     }
+
+    // 
+    pub fn read_from(&self) -> &T {
+        // 絶対に rc >= 1
+        return unsafe { &(*self.ptr).data }
+    }
 }
 
 // Clone トレイトの実装
@@ -93,6 +102,8 @@ impl<T> Clone for SimpleRC<T> {
 
 // Drop トレイトの実装
 // 参照カウントをデクリメントし，0 になったらデータ管理を Box に戻す
+
+// （優先度低）正しく解放されるのか？実際には何個の参照が存在するか（ghost）
 impl<T> Drop for SimpleRC<T> {
     fn drop(&mut self) {
         unsafe {
@@ -124,3 +135,7 @@ fn main(){
 
     assert!(a.rc_count() == 1); // Rc(a) = 1
 }   // drop(a) が実行され，a が free される   
+
+
+
+// &mut をとるとうまくいかなくなる最小の例を残しておく

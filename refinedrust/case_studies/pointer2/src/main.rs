@@ -9,8 +9,8 @@ fn main() {
 
 #[rr::params(x : "Z", "γ")]
 #[rr::args("(#x, γ)")]
-#[rr::requires("(x + 42)%Z ∈ i32")]
-#[rr::observe("γ": "x + 42")]
+#[rr::requires("x + 42 ∈ i32")]
+#[rr::observe(#iris "Res γ (x + 42)")]
 fn mut_ref_add_42(x : &mut i32) {
     *x += 42;
 }

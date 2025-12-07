@@ -4,14 +4,18 @@
 #![feature(custom_inner_attributes)]
 // ——― RefinedRust annotations END ——―//
 
-fn main() {
+fn main(){
+
+}
+
+fn logic() {
     let mut a;
 
     a = EvenInt::new(0);
 
     a.add_two();
     assert!(a.get() % 2 == 0);  // 検証したいこと
-    // assert! (1 == 2) など
+    
 }
 
 // RefinedRustの数理モデルはCoqの整数Zを使う
@@ -24,14 +28,14 @@ struct EvenInt {
 }
 
 impl EvenInt {
-    
     #[rr::params("x")]
     #[rr::args("x")]
-    #[rr::requires("Zeven x")]  //事前条件
-    #[rr::returns("x")]         //事後条件
+    #[rr::requires("Zeven x")]
+    #[rr::returns("x")]
+
     /// Create a new even integer.
-    pub fn new(x: i32) -> Self {
-        Self {num: x}
+    pub fn new(z: i32) -> Self {
+        Self {num: z}
     }
 
     #[rr::params("x", "γ")]
@@ -40,6 +44,12 @@ impl EvenInt {
                                         // γが指す場所に格納されている整数をxとする，ということ？
     #[rr::requires("(x + 1 ≤ MaxInt i32)%Z")]
     #[rr::observe("γ": "(-[#(x+1)%Z] : plist place_rfn _)")] //事後条件（たぶん）
+
+    // #[rr::params("x", "γ")]
+    // #[rr::args(#raw "((-[x]), γ)")]
+    // #[rr::requires("(x + 1 ≤ MaxInt i32)%Z")]
+    // #[rr::observe("γ": "(-[#(x+1)%Z] : plistRT _)")]
+
     /// Internal function. Unsafely add 1, making the integer odd.
     fn add(&mut self) {
         self.num += 1;
@@ -51,9 +61,9 @@ impl EvenInt {
     }
 
     /// Add another even integer.
-    pub fn add_even(&mut self, other: &Self) {
-        self.num += other.num;
-    }
+    // pub fn add_even(&mut self, other: &Self) {
+    //     self.num += other.num;
+    // }
 
     #[rr::params("x", "γ")]
     #[rr::args("(#x, γ)")]
@@ -62,11 +72,10 @@ impl EvenInt {
     /// Add 2 to an even integer.
     pub fn add_two(&mut self) {
         self.num;
-
-        
+        unsafe{
             self.add();
             self.add();
-        
+        }
     }
 }
 
